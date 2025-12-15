@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { StyleSheet, View, TextInput, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -28,10 +28,8 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(
     },
     ref
   ) {
-    const backgroundColor = useThemeColor(
-      { light: '#F3F3EE', dark: '#292524' },
-      'background'
-    );
+    const [isFocused, setIsFocused] = useState(false);
+    
     const textColor = useThemeColor(
       { light: '#4B6468', dark: '#FAFAF9' },
       'text'
@@ -45,10 +43,33 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(
       'textSecondary'
     );
     const cancelColor = '#21808D';
+    
+    // White background for search bar
+    const inputBackgroundColor = '#FCFCF9';
+    // Soft gray border, Rora Teal when focused
+    const borderColor = isFocused ? '#21808D' : '#E5E5DE';
+
+    const handleFocus = () => {
+      setIsFocused(true);
+      onFocus?.();
+    };
+
+    const handleBlur = () => {
+      setIsFocused(false);
+    };
 
     return (
       <View style={styles.container}>
-        <View style={[styles.inputContainer, { backgroundColor }]}>
+        <View 
+          style={[
+            styles.inputContainer, 
+            { 
+              backgroundColor: inputBackgroundColor,
+              borderColor: borderColor,
+              borderWidth: isFocused ? 2 : 1,
+            }
+          ]}
+        >
           <Ionicons name="search" size={18} color={iconColor} style={styles.icon} />
           <TextInput
             ref={ref}
@@ -57,7 +78,8 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(
             placeholderTextColor={placeholderColor}
             value={value}
             onChangeText={onChangeText}
-            onFocus={onFocus}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             autoFocus={autoFocus}
             returnKeyType="search"
           />
@@ -92,6 +114,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
+    // Soft shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   icon: {
     marginRight: 10,
@@ -112,4 +140,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-

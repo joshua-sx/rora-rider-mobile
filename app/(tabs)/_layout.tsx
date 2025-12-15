@@ -3,7 +3,11 @@ import React from 'react';
 
 export default function TabLayout() {
   return (
-    <NativeTabs blurEffect="systemMaterial">
+    <NativeTabs 
+      blurEffect="systemMaterial"
+      iconColor="#8E8E93"
+      selectedIconColor="#21808D"
+    >
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>
         <Icon sf="house.fill" />
