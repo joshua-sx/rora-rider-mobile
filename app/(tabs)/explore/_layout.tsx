@@ -16,8 +16,11 @@ export default function ExploreLayout() {
         animation: 'slide_from_right',
       }}
     >
+      <Stack.Screen name="index" />
       <Stack.Screen name="category/[slug]" />
       <Stack.Screen name="venue/[id]" />
     </Stack>
   );
 }
+
+

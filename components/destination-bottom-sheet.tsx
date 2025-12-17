@@ -32,8 +32,8 @@ export function DestinationBottomSheet({
   );
 
   const handleSearchPress = useCallback(() => {
-    // Navigate to route input screen
-    router.push('/route-input');
+    // Navigate to location picker with Google Places integration
+    router.push('/location-picker');
   }, [router]);
 
   return (

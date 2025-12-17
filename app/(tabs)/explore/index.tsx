@@ -29,14 +29,11 @@ export default function ExploreScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const searchInputRef = useRef<TextInput>(null);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const backgroundColor = useThemeColor(
-    { light: '#F9F9F9', dark: '#0E0F0F' },
-    'background'
-  );
+  useThemeColor({ light: '#F9F9F9', dark: '#0E0F0F' }, 'background');
   const primaryColor = useThemeColor({}, 'tint');
 
   const featuredVenues = getFeaturedVenues();
@@ -77,10 +74,8 @@ export default function ExploreScreen() {
   return (
     <ThemedView style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        {!isSearchActive && (
-          <ThemedText style={styles.title}>Explore</ThemedText>
-        )}
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        {!isSearchActive && <ThemedText style={styles.title}>Explore</ThemedText>}
         <SearchBar
           ref={searchInputRef}
           value={searchQuery}
@@ -117,10 +112,7 @@ export default function ExploreScreen() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.categoriesContent}
                 renderItem={({ item }) => (
-                  <CategoryChip
-                    category={item}
-                    onPress={handleCategoryPress}
-                  />
+                  <CategoryChip category={item} onPress={handleCategoryPress} />
                 )}
               />
             </View>
@@ -225,3 +217,5 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
 });
+
+
