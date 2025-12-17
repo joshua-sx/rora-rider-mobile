@@ -3,10 +3,10 @@ import {
   StyleSheet,
   View,
   ScrollView,
-  TextInput,
   Keyboard,
   FlatList,
 } from 'react-native';
+import type { TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
@@ -33,7 +33,10 @@ export default function ExploreScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  useThemeColor({ light: '#F9F9F9', dark: '#0E0F0F' }, 'background');
+  const backgroundColor = useThemeColor(
+    { light: '#F9F9F9', dark: '#0E0F0F' },
+    'background'
+  );
   const primaryColor = useThemeColor({}, 'tint');
 
   const featuredVenues = getFeaturedVenues();
@@ -72,7 +75,7 @@ export default function ExploreScreen() {
   }, [router]);
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         {!isSearchActive && <ThemedText style={styles.title}>Explore</ThemedText>}
@@ -217,5 +220,3 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
 });
-
-
