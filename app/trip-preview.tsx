@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, { Marker, Polyline } from "react-native-maps";
+import PagerView from "react-native-pager-view";
+import QRCode from "react-native-qrcode-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
@@ -12,6 +14,7 @@ import { SINT_MAARTEN_REGION } from "@/constants/config";
 import { Colors, BorderRadius, Spacing } from "@/constants/design-tokens";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { useRouteStore } from "@/store/route-store";
+import { useTripHistoryStore } from "@/store/trip-history-store";
 import { formatDistance, formatDuration, formatPrice } from "@/utils/pricing";
 
 export default function TripPreviewScreen() {
@@ -21,7 +24,9 @@ export default function TripPreviewScreen() {
 	const bottomSheetRef = useRef<BottomSheet>(null);
 
 	const { origin, destination, routeData } = useRouteStore();
-	const [sheetIndex, setSheetIndex] = useState(0); // 0 = collapsed
+	const { addTrip } = useTripHistoryStore();
+	const [currentPage, setCurrentPage] = useState(0); // 0 = details, 1 = qr
+	const [tripId, setTripId] = useState<string | null>(null);
 
 	// Theme colors
 	const backgroundColor = useThemeColor({ light: "#FFFFFF", dark: "#161616" }, "background");
@@ -32,17 +37,33 @@ export default function TripPreviewScreen() {
 	const handleIndicatorColor = useThemeColor({ light: "#E3E6E3", dark: "#2F3237" }, "border");
 	const tintColor = useThemeColor({}, "tint");
 
-	// Snap points for bottom sheet
-	const snapPoints = useMemo(() => ["30%", "65%"], []);
+	// Snap points for bottom sheet - fixed height
+	const snapPoints = useMemo(() => ["60%"], []);
 
 	// Validate route data exists
 	useEffect(() => {
 		if (!routeData || !origin || !destination) {
 			console.warn("No route data available, returning to input");
-			// Guard/redirect: replace to avoid leaving an invalid screen in history.
 			router.replace("/route-input");
 		}
 	}, [routeData, origin, destination, router]);
+
+	// Auto-save trip to history on mount
+	useEffect(() => {
+		if (routeData && origin && destination && !tripId) {
+			const newTripId = `trip-${Date.now()}`;
+			addTrip({
+				id: newTripId,
+				timestamp: Date.now(),
+				origin,
+				destination,
+				routeData,
+				status: 'not_taken',
+			});
+			setTripId(newTripId);
+			console.log('[trip-preview] Trip saved to history:', newTripId);
+		}
+	}, [routeData, origin, destination, tripId, addTrip]);
 
 	// Fit map to show full route
 	useEffect(() => {
@@ -64,14 +85,9 @@ export default function TripPreviewScreen() {
 		router.back();
 	}, [router]);
 
-	const handleConfirmRide = useCallback(() => {
-		// TODO: Navigate to ride confirmation or booking screen
-		console.log("Confirm ride with route:", routeData);
-	}, [routeData]);
-
-	const handleSheetChange = useCallback((index: number) => {
-		setSheetIndex(index);
-	}, []);
+	const handleFindDriver = useCallback(() => {
+		router.push("/find-driver-info");
+	}, [router]);
 
 	if (!routeData || !origin || !destination) {
 		return null;
@@ -129,7 +145,6 @@ export default function TripPreviewScreen() {
 				ref={bottomSheetRef}
 				index={0}
 				snapPoints={snapPoints}
-				onChange={handleSheetChange}
 				enablePanDownToClose={false}
 				backgroundStyle={[styles.bottomSheetBackground, { backgroundColor: surfaceColor }]}
 				handleIndicatorStyle={[
@@ -138,21 +153,40 @@ export default function TripPreviewScreen() {
 				]}
 			>
 				<BottomSheetView style={styles.bottomSheetContent}>
-					{/* Collapsed State - Helper Text */}
-					{sheetIndex === 0 && (
-						<View style={styles.collapsedContent}>
-							<Ionicons name="chevron-up" size={24} color={secondaryTextColor} />
-							<ThemedText style={styles.helperText}>Slide up for trip details</ThemedText>
-						</View>
-					)}
+					{/* Page Indicator */}
+					<View style={styles.pageIndicator}>
+						<View
+							style={[
+								styles.dot,
+								currentPage === 0
+									? { backgroundColor: tintColor }
+									: { backgroundColor: "#D0D3D7" },
+							]}
+						/>
+						<View
+							style={[
+								styles.dot,
+								currentPage === 1
+									? { backgroundColor: tintColor }
+									: { backgroundColor: "#D0D3D7" },
+							]}
+						/>
+					</View>
 
-					{/* Expanded State - Full Details */}
-					{sheetIndex === 1 && (
-						<View style={styles.expandedContent}>
+					{/* Horizontal Pager */}
+					<PagerView
+						style={styles.pager}
+						initialPage={0}
+						onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
+					>
+						{/* Page 1: Trip Details */}
+						<View key="1" style={styles.page}>
+							<ThemedText style={styles.pageTitle}>Trip details</ThemedText>
+
 							{/* Route Points */}
 							<View style={styles.routeInfo}>
 								<View style={styles.routePoint}>
-									<View style={[styles.dot, { backgroundColor: tintColor }]} />
+									<View style={[styles.routeDot, { backgroundColor: tintColor }]} />
 									<View style={styles.routePointText}>
 										<ThemedText style={styles.routePointLabel}>Pickup</ThemedText>
 										<ThemedText style={styles.routePointName} numberOfLines={1}>
@@ -164,7 +198,7 @@ export default function TripPreviewScreen() {
 								<View style={[styles.routeLine, { backgroundColor: borderColor }]} />
 
 								<View style={styles.routePoint}>
-									<View style={[styles.dot, { backgroundColor: "#FF5733" }]} />
+									<View style={[styles.routeDot, { backgroundColor: "#FF5733" }]} />
 									<View style={styles.routePointText}>
 										<ThemedText style={styles.routePointLabel}>Dropoff</ThemedText>
 										<ThemedText style={styles.routePointName} numberOfLines={1}>
@@ -192,19 +226,9 @@ export default function TripPreviewScreen() {
 
 							{/* Price Display */}
 							<View style={[styles.priceContainer, { borderColor }]}>
-								<View>
-									<ThemedText style={styles.priceLabel}>Estimated fare</ThemedText>
-									<ThemedText style={styles.price}>
-										{formatPrice(routeData.price)}
-									</ThemedText>
-								</View>
-							</View>
-
-							{/* QR Placeholder */}
-							<View style={[styles.qrPlaceholder, { borderColor }]}>
-								<Ionicons name="qr-code-outline" size={80} color={secondaryTextColor} />
-								<ThemedText style={[styles.qrLabel, { color: secondaryTextColor }]}>
-									Scan to confirm ride
+								<ThemedText style={styles.priceLabel}>Estimated fare</ThemedText>
+								<ThemedText style={styles.price}>
+									{formatPrice(routeData.price)}
 								</ThemedText>
 							</View>
 
@@ -221,17 +245,42 @@ export default function TripPreviewScreen() {
 								</Pressable>
 
 								<Pressable
-									onPress={handleConfirmRide}
+									onPress={handleFindDriver}
 									style={[styles.primaryButton, { backgroundColor: tintColor }]}
 									accessible
 									accessibilityRole="button"
-									accessibilityLabel="Confirm ride"
+									accessibilityLabel="Find driver"
 								>
-									<ThemedText style={styles.primaryButtonText}>Confirm Ride</ThemedText>
+									<ThemedText style={styles.primaryButtonText}>Find Driver</ThemedText>
 								</Pressable>
 							</View>
 						</View>
-					)}
+
+						{/* Page 2: QR Code */}
+						<View key="2" style={styles.page}>
+							<ThemedText style={styles.pageTitle}>Your QR Code</ThemedText>
+
+							{/* QR Code */}
+							<View style={styles.qrContainer}>
+								{tripId && (
+									<QRCode
+										value={tripId}
+										size={200}
+										backgroundColor="white"
+										color="black"
+									/>
+								)}
+							</View>
+
+							{/* Instruction Text */}
+							<ThemedText style={styles.qrInstruction}>
+								Show the driver
+							</ThemedText>
+							<ThemedText style={[styles.qrSubtext, { color: secondaryTextColor }]}>
+								Present this code to your driver to confirm your trip
+							</ThemedText>
+						</View>
+					</PagerView>
 				</BottomSheetView>
 			</BottomSheet>
 		</GestureHandlerRootView>
@@ -282,32 +331,41 @@ const styles = StyleSheet.create({
 	},
 	bottomSheetContent: {
 		flex: 1,
-		paddingHorizontal: Spacing.xl,
 	},
-	collapsedContent: {
-		flex: 1,
-		alignItems: "center",
+	pageIndicator: {
+		flexDirection: "row",
+		gap: 8,
 		justifyContent: "center",
-		paddingVertical: Spacing.xl,
+		paddingVertical: 12,
 	},
-	helperText: {
-		marginTop: Spacing.sm,
-		fontSize: 16,
-		fontWeight: "600",
+	dot: {
+		width: 8,
+		height: 8,
+		borderRadius: 4,
 	},
-	expandedContent: {
+	pager: {
 		flex: 1,
-		gap: Spacing.lg,
+	},
+	page: {
+		flex: 1,
+		paddingHorizontal: Spacing.xl,
+		paddingBottom: 20,
+	},
+	pageTitle: {
+		fontSize: 20,
+		fontWeight: "700",
+		marginBottom: Spacing.lg,
 	},
 	routeInfo: {
 		paddingVertical: Spacing.md,
+		marginBottom: Spacing.md,
 	},
 	routePoint: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: Spacing.md,
 	},
-	dot: {
+	routeDot: {
 		width: 12,
 		height: 12,
 		borderRadius: 6,
@@ -335,6 +393,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		gap: Spacing.xl,
 		paddingVertical: Spacing.sm,
+		marginBottom: Spacing.lg,
 	},
 	detailItem: {
 		flexDirection: "row",
@@ -350,6 +409,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: Spacing.lg,
 		borderWidth: 1,
 		borderRadius: BorderRadius.card,
+		marginBottom: Spacing.xl,
 	},
 	priceLabel: {
 		fontSize: 13,
@@ -358,21 +418,27 @@ const styles = StyleSheet.create({
 		marginBottom: 4,
 	},
 	price: {
-		fontSize: 28,
+		fontSize: 32,
 		fontWeight: "700",
 	},
-	qrPlaceholder: {
+	qrContainer: {
 		alignItems: "center",
 		justifyContent: "center",
 		paddingVertical: Spacing.xxl,
-		borderWidth: 2,
-		borderRadius: BorderRadius.card,
-		borderStyle: "dashed",
+		marginVertical: Spacing.xl,
 	},
-	qrLabel: {
-		marginTop: Spacing.md,
+	qrInstruction: {
+		fontSize: 24,
+		fontWeight: "700",
+		textAlign: "center",
+		marginTop: Spacing.lg,
+	},
+	qrSubtext: {
 		fontSize: 14,
 		fontWeight: "500",
+		textAlign: "center",
+		marginTop: Spacing.sm,
+		paddingHorizontal: Spacing.lg,
 	},
 	actions: {
 		flexDirection: "row",

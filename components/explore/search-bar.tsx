@@ -63,6 +63,14 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(
       setIsFocused(false);
     };
 
+    const handleCancel = () => {
+      // Blur the input for proper focus management
+      if (typeof ref === 'object' && ref?.current) {
+        ref.current.blur();
+      }
+      onCancel?.();
+    };
+
     return (
       <View style={styles.container}>
         <View 
@@ -96,7 +104,7 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(
         </View>
 
         {isActive && (
-          <Pressable onPress={onCancel} style={styles.cancelButton}>
+          <Pressable onPress={handleCancel} style={styles.cancelButton}>
             <ThemedText style={[styles.cancelText, { color: cancelColor }]}>
               Cancel
             </ThemedText>

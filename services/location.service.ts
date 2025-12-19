@@ -60,6 +60,21 @@ class LocationService {
   }
 
   /**
+   * Get the current permission status without requesting
+   * @returns Promise<Location.PermissionStatus>
+   */
+  async getPermissionStatus(): Promise<Location.PermissionStatus> {
+    try {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      console.log("[LocationService] Permission status:", status);
+      return status;
+    } catch (error) {
+      console.error("[LocationService] Get permission status error:", error);
+      return Location.PermissionStatus.UNDETERMINED;
+    }
+  }
+
+  /**
    * Get the device's current GPS position
    * @returns Promise<LatLng | null> - coordinates or null if unavailable
    */

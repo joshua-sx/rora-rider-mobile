@@ -1,5 +1,6 @@
-import { StyleSheet, View, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, View, Pressable, ScrollView, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -18,6 +19,21 @@ export function SearchResults({
   onVenuePress,
   onCategoryPress,
 }: SearchResultsProps) {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  
+  useEffect(() => {
+    const showListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+  
   const backgroundColor = useThemeColor(
     { light: '#FFFFFF', dark: '#0E0F0F' },
     'surface'
@@ -57,8 +73,9 @@ export function SearchResults({
   return (
     <ScrollView
       style={[styles.container, { backgroundColor }]}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 20 : 120 }]}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="none"
     >
       {/* Category Suggestions */}
       {matchingCategories.length > 0 && (

@@ -9,6 +9,7 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 	Pressable,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -92,6 +93,7 @@ export default function RouteInputScreen() {
 	const mapRef = useRef<MapView>(null);
 	const originAutocompleteRef = useRef<TextInput>(null);
 	const destinationAutocompleteRef = useRef<TextInput>(null);
+	const hasCalculatedRoute = useRef(false);
 
 	const {
 		origin,
@@ -154,9 +156,11 @@ export default function RouteInputScreen() {
 	}, [router]);
 
 	const handleContinue = useCallback(() => {
-		// TODO: Navigate to booking confirmation screen
-		console.log("Continue to booking with route:", routeData);
-	}, [routeData]);
+		// #region agent log
+		fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:163',message:'MANUAL Continue button pressed - navigating to trip-preview',data:{hypothesisId:'H6',navigationType:'manual-push',viewState,hasRouteData:!!routeData,hasOrigin:!!origin,hasDestination:!!destination},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
+		// #endregion
+		router.push("/trip-preview");
+	}, [router, viewState, routeData, origin, destination]);
 
 	const handleSwap = useCallback(() => {
 		swapLocations();
@@ -182,6 +186,9 @@ export default function RouteInputScreen() {
 
 		try {
 			const results = await googleMapsService.searchPlaces(query);
+			// #region agent log
+			fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:189',message:'Autocomplete results received',data:{hypothesisId:'H2',isOrigin,query,resultsCount:results.length,willTriggerFlatListRender:results.length>0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
+			// #endregion
 			if (isOrigin) setOriginSuggestions(results);
 			else setDestinationSuggestions(results);
 		} catch (error) {
@@ -252,10 +259,17 @@ export default function RouteInputScreen() {
 	);
 
 	// Auto-navigate to trip preview when route is calculated
+	// Only navigate if we actually calculated a route (not just pre-filled from home carousel)
 	useEffect(() => {
-		if (viewState === "preview" && routeData && origin && destination) {
+		if (viewState === "preview" && routeData && origin && destination && hasCalculatedRoute.current) {
+			// #region agent log
+			fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:263',message:'Auto-navigation effect triggered - will navigate in 500ms',data:{hypothesisId:'H5',viewState,hasRouteData:!!routeData,hasOrigin:!!origin,hasDestination:!!destination,routeDataComplete:{distance:routeData?.distance,duration:routeData?.duration,price:routeData?.price,coordsCount:routeData?.coordinates?.length}},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
+			// #endregion
 			// Small delay to ensure route data is fully set
 			const timer = setTimeout(() => {
+				// #region agent log
+				fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:270',message:'AUTO-NAVIGATION EXECUTING NOW - navigating to trip-preview',data:{hypothesisId:'H5',navigationType:'auto-replace'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
+				// #endregion
 				// This is effectively a state-driven redirect; replace avoids stacking duplicates
 				// if the effect re-triggers.
 				router.replace("/trip-preview");
@@ -295,6 +309,10 @@ export default function RouteInputScreen() {
 
 				const price = calculatePrice(distanceKm, durationMin);
 
+				// #region agent log
+				fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:292',message:'Route calculated from Google Directions API',data:{hypothesisId:'H2',originName:origin?.name,destinationName:destination?.name,distanceMeters:leg.distance?.value,distanceKm:distanceKm,durationSeconds:leg.duration?.value,durationMin:durationMin,calculatedPrice:price,coordinatesCount:coords.length,formattedDistance:formatDistance(distanceKm),formattedDuration:formatDuration(durationMin),formattedPrice:formatPrice(price)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
+				// #endregion
+
 				if (cancelled) return;
 
 				setRouteData({
@@ -317,6 +335,8 @@ export default function RouteInputScreen() {
 					});
 				}
 
+				// Mark that we've calculated a route (not just pre-filled)
+				hasCalculatedRoute.current = true;
 				setViewState("preview");
 			} catch (e: unknown) {
 				const message =
@@ -336,17 +356,20 @@ export default function RouteInputScreen() {
 	}, [viewState, origin, destination, setError, setRouteData]);
 
 	// Sync input text with store values on mount/change
+	// Don't include input values in deps to avoid clearing auto-filled values
 	useEffect(() => {
 		if (origin && !originInput) {
 			setOriginInput(origin.name);
 		}
-	}, [origin, originInput]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [origin]);
 
 	useEffect(() => {
 		if (destination && !destinationInput) {
 			setDestinationInput(destination.name);
 		}
-	}, [destination, destinationInput]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [destination]);
 
 	// Render autocomplete suggestion item with highlighted text
 	const renderSuggestionItem = useCallback(
@@ -396,34 +419,36 @@ export default function RouteInputScreen() {
 
 	// Input State UI
 	if (viewState === "input") {
+		// #region agent log
+		fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:413',message:'Input view rendering',data:{hypothesisId:'H1',hasOriginSuggestions:originSuggestions.length>0,originSuggestionsCount:originSuggestions.length,hasDestinationSuggestions:destinationSuggestions.length>0,destinationSuggestionsCount:destinationSuggestions.length,isScrollViewRendered:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
+		// #endregion
 		return (
 			<KeyboardAvoidingView
 				style={[styles.container, { backgroundColor }]}
 				behavior={Platform.OS === "ios" ? "padding" : undefined}
 				keyboardVerticalOffset={0}
 			>
-				{/* Header */}
+				{/* Header - Fixed at top */}
 				<View style={[styles.header, { paddingTop: insets.top + 12 }]}>
 					<Pressable onPress={handleClose} hitSlop={8}>
 						<Ionicons name="close" size={28} color={textColor} />
 					</Pressable>
 					<ThemedText style={styles.headerTitle}>Your route</ThemedText>
-					{__DEV__ ? (
-						<Pressable
-							onPress={() => router.push("/location-picker")}
-							hitSlop={8}
-							accessibilityRole="button"
-							accessibilityLabel="Open new location picker (dev)"
-						>
-							<Ionicons name="search" size={24} color={textColor} />
-						</Pressable>
-					) : (
-						<View style={{ width: 28 }} />
-					)}
+					<View style={{ width: 28 }} />
 				</View>
 
-				{/* Input Fields Container */}
-				<View style={styles.inputsContainer}>
+				{/* Scrollable Content */}
+				<ScrollView
+					style={styles.scrollView}
+					contentContainerStyle={[
+						styles.scrollContent,
+						{ paddingBottom: insets.bottom + Spacing.xxl }
+					]}
+					keyboardShouldPersistTaps="handled"
+					showsVerticalScrollIndicator={false}
+				>
+					{/* Input Fields Container */}
+					<View style={styles.inputsContainer}>
 					{/* Origin Input with Clock Icon */}
 					<View style={styles.inputWrapper}>
 						<View style={styles.inputRow}>
@@ -452,7 +477,10 @@ export default function RouteInputScreen() {
 										value={originInput}
 										onChangeText={handleOriginChange}
 										onFocus={() => setIsOriginFocused(true)}
-										onBlur={() => setIsOriginFocused(false)}
+										onBlur={() => {
+											setIsOriginFocused(false);
+											setTimeout(() => setOriginSuggestions([]), 150);
+										}}
 										returnKeyType="search"
 										autoCapitalize="none"
 										autoCorrect={false}
@@ -472,31 +500,33 @@ export default function RouteInputScreen() {
 										</Pressable>
 									)}
 								</View>
-								{/* Origin Suggestions Dropdown */}
-								{originSuggestions.length > 0 && (
-									<View
-										style={[
-											styles.suggestionsContainer,
-											{ backgroundColor: surfaceColor, borderColor },
-										]}
-									>
-										<FlatList
-											data={originSuggestions}
-											keyExtractor={(item) => item.placeId}
-											renderItem={renderSuggestionItem}
-											ItemSeparatorComponent={() => (
-												<View
-													style={[
-														styles.suggestionSeparator,
-														{ backgroundColor: borderColor },
-													]}
-												/>
-											)}
-											keyboardShouldPersistTaps="handled"
-											nestedScrollEnabled
-										/>
-									</View>
-								)}
+							{/* Origin Suggestions Dropdown */}
+							{originSuggestions.length > 0 && (
+								<View
+									style={[
+										styles.suggestionsContainer,
+										{ backgroundColor: surfaceColor, borderColor },
+									]}
+								>
+									{/* #region agent log */}
+									{(() => { fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:491',message:'Origin FlatList rendering inside ScrollView',data:{hypothesisId:'H1,H2,H4',suggestionCount:originSuggestions.length,nestedScrollEnabled:true,parentContainer:'ScrollView',positioning:'absolute'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{}); return null; })()}
+									{/* #endregion */}
+									<FlatList
+										data={originSuggestions}
+										keyExtractor={(item) => item.placeId}
+										renderItem={renderSuggestionItem}
+										ItemSeparatorComponent={() => (
+											<View
+												style={[
+													styles.suggestionSeparator,
+													{ backgroundColor: borderColor },
+												]}
+											/>
+										)}
+										keyboardShouldPersistTaps="handled"
+									/>
+								</View>
+							)}
 								{/* Loading Indicator */}
 								{isOriginLoading && (
 									<ActivityIndicator
@@ -547,7 +577,10 @@ export default function RouteInputScreen() {
 										value={destinationInput}
 										onChangeText={handleDestinationChange}
 										onFocus={() => setIsDestinationFocused(true)}
-										onBlur={() => setIsDestinationFocused(false)}
+										onBlur={() => {
+											setIsDestinationFocused(false);
+											setTimeout(() => setDestinationSuggestions([]), 150);
+										}}
 										returnKeyType="search"
 										autoCapitalize="none"
 										autoCorrect={false}
@@ -567,31 +600,33 @@ export default function RouteInputScreen() {
 										</Pressable>
 									)}
 								</View>
-								{/* Destination Suggestions Dropdown */}
-								{destinationSuggestions.length > 0 && (
-									<View
-										style={[
-											styles.suggestionsContainer,
-											{ backgroundColor: surfaceColor, borderColor },
-										]}
-									>
-										<FlatList
-											data={destinationSuggestions}
-											keyExtractor={(item) => item.placeId}
-											renderItem={renderSuggestionItem}
-											ItemSeparatorComponent={() => (
-												<View
-													style={[
-														styles.suggestionSeparator,
-														{ backgroundColor: borderColor },
-													]}
-												/>
-											)}
-											keyboardShouldPersistTaps="handled"
-											nestedScrollEnabled
-										/>
-									</View>
-								)}
+							{/* Destination Suggestions Dropdown */}
+							{destinationSuggestions.length > 0 && (
+								<View
+									style={[
+										styles.suggestionsContainer,
+										{ backgroundColor: surfaceColor, borderColor },
+									]}
+								>
+									{/* #region agent log */}
+									{(() => { fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:586',message:'Destination FlatList rendering inside ScrollView',data:{hypothesisId:'H1,H2,H4',suggestionCount:destinationSuggestions.length,nestedScrollEnabled:true,parentContainer:'ScrollView',positioning:'absolute'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{}); return null; })()}
+									{/* #endregion */}
+									<FlatList
+										data={destinationSuggestions}
+										keyExtractor={(item) => item.placeId}
+										renderItem={renderSuggestionItem}
+										ItemSeparatorComponent={() => (
+											<View
+												style={[
+													styles.suggestionSeparator,
+													{ backgroundColor: borderColor },
+												]}
+											/>
+										)}
+										keyboardShouldPersistTaps="handled"
+									/>
+								</View>
+							)}
 								{/* Loading Indicator */}
 								{isDestinationLoading && (
 									<ActivityIndicator
@@ -615,22 +650,23 @@ export default function RouteInputScreen() {
 					</View>
 				</View>
 
-				{/* Continue Button - Only show when both locations selected */}
-				{origin && destination && (
-					<View style={styles.continueButtonContainer}>
-						<Pressable
-							onPress={() => {
-								Keyboard.dismiss();
-								setViewState("loading");
-							}}
-							style={[styles.continueButton, { backgroundColor: tintColor }]}
-						>
-							<ThemedText style={styles.continueButtonText}>
-								Continue
-							</ThemedText>
-						</Pressable>
-					</View>
-				)}
+					{/* Continue Button - Only show when both locations selected */}
+					{origin && destination && (
+						<View style={styles.continueButtonContainer}>
+							<Pressable
+								onPress={() => {
+									Keyboard.dismiss();
+									setViewState("loading");
+								}}
+								style={[styles.continueButton, { backgroundColor: tintColor }]}
+							>
+								<ThemedText style={styles.continueButtonText}>
+									Continue
+								</ThemedText>
+							</Pressable>
+						</View>
+					)}
+				</ScrollView>
 			</KeyboardAvoidingView>
 		);
 	}
@@ -809,6 +845,12 @@ const styles = StyleSheet.create({
 	map: {
 		...StyleSheet.absoluteFillObject,
 	},
+	scrollView: {
+		flex: 1,
+	},
+	scrollContent: {
+		flexGrow: 1,
+	},
 	header: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -825,7 +867,6 @@ const styles = StyleSheet.create({
 	},
 	inputWrapper: {
 		marginBottom: Spacing.lg,
-		zIndex: 1,
 	},
 	label: {
 		fontSize: Typography.sizes.bodySmall,
@@ -839,7 +880,6 @@ const styles = StyleSheet.create({
 	},
 	inputFieldContainer: {
 		flex: 1,
-		zIndex: 2,
 	},
 	inputWithIcon: {
 		height: 48,
@@ -877,12 +917,12 @@ const styles = StyleSheet.create({
 		maxHeight: 300,
 		borderRadius: BorderRadius.input,
 		borderWidth: 1,
-		zIndex: 1000,
+		zIndex: 9999,
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 8,
-		elevation: 4,
+		elevation: 10,
 	},
 	suggestionItem: {
 		flexDirection: "row",

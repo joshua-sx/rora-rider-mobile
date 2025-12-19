@@ -1,12 +1,13 @@
-import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
-import React from 'react';
+import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 
 export default function TabLayout() {
   return (
-    <NativeTabs 
+    <NativeTabs
       blurEffect="systemMaterial"
-      iconColor="#8C9390"
-      selectedIconColor="#00BE3C"
+      iconColor={{
+        default: "#8C9390",
+        selected: "#00BE3C"
+      }}
     >
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>

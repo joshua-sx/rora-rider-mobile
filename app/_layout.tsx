@@ -39,14 +39,6 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
-            name="location-picker"
-            options={{
-              presentation: 'card',
-              headerShown: false,
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen
             name="trip-preview"
             options={{
               presentation: 'card',

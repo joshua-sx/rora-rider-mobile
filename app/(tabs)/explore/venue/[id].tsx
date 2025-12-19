@@ -13,6 +13,9 @@ import { RideCtaCard } from '@/components/explore/ride-cta-card';
 import { RideCtaSheet } from '@/components/ride-cta-sheet';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { getVenueById } from '@/data/venues';
+import { googleMapsService } from '@/services/google-maps.service';
+import { useRouteStore } from '@/store/route-store';
+import { calculatePrice } from '@/utils/pricing';
 
 export default function VenueDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,6 +24,9 @@ export default function VenueDetailScreen() {
 
   const [isSaved, setIsSaved] = useState(false);
   const [showRideSheet, setShowRideSheet] = useState(false);
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  
+  const { setOrigin, setDestination, setRouteData, setError } = useRouteStore();
 
   const backgroundColor = useThemeColor(
     { light: '#F9F9F9', dark: '#0E0F0F' },
@@ -50,12 +56,73 @@ export default function VenueDetailScreen() {
     setShowRideSheet(false);
   }, []);
 
-  const handleGetQuote = useCallback(() => {
-    // TODO: Navigate to driver list with route data
-    console.log('Get quote for ride to', venue?.name);
+  const handleGetQuote = useCallback(async () => {
+    if (!venue) return;
+    
+    setIsLoadingRoute(true);
     setShowRideSheet(false);
-    // router.push('/drivers'); // Navigate to drivers flow
-  }, [venue]);
+    
+    try {
+      // Get user's current location (for now, using a default Sint Maarten location)
+      // In production, you'd use expo-location to get actual user location
+      const currentLocation = {
+        latitude: 18.0425,
+        longitude: -63.0548,
+      };
+      
+      // Fetch route from Google Maps
+      const directions = await googleMapsService.getDirections(
+        currentLocation,
+        { latitude: venue.latitude, longitude: venue.longitude }
+      );
+      
+      const route = directions.routes?.[0];
+      const leg = route?.legs?.[0];
+      const encoded = route?.overview_polyline?.points;
+      
+      if (!leg || !encoded) {
+        throw new Error('Could not calculate route');
+      }
+      
+      const distanceKm = (leg.distance?.value ?? 0) / 1000;
+      const durationMin = (leg.duration?.value ?? 0) / 60;
+      const coords = googleMapsService.decodePolyline(encoded);
+      const price = calculatePrice(distanceKm, durationMin);
+      
+      // Set origin (current location)
+      setOrigin({
+        placeId: 'current-location',
+        name: 'Current Location',
+        description: 'Your current location',
+        coordinates: currentLocation,
+      });
+      
+      // Set destination (venue)
+      setDestination({
+        placeId: venue.id,
+        name: venue.name,
+        description: venue.description,
+        coordinates: { latitude: venue.latitude, longitude: venue.longitude },
+      });
+      
+      // Set route data
+      setRouteData({
+        distance: distanceKm,
+        duration: durationMin,
+        price,
+        coordinates: coords,
+      });
+      
+      // Navigate to trip preview
+      router.push('/trip-preview');
+    } catch (error) {
+      console.error('[venue] Error fetching route:', error);
+      setError(error instanceof Error ? error.message : 'Failed to calculate route');
+      // Optionally show an alert to the user
+    } finally {
+      setIsLoadingRoute(false);
+    }
+  }, [venue, router, setOrigin, setDestination, setRouteData, setError]);
 
   if (!venue) {
     return (
