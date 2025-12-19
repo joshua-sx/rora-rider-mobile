@@ -1,7 +1,8 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HomePopularCarousel } from "@/components/home-popular-carousel";
 import { PillSearchBar } from "@/components/ui/pill-search-bar";
@@ -9,7 +10,7 @@ import { BorderRadius, Spacing } from "@/constants/design-tokens";
 import { useThemeColor } from "@/hooks/use-theme-color";
 
 type DestinationBottomSheetProps = {
-  bottomInset?: number;
+  bottomInset?: number; // Tab bar height (optional override)
 };
 
 export function DestinationBottomSheet({
@@ -17,6 +18,7 @@ export function DestinationBottomSheet({
 }: DestinationBottomSheetProps) {
 	const bottomSheetRef = useRef<BottomSheet>(null);
 	const router = useRouter();
+	const insets = useSafeAreaInsets();
 
 	const backgroundColor = useThemeColor(
 		{ light: "#FFFFFF", dark: "#161616" },
@@ -29,33 +31,37 @@ export function DestinationBottomSheet({
 
 	const screenWidth = Dimensions.get("window").width;
 
-	// Calculate snap point for square cards layout
-	// Top padding: Spacing.xl (20px) - space above pill search
-	// Pill bar: 56px
-	// Gap after pill: Spacing.lg (16px)
-	// Header "Popular locations": ~28px (h5 font + margins)
-	// Square card height: screenWidth * 0.5 (matches width for square)
-	// Bottom padding: Spacing.xl (20px) - same as top for symmetry
-	// Tab bar inset: bottomInset (passed from parent)
-	const snapPoints = useMemo(() => {
-		const topPadding = Spacing.xl; // 20px - space above search bar
-		const pillHeight = 56;
-		const pillBottomGap = Spacing.lg; // 16px
-		const headerHeight = 28; // Header with margins
-		const cardHeight = screenWidth * 0.5; // Square card (50% screen width)
-		const bottomPadding = Spacing.xl; // 20px - matching top padding for symmetry
+	// Calculate total bottom padding: device safe area + tab bar height + content padding
+	// This ensures content never scrolls under the floating tab bar
+	const totalBottomPadding = insets.bottom + bottomInset + Spacing.xl;
 
-		const totalHeight =
+	// Two snap points: collapsed (pill only) and expanded (pill + cards)
+	const snapPoints = useMemo(() => {
+		const handleIndicatorSpace = 12; // Handle indicator + top margin
+		const topPadding = Spacing.xl; // 20px
+		const pillHeight = 60; // Updated to match new pill height
+
+		// Collapsed state: just pill search bar
+		// Use totalBottomPadding to account for safe area + tab bar + content padding
+		const collapsedHeight =
+			handleIndicatorSpace + topPadding + pillHeight + totalBottomPadding;
+
+		// Expanded state: pill + popular locations cards
+		const gapAfterPill = Spacing.lg; // 16px
+		const headerHeight = 28; // "Popular locations" header
+		const cardHeight = screenWidth * 0.5; // Square card (50% screen width)
+
+		const expandedHeight =
+			handleIndicatorSpace +
 			topPadding +
 			pillHeight +
-			pillBottomGap +
+			gapAfterPill +
 			headerHeight +
 			cardHeight +
-			bottomPadding +
-			bottomInset; // Tab bar height from parent
+			totalBottomPadding;
 
-		return [totalHeight];
-	}, [screenWidth, bottomInset]);
+		return [collapsedHeight, expandedHeight];
+	}, [screenWidth, totalBottomPadding]);
 
 	const handleSearchPress = useCallback(() => {
 		router.push("/route-input");
@@ -64,7 +70,7 @@ export function DestinationBottomSheet({
 	return (
 		<BottomSheet
 			ref={bottomSheetRef}
-			index={0}
+			index={1}
 			snapPoints={snapPoints}
 			backgroundStyle={[styles.background, { backgroundColor }]}
 			handleIndicatorStyle={[
@@ -73,22 +79,21 @@ export function DestinationBottomSheet({
 			]}
 			enablePanDownToClose={false}
 		>
-			<BottomSheetScrollView
-				contentContainerStyle={{
+			<BottomSheetView
+				style={{
 					paddingTop: Spacing.xl, // 20px
-					paddingBottom: bottomInset + Spacing.xl, // Tab bar space + 20px padding
+					paddingBottom: totalBottomPadding, // Device safe area + tab bar + content padding
+					paddingHorizontal: Spacing.xl, // 20px
 				}}
 			>
 				{/* Pill search bar */}
-				<View style={{ paddingHorizontal: Spacing.xl }}>
-					<PillSearchBar onSearchPress={handleSearchPress} />
-				</View>
+				<PillSearchBar onSearchPress={handleSearchPress} />
 
 				{/* Popular locations carousel */}
 				<View style={{ marginTop: Spacing.lg }}>
 					<HomePopularCarousel />
 				</View>
-			</BottomSheetScrollView>
+			</BottomSheetView>
 		</BottomSheet>
 	);
 }
@@ -97,14 +102,15 @@ const styles = StyleSheet.create({
 	background: {
 		borderTopLeftRadius: BorderRadius.sheet, // 24px
 		borderTopRightRadius: BorderRadius.sheet,
-		shadowColor: "#000",
+		// No shadows - flat, clean appearance
+		shadowColor: "transparent",
 		shadowOffset: {
 			width: 0,
-			height: -4,
+			height: 0,
 		},
-		shadowOpacity: 0.1,
-		shadowRadius: 12,
-		elevation: 8,
+		shadowOpacity: 0,
+		shadowRadius: 0,
+		elevation: 0,
 	},
 	handleIndicator: {
 		width: 40,

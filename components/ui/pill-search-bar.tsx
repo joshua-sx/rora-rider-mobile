@@ -10,17 +10,21 @@ type PillSearchBarProps = {
 };
 
 export function PillSearchBar({ onSearchPress }: PillSearchBarProps) {
-	const surfaceColor = useThemeColor(
-		{ light: "#FFFFFF", dark: "#161616" },
+	const containerColor = useThemeColor(
+		{ light: "#F5F5F5", dark: "#1C1C1C" },
 		"surface",
 	);
 	const textColor = useThemeColor(
 		{ light: "#262626", dark: "#E5E7EA" },
 		"text",
 	);
-	const secondaryTextColor = useThemeColor(
-		{ light: "#5C5F62", dark: "#8B8F95" },
-		"textSecondary",
+	const laterButtonBg = useThemeColor(
+		{ light: "#FFFFFF", dark: "#2A2A2A" },
+		"surface",
+	);
+	const laterTextColor = useThemeColor(
+		{ light: "#262626", dark: "#E5E7EA" },
+		"text",
 	);
 
 	return (
@@ -28,7 +32,7 @@ export function PillSearchBar({ onSearchPress }: PillSearchBarProps) {
 			onPress={onSearchPress}
 			style={({ pressed }) => [
 				styles.container,
-				{ backgroundColor: surfaceColor },
+				{ backgroundColor: containerColor },
 				pressed && styles.pressed,
 			]}
 		>
@@ -42,15 +46,15 @@ export function PillSearchBar({ onSearchPress }: PillSearchBarProps) {
 				Where to?
 			</ThemedText>
 
-			{/* "Later" button (non-functional placeholder) */}
-			<View style={styles.laterButton}>
+			{/* "Later" pill button */}
+			<View style={[styles.laterButton, { backgroundColor: laterButtonBg }]}>
 				<Ionicons
 					name="calendar-outline"
-					size={16}
-					color={secondaryTextColor}
+					size={18}
+					color={laterTextColor}
 					style={styles.calendarIcon}
 				/>
-				<ThemedText style={[styles.laterText, { color: secondaryTextColor }]}>
+				<ThemedText style={[styles.laterText, { color: laterTextColor }]}>
 					Later
 				</ThemedText>
 			</View>
@@ -60,19 +64,16 @@ export function PillSearchBar({ onSearchPress }: PillSearchBarProps) {
 
 const styles = StyleSheet.create({
 	container: {
-		height: 56,
+		height: 60,
 		borderRadius: 9999, // Pill shape (fully rounded)
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: Spacing.md, // 12px
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.08,
-		shadowRadius: 8,
-		elevation: 3,
+		paddingLeft: Spacing.sm, // 8px - tighter on left for icon
+		paddingRight: Spacing.sm, // 8px - tighter on right for later button
 	},
 	pressed: {
-		opacity: 0.9,
+		opacity: 0.95,
+		transform: [{ scale: 0.995 }],
 	},
 	iconCircle: {
 		width: 44,
@@ -84,19 +85,29 @@ const styles = StyleSheet.create({
 	},
 	searchText: {
 		flex: 1,
-		fontSize: Typography.sizes.body, // 16px
-		fontWeight: Typography.weights.medium,
+		fontSize: Typography.sizes.h5, // 18px - larger for prominence
+		fontWeight: Typography.weights.semiBold, // 600 - bolder
+		letterSpacing: -0.2,
 	},
 	laterButton: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: Spacing.sm, // 8px
+		paddingHorizontal: Spacing.lg, // 16px - more generous
+		paddingVertical: Spacing.sm, // 8px - reduced padding
+		borderRadius: 9999, // Pill shape
+		// No shadows - flat, clean appearance
+		shadowColor: "transparent",
+		shadowOffset: { width: 0, height: 0 },
+		shadowOpacity: 0,
+		shadowRadius: 0,
+		elevation: 0,
 	},
 	calendarIcon: {
 		marginRight: Spacing.sm, // 8px
 	},
 	laterText: {
-		fontSize: Typography.sizes.body, // 16px
-		fontWeight: Typography.weights.medium,
+		fontSize: Typography.sizes.bodySmall, // 14px
+		fontWeight: Typography.weights.semiBold, // 600
+		letterSpacing: -0.1,
 	},
 });

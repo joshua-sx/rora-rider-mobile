@@ -449,7 +449,7 @@ export default function RouteInputScreen() {
 				>
 					{/* Input Fields Container */}
 					<View style={styles.inputsContainer}>
-					{/* Origin Input with Clock Icon */}
+					{/* Origin Input */}
 					<View style={styles.inputWrapper}>
 						<View style={styles.inputRow}>
 							<View style={styles.inputFieldContainer}>
@@ -459,7 +459,7 @@ export default function RouteInputScreen() {
 										{
 											backgroundColor: surfaceColor,
 											borderColor: isOriginFocused ? tintColor : borderColor,
-											borderWidth: isOriginFocused ? 2 : 1,
+											borderWidth: 1,
 										},
 									]}
 								>
@@ -536,18 +536,22 @@ export default function RouteInputScreen() {
 									/>
 								)}
 							</View>
-							<View
+							{/* Time Icon Button */}
+							<Pressable
 								style={[
 									styles.sideIconButton,
-									{ backgroundColor: surfaceColor, borderColor: borderColor },
+									{ borderColor, backgroundColor: surfaceColor },
 								]}
+								onPress={() => {
+									// TODO: Implement time picker
+								}}
 							>
 								<Ionicons name="time-outline" size={20} color={iconColor} />
-							</View>
+							</Pressable>
 						</View>
 					</View>
 
-					{/* Destination Input with Swap Button */}
+					{/* Destination Input */}
 					<View style={styles.inputWrapper}>
 						<View style={styles.inputRow}>
 							<View style={styles.inputFieldContainer}>
@@ -556,10 +560,8 @@ export default function RouteInputScreen() {
 										styles.inputWithIcon,
 										{
 											backgroundColor: surfaceColor,
-											borderColor: isDestinationFocused
-												? tintColor
-												: borderColor,
-											borderWidth: isDestinationFocused ? 2 : 1,
+											borderColor: isDestinationFocused ? tintColor : borderColor,
+											borderWidth: 1,
 										},
 									]}
 								>
@@ -636,13 +638,13 @@ export default function RouteInputScreen() {
 									/>
 								)}
 							</View>
+							{/* Swap Icon Button */}
 							<Pressable
-								onPress={handleSwap}
 								style={[
 									styles.sideIconButton,
-									{ backgroundColor: surfaceColor, borderColor: borderColor },
+									{ borderColor, backgroundColor: surfaceColor },
 								]}
-								hitSlop={8}
+								onPress={handleSwap}
 							>
 								<Ionicons name="swap-vertical" size={20} color={iconColor} />
 							</Pressable>
@@ -698,7 +700,7 @@ export default function RouteInputScreen() {
 						<Marker
 							coordinate={destination.coordinates}
 							title={destination.name}
-							pinColor="#FF5733"
+							pinColor={tintColor}
 						/>
 					)}
 
@@ -767,7 +769,7 @@ export default function RouteInputScreen() {
 									/>
 									<View style={styles.routePoint}>
 										<View
-											style={[styles.dot, { backgroundColor: "#FF5733" }]}
+											style={[styles.dot, { backgroundColor: tintColor }]}
 										/>
 										<ThemedText style={styles.routeText}>
 											{destination?.name || "Destination"}
@@ -894,6 +896,7 @@ const styles = StyleSheet.create({
 	input: {
 		flex: 1,
 		fontSize: Typography.sizes.body,
+		fontWeight: Typography.weights.semiBold,
 		paddingVertical: 0,
 	},
 	clearButton: {
@@ -901,9 +904,9 @@ const styles = StyleSheet.create({
 		padding: 2,
 	},
 	sideIconButton: {
-		width: 44,
-		height: 44,
-		borderRadius: 22,
+		width: 48,
+		height: 48,
+		borderRadius: 24,
 		borderWidth: 1,
 		alignItems: "center",
 		justifyContent: "center",
