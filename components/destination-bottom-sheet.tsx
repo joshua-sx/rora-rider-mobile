@@ -1,14 +1,9 @@
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import type BottomSheet from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
-import {
-	LayoutChangeEvent,
-	StyleSheet,
-	View,
-	useWindowDimensions,
-} from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { LayoutChangeEvent } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
-	Extrapolate,
 	interpolate,
 	useAnimatedStyle,
 	useSharedValue,
@@ -17,8 +12,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HomePopularCarousel } from "@/components/home-popular-carousel";
 import { PillSearchBar } from "@/components/ui/pill-search-bar";
-import { BorderRadius, Spacing } from "@/constants/design-tokens";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { Sheet } from "@/src/ui/components/Sheet";
+import { space } from "@/src/ui/tokens/spacing";
 
 type DestinationBottomSheetProps = {
   bottomInset?: number; // Tab bar height (optional override)
@@ -37,36 +32,42 @@ export function DestinationBottomSheet({
 	const [isExpanded, setIsExpanded] = useState(true);
 	const [carouselHeight, setCarouselHeight] = useState<number | null>(null);
 
-	const backgroundColor = useThemeColor(
-		{ light: "#FFFFFF", dark: "#161616" },
-		"surface",
-	);
-	const handleIndicatorColor = useThemeColor(
-		{ light: "#E3E6E3", dark: "#2F3237" },
-		"border",
-	);
-
-	// Calculate total bottom padding: device safe area + tab bar height + content padding
-	// This ensures content never scrolls under the floating tab bar
-	const totalBottomPadding = insets.bottom + bottomInset + Spacing.xl;
+	// Calculate total bottom padding: device safe area + tab bar height
+	// This ensures content never renders under the floating tab bar
+	const totalBottomPadding = insets.bottom + bottomInset;
 
 	// Two snap points: collapsed (pill only) and expanded (pill + cards)
 	const snapPoints = useMemo(() => {
 		const handleIndicatorSpace = 12; // Handle indicator + top margin
-		const topPadding = Spacing.xl; // 20px
+		const topPadding = space[5]; // 20px
 		const pillHeight = 60; // Updated to match new pill height
 
 		// Collapsed state: just pill search bar
-		// Use totalBottomPadding to account for safe area + tab bar + content padding
+		// Snap point = handle + top padding + pill + bottom padding + safe area/tab bar
+		const bottomContentPadding = space[5]; // 20px applied in contentContainerStyle
 		const collapsedHeight =
-			handleIndicatorSpace + topPadding + pillHeight + totalBottomPadding;
+			handleIndicatorSpace +
+			topPadding +
+			pillHeight +
+			bottomContentPadding +
+			totalBottomPadding;
 
 		// Expanded state: pill + popular locations cards
-		const gapAfterPill = Spacing.lg; // 16px
-		const cardHeight = screenWidth * 0.5; // Square card (50% screen width)
-		const estimatedHeaderHeight = 24; // Icon/text row without font scaling
+		const gapAfterPill = space[5]; // 20px (matches marginTop on carousel)
+		const cardWidth = screenWidth * 0.5; // Card width (50% screen width)
+		const cardHeight = cardWidth; // Square aspect ratio (width = height)
+
+		// Carousel structure (home-popular-carousel.tsx:84-119):
+		// 1. Header row (flexDirection: row, alignItems: center):
+		//    - Icon (20px) + gap (space[2] = 8px) + Text (h2 variant ~20-22px line height)
+		//    - Total row height: ~32px (height of tallest element)
+		// 2. Header bottom margin: space[4] = 16px
+		// 3. Card (square, popular-location-card.tsx:54): height = width
+		const headerRowHeight = 32; // Icon row with star + text
+		const headerBottomMargin = space[4]; // 16px
 		const estimatedCarouselHeight =
-			cardHeight + Spacing.lg + estimatedHeaderHeight;
+			headerRowHeight + headerBottomMargin + cardHeight;
+
 		const effectiveCarouselHeight = carouselHeight ?? estimatedCarouselHeight;
 
 		const expandedHeight =
@@ -75,15 +76,41 @@ export function DestinationBottomSheet({
 			pillHeight +
 			gapAfterPill +
 			effectiveCarouselHeight +
+			bottomContentPadding +
 			totalBottomPadding;
 
+		console.log("[DestinationBottomSheet] Snap points calculated:", {
+			collapsed: collapsedHeight,
+			expanded: expandedHeight,
+			screenWidth,
+			cardWidth,
+			cardHeight,
+			carouselHeight: effectiveCarouselHeight,
+			isEstimate: carouselHeight === null,
+			breakdown: {
+				handleIndicatorSpace,
+				topPadding,
+				pillHeight,
+				gapAfterPill,
+				headerRowHeight,
+				headerBottomMargin,
+				effectiveCarouselHeight,
+				bottomContentPadding,
+				totalBottomPadding,
+				bottomInset,
+				safeAreaBottom: insets.bottom,
+			},
+		});
+
 		return [collapsedHeight, expandedHeight];
-	}, [carouselHeight, screenWidth, totalBottomPadding]);
+	}, [carouselHeight, screenWidth, totalBottomPadding, bottomInset, insets.bottom]);
 
 	// Callback when bottom sheet position changes
 	const handleSheetChange = useCallback((index: number) => {
 		// index 0 = collapsed (hide carousel), index 1 = expanded (show carousel)
 		setIsExpanded(index === 1);
+		// Note: animatedIndex SharedValue is automatically updated by the bottom sheet
+		// when passed as a prop, so no manual synchronization needed here
 	}, []);
 
 	const handleSearchPress = useCallback(() => {
@@ -95,19 +122,19 @@ export function DestinationBottomSheet({
 			animatedIndex.value,
 			[0, 0.2, 1],
 			[0, 0, 1],
-			Extrapolate.CLAMP,
+			"clamp",
 		);
 		const translateY = interpolate(
 			animatedIndex.value,
 			[0, 1],
 			[12, 0],
-			Extrapolate.CLAMP,
+			"clamp",
 		);
 		const scale = interpolate(
 			animatedIndex.value,
 			[0, 1],
 			[0.98, 1],
-			Extrapolate.CLAMP,
+			"clamp",
 		);
 
 		return {
@@ -116,59 +143,63 @@ export function DestinationBottomSheet({
 		};
 	}, []);
 
-	const handleCarouselLayout = useCallback(
-		(event: LayoutChangeEvent) => {
-			const nextHeight = event.nativeEvent.layout.height;
-			setCarouselHeight((current) => {
-				if (current === null) return nextHeight;
-				if (Math.abs(current - nextHeight) < 1) return current;
-				return nextHeight;
-			});
-		},
-		[setCarouselHeight],
-	);
+	const handleCarouselLayout = useCallback((event: LayoutChangeEvent) => {
+		const nextHeight = event.nativeEvent.layout.height;
+		setCarouselHeight((current) => {
+			if (current === null) return nextHeight;
+			if (Math.abs(current - nextHeight) < 1) return current;
+			return nextHeight;
+		});
+	}, []);
+
+	// Ensure animatedIndex is initialized correctly on mount
+	useEffect(() => {
+		// Initialize animatedIndex to match initial index (1 = expanded)
+		animatedIndex.value = 1;
+	}, [animatedIndex]);
 
 	return (
-		<BottomSheet
+		<Sheet
 			ref={bottomSheetRef}
 			index={1}
 			snapPoints={snapPoints}
 			animatedIndex={animatedIndex}
-			backgroundStyle={[styles.background, { backgroundColor }]}
-			handleIndicatorStyle={[
-				styles.handleIndicator,
-				{ backgroundColor: handleIndicatorColor },
-			]}
+			backgroundStyle={styles.background}
+			handleIndicatorStyle={styles.handleIndicator}
 			enablePanDownToClose={false}
 			onChange={handleSheetChange}
+			animateOnMount={false}
+			enableOverDrag={false}
+			overDragResistanceFactor={0}
+			enableDynamicSizing={false}
+			// Gesture thresholds: allow horizontal scrolling with smaller vertical movement
+			// activeOffsetY: vertical pan activates after 15px movement (prevents accidental drags)
+			// failOffsetX: horizontal pan fails after 5px movement (allows horizontal scroll to take priority)
+			activeOffsetY={[-15, 15]}
+			failOffsetX={[-5, 5]}
+			contentContainerStyle={{
+				paddingTop: space[5], // 20px
+				paddingBottom: space[5] + totalBottomPadding, // Content padding + safe area + tab bar
+				paddingHorizontal: space[5], // 20px
+			}}
 		>
-			<BottomSheetView
-				style={{
-					paddingTop: Spacing.xl, // 20px
-					paddingBottom: totalBottomPadding, // Device safe area + tab bar + content padding
-					paddingHorizontal: Spacing.xl, // 20px
-				}}
-			>
-				{/* Pill search bar */}
-				<PillSearchBar onSearchPress={handleSearchPress} />
+			{/* Pill search bar */}
+			<PillSearchBar onSearchPress={handleSearchPress} />
 
-				{/* Popular locations carousel - hidden when collapsed */}
-				<Animated.View
-					style={[{ marginTop: Spacing.xl }, carouselAnimatedStyle]}
-					onLayout={handleCarouselLayout}
-					pointerEvents={isExpanded ? "box-none" : "none"}
-				>
-					<HomePopularCarousel />
-				</Animated.View>
-			</BottomSheetView>
-		</BottomSheet>
+			{/* Popular locations carousel - hidden when collapsed */}
+			<Animated.View
+				style={[{ marginTop: space[5] }, carouselAnimatedStyle]}
+				onLayout={handleCarouselLayout}
+				pointerEvents={isExpanded ? "box-none" : "none"}
+			>
+				<HomePopularCarousel />
+			</Animated.View>
+		</Sheet>
 	);
 }
 
 const styles = StyleSheet.create({
 	background: {
-		borderTopLeftRadius: BorderRadius.sheet, // 24px
-		borderTopRightRadius: BorderRadius.sheet,
 		// No shadows - flat, clean appearance
 		shadowColor: "transparent",
 		shadowOffset: {
@@ -180,9 +211,6 @@ const styles = StyleSheet.create({
 		elevation: 0,
 	},
 	handleIndicator: {
-		width: 40,
-		height: 4,
-		borderRadius: 2,
-		marginTop: Spacing.sm, // 8px
+		// Custom handle styling if needed
 	},
 });

@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import QRCode from "react-native-qrcode-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { SINT_MAARTEN_REGION } from "@/constants/config";
@@ -16,6 +17,7 @@ import { useRouteStore } from "@/store/route-store";
 import { useTripHistoryStore } from "@/store/trip-history-store";
 import { formatDistance, formatDuration, formatPrice } from "@/utils/pricing";
 import { fitMapToRoute } from "@/utils/map";
+import { useToast } from "@/src/ui/providers/ToastProvider";
 
 export default function TripPreviewScreen() {
 	const router = useRouter();
@@ -23,6 +25,7 @@ export default function TripPreviewScreen() {
 	const { height: screenHeight } = useWindowDimensions();
 	const mapRef = useRef<MapView>(null);
 	const bottomSheetRef = useRef<BottomSheet>(null);
+	const { showToast } = useToast();
 
 	const { origin, destination, routeData } = useRouteStore();
 	const { addTrip, toggleSaved } = useTripHistoryStore();
@@ -106,8 +109,16 @@ export default function TripPreviewScreen() {
 			toggleSaved(tripId);
 			setIsSaved(true);
 		}
-		router.push("/");
-	}, [tripId, toggleSaved, isSaved, router]);
+
+		// Show success feedback
+		showToast("Trip saved successfully");
+		Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+		// Delay navigation to show toast
+		setTimeout(() => {
+			router.push("/");
+		}, 800);
+	}, [tripId, toggleSaved, isSaved, showToast, router]);
 
 	const togglePage = useCallback(() => {
 		setCurrentPage(prev => prev === 0 ? 1 : 0);

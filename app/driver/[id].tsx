@@ -8,11 +8,13 @@ import { ThemedView } from '@/components/themed-view';
 import { BorderRadius, Spacing } from '@/constants/design-tokens';
 import { getDriverById } from '@/data/drivers';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useToast } from '@/src/ui/providers/ToastProvider';
 
 export default function DriverProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
 
   const driver = getDriverById(id);
 
@@ -43,12 +45,14 @@ export default function DriverProfileScreen() {
 
   const handleCall = () => {
     if (driver?.phone) {
+      showToast('Opening phone...');
       Linking.openURL(`tel:${driver.phone}`);
     }
   };
 
   const handleEmail = () => {
     if (driver?.email) {
+      showToast('Opening email...');
       Linking.openURL(`mailto:${driver.email}`);
     }
   };

@@ -1,12 +1,15 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { StyleSheet, Pressable } from 'react-native';
+import type BottomSheet from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/components/themed-text';
-import { LocationInputField } from '@/components/ui/location-input-field';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Venue } from '@/types/venue';
+import { Sheet, Button } from '@/src/ui';
+import { Text } from '@/src/ui/primitives/Text';
+import { Box } from '@/src/ui/primitives/Box';
+import { colors } from '@/src/ui/tokens/colors';
+import { space } from '@/src/ui/tokens/spacing';
+import { radius } from '@/src/ui/tokens/radius';
 
 type RideCtaSheetProps = {
   venue: Venue;
@@ -25,24 +28,6 @@ export function RideCtaSheet({
 }: RideCtaSheetProps) {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const backgroundColor = useThemeColor(
-    { light: '#FFFFFF', dark: '#161616' },
-    'surface'
-  );
-  const handleIndicatorColor = useThemeColor(
-    { light: '#E3E6E3', dark: '#2F3237' },
-    'border'
-  );
-  const subtextColor = useThemeColor(
-    { light: '#5C5F62', dark: '#A0A5AA' },
-    'textSecondary'
-  );
-  const borderColor = useThemeColor(
-    { light: '#E3E6E3', dark: '#2F3237' },
-    'border'
-  );
-  const primaryColor = useThemeColor({}, 'tint');
-
   const snapPoints = useMemo(() => ['55%'], []);
 
   const handleSheetChanges = useCallback(
@@ -59,98 +44,85 @@ export function RideCtaSheet({
   }
 
   return (
-    <BottomSheet
+    <Sheet
       ref={bottomSheetRef}
       index={0}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
-      backgroundStyle={[styles.background, { backgroundColor }]}
-      handleIndicatorStyle={[
-        styles.handleIndicator,
-        { backgroundColor: handleIndicatorColor },
-      ]}
+      backgroundStyle={styles.background}
+      handleIndicatorStyle={styles.handleIndicator}
+      contentContainerStyle={styles.contentContainer}
     >
-      <BottomSheetView style={styles.contentContainer}>
-        {/* Header */}
-        <View style={styles.header}>
-          <ThemedText style={styles.title}>
-            Get a ride to {venue.name}
-          </ThemedText>
-        </View>
+      {/* Header */}
+      <Box style={styles.header}>
+        <Text variant="title">
+          Get a ride to {venue.name}
+        </Text>
+      </Box>
 
-        {/* Pickup Field */}
-        <View style={styles.fieldContainer}>
-          <View style={styles.fieldHeader}>
-            <ThemedText style={[styles.fieldLabel, { color: subtextColor }]}>
-              PICKUP
-            </ThemedText>
-          </View>
-          <Pressable
-            style={[styles.fieldInput, { borderColor }]}
-            onPress={onEditPickup}
-          >
-            <Ionicons name="location" size={18} color={primaryColor} />
-            <ThemedText style={styles.fieldValue}>Current Location</ThemedText>
-            <Ionicons name="chevron-down" size={18} color={subtextColor} />
-          </Pressable>
-        </View>
-
-        {/* Destination Field (Locked) */}
-        <View style={styles.fieldContainer}>
-          <View style={styles.fieldHeader}>
-            <ThemedText style={[styles.fieldLabel, { color: subtextColor }]}>
-              DESTINATION
-            </ThemedText>
-          </View>
-          <View style={[styles.fieldInput, styles.fieldLocked, { borderColor }]}>
-            <Ionicons name="location" size={18} color={subtextColor} />
-            <ThemedText style={[styles.fieldValue, { flex: 1 }]}>
-              {venue.name}
-            </ThemedText>
-            <Ionicons name="lock-closed" size={16} color={subtextColor} />
-          </View>
-        </View>
-
-        {/* Route Preview */}
-        <View style={[styles.routePreview, { borderColor }]}>
-          <View style={styles.routeItem}>
-            <Ionicons name="time-outline" size={20} color={subtextColor} />
-            <ThemedText style={styles.routeText}>
-              ~{venue.estimatedDuration || 12} min
-            </ThemedText>
-          </View>
-          <View style={[styles.routeDivider, { backgroundColor: borderColor }]} />
-          <View style={styles.routeItem}>
-            <Ionicons name="navigate-outline" size={20} color={subtextColor} />
-            <ThemedText style={styles.routeText}>
-              ~{venue.distance} km
-            </ThemedText>
-          </View>
-        </View>
-
-        {/* CTA Button */}
+      {/* Pickup Field */}
+      <Box style={styles.fieldContainer}>
+        <Box style={styles.fieldHeader}>
+          <Text variant="cap" muted>
+            PICKUP
+          </Text>
+        </Box>
         <Pressable
-          style={({ pressed }) => [
-            styles.ctaButton,
-            { backgroundColor: primaryColor },
-            pressed && styles.ctaButtonPressed,
-          ]}
-          onPress={onGetQuote}
+          style={styles.fieldInput}
+          onPress={onEditPickup}
         >
-          <ThemedText style={styles.ctaButtonText}>
-            Get Official Quote & View Drivers
-          </ThemedText>
+          <Ionicons name="location" size={18} color={colors.primary} />
+          <Text style={styles.fieldValue}>Current Location</Text>
+          <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
         </Pressable>
-      </BottomSheetView>
-    </BottomSheet>
+      </Box>
+
+      {/* Destination Field (Locked) */}
+      <Box style={styles.fieldContainer}>
+        <Box style={styles.fieldHeader}>
+          <Text variant="cap" muted>
+            DESTINATION
+          </Text>
+        </Box>
+        <Box style={[styles.fieldInput, styles.fieldLocked]}>
+          <Ionicons name="location" size={18} color={colors.textMuted} />
+          <Text style={[styles.fieldValue, { flex: 1 }]}>
+            {venue.name}
+          </Text>
+          <Ionicons name="lock-closed" size={16} color={colors.textMuted} />
+        </Box>
+      </Box>
+
+      {/* Route Preview */}
+      <Box style={styles.routePreview}>
+        <Box style={styles.routeItem}>
+          <Ionicons name="time-outline" size={20} color={colors.textMuted} />
+          <Text style={styles.routeText}>
+            ~{venue.estimatedDuration || 12} min
+          </Text>
+        </Box>
+        <Box style={styles.routeDivider} />
+        <Box style={styles.routeItem}>
+          <Ionicons name="navigate-outline" size={20} color={colors.textMuted} />
+          <Text style={styles.routeText}>
+            ~{venue.distance} km
+          </Text>
+        </Box>
+      </Box>
+
+      {/* CTA Button */}
+      <Button
+        label="Get Official Quote & View Drivers"
+        onPress={onGetQuote}
+        variant="primary"
+      />
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
   background: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
@@ -158,41 +130,29 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   handleIndicator: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    marginTop: 8,
+    // Custom handle styling if needed
   },
   contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 8,
+    paddingHorizontal: space[6],
+    paddingTop: space[2],
   },
   header: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
+    marginBottom: space[6],
   },
   fieldContainer: {
-    marginBottom: 16,
+    marginBottom: space[4],
   },
   fieldHeader: {
-    marginBottom: 8,
-  },
-  fieldLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    marginBottom: space[2],
   },
   fieldInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
-    borderRadius: 12,
+    padding: space[4],
+    borderRadius: radius.md,
     borderWidth: 1,
-    gap: 12,
+    borderColor: colors.border,
+    gap: space[3],
   },
   fieldLocked: {
     opacity: 0.7,
@@ -200,45 +160,32 @@ const styles = StyleSheet.create({
   fieldValue: {
     fontSize: 16,
     fontWeight: '400',
+    color: colors.text,
   },
   routePreview: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: space[4],
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    marginVertical: 16,
+    borderColor: colors.border,
+    marginVertical: space[4],
   },
   routeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: space[2],
   },
   routeDivider: {
     width: 1,
     height: 24,
-    backgroundColor: '#E3E6E3',
-    marginHorizontal: 24,
+    backgroundColor: colors.border,
+    marginHorizontal: space[6],
   },
   routeText: {
     fontSize: 16,
     fontWeight: '500',
-  },
-  ctaButton: {
-    width: '100%',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  ctaButtonPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.99 }],
-  },
-  ctaButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text,
   },
 });

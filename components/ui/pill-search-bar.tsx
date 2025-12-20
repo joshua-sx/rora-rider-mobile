@@ -1,63 +1,46 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
-import { ThemedText } from "@/components/themed-text";
-import { BorderRadius, Colors, Spacing, Typography } from "@/constants/design-tokens";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { Text } from "@/src/ui/primitives/Text";
+import { Box } from "@/src/ui/primitives/Box";
+import { colors } from "@/src/ui/tokens/colors";
+import { space } from "@/src/ui/tokens/spacing";
 
 type PillSearchBarProps = {
 	onSearchPress: () => void;
 };
 
 export function PillSearchBar({ onSearchPress }: PillSearchBarProps) {
-	const containerColor = useThemeColor(
-		{ light: "#F5F5F5", dark: "#1C1C1C" },
-		"surface",
-	);
-	const textColor = useThemeColor(
-		{ light: "#262626", dark: "#E5E7EA" },
-		"text",
-	);
-	const laterButtonBg = useThemeColor(
-		{ light: "#FFFFFF", dark: "#2A2A2A" },
-		"surface",
-	);
-	const laterTextColor = useThemeColor(
-		{ light: "#262626", dark: "#E5E7EA" },
-		"text",
-	);
-
 	return (
 		<Pressable
 			onPress={onSearchPress}
 			style={({ pressed }) => [
 				styles.container,
-				{ backgroundColor: containerColor },
 				pressed && styles.pressed,
 			]}
 		>
 			{/* Green circular search icon */}
-			<View style={[styles.iconCircle, { backgroundColor: Colors.primary }]}>
+			<Box style={styles.iconCircle}>
 				<Ionicons name="search" size={20} color="#FFFFFF" />
-			</View>
+			</Box>
 
 			{/* "Where to?" text */}
-			<ThemedText style={[styles.searchText, { color: textColor }]}>
+			<Text style={styles.searchText}>
 				Where to?
-			</ThemedText>
+			</Text>
 
 			{/* "Later" pill button */}
-			<View style={[styles.laterButton, { backgroundColor: laterButtonBg }]}>
+			<Box style={styles.laterButton}>
 				<Ionicons
 					name="calendar-outline"
 					size={18}
-					color={laterTextColor}
+					color={colors.text}
 					style={styles.calendarIcon}
 				/>
-				<ThemedText style={[styles.laterText, { color: laterTextColor }]}>
+				<Text style={styles.laterText}>
 					Later
-				</ThemedText>
-			</View>
+				</Text>
+			</Box>
 		</Pressable>
 	);
 }
@@ -68,8 +51,9 @@ const styles = StyleSheet.create({
 		borderRadius: 9999, // Pill shape (fully rounded)
 		flexDirection: "row",
 		alignItems: "center",
-		paddingLeft: Spacing.sm, // 8px - tighter on left for icon
-		paddingRight: Spacing.sm, // 8px - tighter on right for later button
+		paddingLeft: space[2], // 8px - tighter on left for icon
+		paddingRight: space[2], // 8px - tighter on right for later button
+		backgroundColor: colors.surface,
 	},
 	pressed: {
 		opacity: 0.95,
@@ -81,20 +65,23 @@ const styles = StyleSheet.create({
 		borderRadius: 22,
 		alignItems: "center",
 		justifyContent: "center",
-		marginRight: Spacing.md, // 12px
+		marginRight: space[3], // 12px
+		backgroundColor: colors.primary,
 	},
 	searchText: {
 		flex: 1,
-		fontSize: Typography.sizes.h5, // 18px - larger for prominence
-		fontWeight: Typography.weights.semiBold, // 600 - bolder
+		fontSize: 18,
+		fontWeight: '600',
 		letterSpacing: -0.2,
+		color: colors.text,
 	},
 	laterButton: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: Spacing.lg, // 16px - more generous
-		paddingVertical: Spacing.sm, // 8px - reduced padding
+		paddingHorizontal: space[4], // 16px - more generous
+		paddingVertical: space[2], // 8px - reduced padding
 		borderRadius: 9999, // Pill shape
+		backgroundColor: colors.bg,
 		// No shadows - flat, clean appearance
 		shadowColor: "transparent",
 		shadowOffset: { width: 0, height: 0 },
@@ -103,11 +90,12 @@ const styles = StyleSheet.create({
 		elevation: 0,
 	},
 	calendarIcon: {
-		marginRight: Spacing.sm, // 8px
+		marginRight: space[2], // 8px
 	},
 	laterText: {
-		fontSize: Typography.sizes.bodySmall, // 14px
-		fontWeight: Typography.weights.semiBold, // 600
+		fontSize: 14,
+		fontWeight: '600',
 		letterSpacing: -0.1,
+		color: colors.text,
 	},
 });

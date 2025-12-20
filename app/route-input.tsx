@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
 	ActivityIndicator,
@@ -35,6 +35,8 @@ import {
 	type PlaceResult,
 } from "@/services/google-maps.service";
 import { useRouteStore } from "@/store/route-store";
+import { useLocationStore } from "@/store/location-store";
+import { useToast } from "@/src/ui/providers/ToastProvider";
 import {
 	calculatePrice,
 	formatDistance,
@@ -97,6 +99,8 @@ export default function RouteInputScreen() {
 	const mapRef = useRef<MapView>(null);
 	const originAutocompleteRef = useRef<TextInput>(null);
 	const destinationAutocompleteRef = useRef<TextInput>(null);
+	const { manualEntry } = useLocalSearchParams<{ manualEntry?: string }>();
+	const { showToast } = useToast();
 
 	const {
 		origin,
@@ -108,6 +112,8 @@ export default function RouteInputScreen() {
 		setError,
 		swapLocations,
 	} = useRouteStore();
+
+	const { setCurrentLocation, setFormattedAddress } = useLocationStore();
 
 	const [viewState, setViewState] = useState<ViewState>("input");
 	const [isOriginFocused, setIsOriginFocused] = useState(false);
@@ -122,6 +128,10 @@ export default function RouteInputScreen() {
 	>([]);
 	const [isOriginLoading, setIsOriginLoading] = useState(false);
 	const [isDestinationLoading, setIsDestinationLoading] = useState(false);
+	const [originSearchError, setOriginSearchError] = useState(false);
+	const [destinationSearchError, setDestinationSearchError] = useState(false);
+	const [showOriginEmpty, setShowOriginEmpty] = useState(false);
+	const [showDestinationEmpty, setShowDestinationEmpty] = useState(false);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const backgroundColor = useThemeColor(
@@ -177,37 +187,61 @@ export default function RouteInputScreen() {
 	// Debounced autocomplete search
 	const searchPlaces = useCallback(async (query: string, isOrigin: boolean) => {
 		if (!query || query.length < 2) {
-			if (isOrigin) setOriginSuggestions([]);
-			else setDestinationSuggestions([]);
+			if (isOrigin) {
+				setOriginSuggestions([]);
+				setShowOriginEmpty(false);
+				setOriginSearchError(false);
+			} else {
+				setDestinationSuggestions([]);
+				setShowDestinationEmpty(false);
+				setDestinationSearchError(false);
+			}
 			return;
 		}
 
-		if (isOrigin) setIsOriginLoading(true);
-		else setIsDestinationLoading(true);
+		if (isOrigin) {
+			setIsOriginLoading(true);
+			setOriginSearchError(false);
+			setShowOriginEmpty(false);
+		} else {
+			setIsDestinationLoading(true);
+			setDestinationSearchError(false);
+			setShowDestinationEmpty(false);
+		}
 
 		try {
 			const results = await googleMapsService.searchPlaces(query);
-			// #region agent log
-			fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:189',message:'Autocomplete results received',data:{hypothesisId:'H2',isOrigin,query,resultsCount:results.length,willTriggerFlatListRender:results.length>0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
-			// #endregion
-			if (isOrigin) setOriginSuggestions(results);
-			else setDestinationSuggestions(results);
+
+			if (isOrigin) {
+				setOriginSuggestions(results);
+				setShowOriginEmpty(results.length === 0);
+			} else {
+				setDestinationSuggestions(results);
+				setShowDestinationEmpty(results.length === 0);
+			}
 		} catch (error) {
 			console.error("[route-input] Autocomplete error:", error);
-			if (isOrigin) setOriginSuggestions([]);
-			else setDestinationSuggestions([]);
+			if (isOrigin) {
+				setOriginSuggestions([]);
+				setOriginSearchError(true);
+				setShowOriginEmpty(false);
+			} else {
+				setDestinationSuggestions([]);
+				setDestinationSearchError(true);
+				setShowDestinationEmpty(false);
+			}
 		} finally {
 			if (isOrigin) setIsOriginLoading(false);
 			else setIsDestinationLoading(false);
 		}
 	}, []);
 
-	// Handle text input change with debounce
+	// Handle text input change with debounce (350ms per UX requirements)
 	const handleOriginChange = useCallback(
 		(text: string) => {
 			setOriginInput(text);
 			if (debounceRef.current) clearTimeout(debounceRef.current);
-			debounceRef.current = setTimeout(() => searchPlaces(text, true), 250);
+			debounceRef.current = setTimeout(() => searchPlaces(text, true), 350);
 		},
 		[searchPlaces],
 	);
@@ -216,7 +250,7 @@ export default function RouteInputScreen() {
 		(text: string) => {
 			setDestinationInput(text);
 			if (debounceRef.current) clearTimeout(debounceRef.current);
-			debounceRef.current = setTimeout(() => searchPlaces(text, false), 250);
+			debounceRef.current = setTimeout(() => searchPlaces(text, false), 350);
 		},
 		[searchPlaces],
 	);
@@ -339,6 +373,18 @@ export default function RouteInputScreen() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [destination]);
 
+	// Handle manual entry mode - when origin is selected, save to location store and go back
+	useEffect(() => {
+		if (manualEntry === "true" && origin) {
+			setCurrentLocation(origin.coordinates);
+			setFormattedAddress(origin.description);
+			showToast("Location set successfully");
+			setTimeout(() => {
+				router.back();
+			}, 800);
+		}
+	}, [manualEntry, origin, setCurrentLocation, setFormattedAddress, showToast, router]);
+
 	// Render autocomplete suggestion item with highlighted text
 	const renderSuggestionItem = useCallback(
 		({ item }: { item: PlaceResult }) => {
@@ -401,7 +447,9 @@ export default function RouteInputScreen() {
 					<Pressable onPress={handleClose} hitSlop={8}>
 						<Ionicons name="close" size={28} color={textColor} />
 					</Pressable>
-					<ThemedText style={styles.headerTitle}>Your route</ThemedText>
+					<ThemedText style={styles.headerTitle}>
+						{manualEntry === "true" ? "Set your location" : "Your route"}
+					</ThemedText>
 					<View style={{ width: 28 }} />
 				</View>
 
@@ -414,6 +462,7 @@ export default function RouteInputScreen() {
 					]}
 					keyboardShouldPersistTaps="handled"
 					showsVerticalScrollIndicator={false}
+					nestedScrollEnabled={false}
 				>
 					{/* Input Fields Container */}
 					<View style={styles.inputsContainer}>
@@ -468,33 +517,6 @@ export default function RouteInputScreen() {
 										</Pressable>
 									)}
 								</View>
-							{/* Origin Suggestions Dropdown */}
-							{originSuggestions.length > 0 && (
-								<View
-									style={[
-										styles.suggestionsContainer,
-										{ backgroundColor: surfaceColor, borderColor },
-									]}
-								>
-									{/* #region agent log */}
-									{(() => { fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:491',message:'Origin FlatList rendering inside ScrollView',data:{hypothesisId:'H1,H2,H4',suggestionCount:originSuggestions.length,nestedScrollEnabled:true,parentContainer:'ScrollView',positioning:'absolute'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{}); return null; })()}
-									{/* #endregion */}
-									<FlatList
-										data={originSuggestions}
-										keyExtractor={(item) => item.placeId}
-										renderItem={renderSuggestionItem}
-										ItemSeparatorComponent={() => (
-											<View
-												style={[
-													styles.suggestionSeparator,
-													{ backgroundColor: borderColor },
-												]}
-											/>
-										)}
-										keyboardShouldPersistTaps="handled"
-									/>
-								</View>
-							)}
 								{/* Loading Indicator */}
 								{isOriginLoading && (
 									<ActivityIndicator
@@ -570,33 +592,6 @@ export default function RouteInputScreen() {
 										</Pressable>
 									)}
 								</View>
-							{/* Destination Suggestions Dropdown */}
-							{destinationSuggestions.length > 0 && (
-								<View
-									style={[
-										styles.suggestionsContainer,
-										{ backgroundColor: surfaceColor, borderColor },
-									]}
-								>
-									{/* #region agent log */}
-									{(() => { fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:586',message:'Destination FlatList rendering inside ScrollView',data:{hypothesisId:'H1,H2,H4',suggestionCount:destinationSuggestions.length,nestedScrollEnabled:true,parentContainer:'ScrollView',positioning:'absolute'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{}); return null; })()}
-									{/* #endregion */}
-									<FlatList
-										data={destinationSuggestions}
-										keyExtractor={(item) => item.placeId}
-										renderItem={renderSuggestionItem}
-										ItemSeparatorComponent={() => (
-											<View
-												style={[
-													styles.suggestionSeparator,
-													{ backgroundColor: borderColor },
-												]}
-											/>
-										)}
-										keyboardShouldPersistTaps="handled"
-									/>
-								</View>
-							)}
 								{/* Loading Indicator */}
 								{isDestinationLoading && (
 									<ActivityIndicator
@@ -637,6 +632,114 @@ export default function RouteInputScreen() {
 						</View>
 					)}
 				</ScrollView>
+
+				{/* Origin Suggestions Dropdown - Rendered outside ScrollView to avoid nesting warning */}
+				{(originSuggestions.length > 0 || showOriginEmpty || originSearchError) && (
+					<View
+						style={[
+							styles.suggestionsContainer,
+							styles.originSuggestionsPosition,
+							{ backgroundColor: surfaceColor, borderColor },
+						]}
+					>
+						{originSearchError ? (
+							<Pressable
+								style={styles.emptyStateContainer}
+								onPress={() => searchPlaces(originInput, true)}
+							>
+								<Ionicons name="alert-circle-outline" size={24} color={iconColor} />
+								<ThemedText style={styles.emptyStateText}>
+									Couldn't load results
+								</ThemedText>
+								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+									Check connection and try again
+								</ThemedText>
+							</Pressable>
+						) : showOriginEmpty ? (
+							<View style={styles.emptyStateContainer}>
+								<Ionicons name="search-outline" size={24} color={iconColor} />
+								<ThemedText style={styles.emptyStateText}>
+									No results found
+								</ThemedText>
+								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+									Try a broader search
+								</ThemedText>
+							</View>
+						) : (
+							<FlatList
+								data={originSuggestions}
+								keyExtractor={(item) => item.placeId}
+								renderItem={renderSuggestionItem}
+								ItemSeparatorComponent={() => (
+									<View
+										style={[
+											styles.suggestionSeparator,
+											{ backgroundColor: borderColor },
+										]}
+									/>
+								)}
+								keyboardShouldPersistTaps="handled"
+								initialNumToRender={8}
+								maxToRenderPerBatch={10}
+								windowSize={7}
+							/>
+						)}
+					</View>
+				)}
+
+				{/* Destination Suggestions Dropdown - Rendered outside ScrollView to avoid nesting warning */}
+				{(destinationSuggestions.length > 0 || showDestinationEmpty || destinationSearchError) && (
+					<View
+						style={[
+							styles.suggestionsContainer,
+							styles.destinationSuggestionsPosition,
+							{ backgroundColor: surfaceColor, borderColor },
+						]}
+					>
+						{destinationSearchError ? (
+							<Pressable
+								style={styles.emptyStateContainer}
+								onPress={() => searchPlaces(destinationInput, false)}
+							>
+								<Ionicons name="alert-circle-outline" size={24} color={iconColor} />
+								<ThemedText style={styles.emptyStateText}>
+									Couldn't load results
+								</ThemedText>
+								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+									Check connection and try again
+								</ThemedText>
+							</Pressable>
+						) : showDestinationEmpty ? (
+							<View style={styles.emptyStateContainer}>
+								<Ionicons name="search-outline" size={24} color={iconColor} />
+								<ThemedText style={styles.emptyStateText}>
+									No results found
+								</ThemedText>
+								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+									Try a broader search
+								</ThemedText>
+							</View>
+						) : (
+							<FlatList
+								data={destinationSuggestions}
+								keyExtractor={(item) => item.placeId}
+								renderItem={renderSuggestionItem}
+								ItemSeparatorComponent={() => (
+									<View
+										style={[
+											styles.suggestionSeparator,
+											{ backgroundColor: borderColor },
+										]}
+									/>
+								)}
+								keyboardShouldPersistTaps="handled"
+								initialNumToRender={8}
+								maxToRenderPerBatch={10}
+								windowSize={7}
+							/>
+						)}
+					</View>
+				)}
 			</KeyboardAvoidingView>
 		);
 	}
@@ -804,9 +907,8 @@ const styles = StyleSheet.create({
 	},
 	suggestionsContainer: {
 		position: "absolute",
-		top: 52,
-		left: 0,
-		right: 0,
+		left: Spacing.xl,
+		right: Spacing.xl,
 		maxHeight: 300,
 		borderRadius: BorderRadius.input,
 		borderWidth: 1,
@@ -816,6 +918,12 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 8,
 		elevation: 10,
+	},
+	originSuggestionsPosition: {
+		top: 144, // Header (60) + padding (20) + origin input (64) = 144
+	},
+	destinationSuggestionsPosition: {
+		top: 228, // Header (60) + padding (20) + origin input (64) + gap (20) + destination input (64) = 228
 	},
 	suggestionItem: {
 		flexDirection: "row",
@@ -840,6 +948,24 @@ const styles = StyleSheet.create({
 	},
 	suggestionSeparator: {
 		height: StyleSheet.hairlineWidth,
+	},
+	emptyStateContainer: {
+		height: 56,
+		paddingHorizontal: Spacing.lg,
+		paddingVertical: Spacing.md,
+		justifyContent: "center",
+		alignItems: "center",
+		gap: Spacing.xs,
+	},
+	emptyStateText: {
+		fontSize: Typography.sizes.body,
+		fontWeight: Typography.weights.medium,
+		textAlign: "center",
+	},
+	emptyStateSubtext: {
+		fontSize: Typography.sizes.bodySmall,
+		fontWeight: Typography.weights.regular,
+		textAlign: "center",
 	},
 	inputLoader: {
 		position: "absolute",

@@ -208,7 +208,12 @@ export default function HomeScreen() {
 		console.log("[HomeScreen] User chose manual entry");
 		setShowPermissionModal(false);
 		setPermissionGranted(false);
-		// User can now use manual location input (existing functionality)
+
+		// Navigate to route input for manual location entry
+		router.push({
+			pathname: "/route-input",
+			params: { manualEntry: "true" },
+		});
 	};
 
 	return (

@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { ToastProvider } from '@/src/ui/providers/ToastProvider';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -20,34 +21,36 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: headerBackgroundColor },
-            headerTintColor,
-            headerTitleStyle: { fontWeight: '600', color: headerTitleColor },
-            headerShadowVisible: false,
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen
-            name="route-input"
-            options={{
-              presentation: 'card',
-              headerShown: false,
-              animation: 'slide_from_right',
+        <ToastProvider>
+          <Stack
+            screenOptions={{
+              headerStyle: { backgroundColor: headerBackgroundColor },
+              headerTintColor,
+              headerTitleStyle: { fontWeight: '600', color: headerTitleColor },
+              headerShadowVisible: false,
             }}
-          />
-          <Stack.Screen
-            name="trip-preview"
-            options={{
-              presentation: 'card',
-              headerShown: false,
-              animation: 'slide_from_right',
-            }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            <Stack.Screen
+              name="route-input"
+              options={{
+                presentation: 'card',
+                headerShown: false,
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="trip-preview"
+              options={{
+                presentation: 'card',
+                headerShown: false,
+                animation: 'slide_from_right',
+              }}
+            />
+          </Stack>
+          <StatusBar style="auto" />
+        </ToastProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

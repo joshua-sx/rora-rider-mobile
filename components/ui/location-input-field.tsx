@@ -8,9 +8,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/components/themed-text';
-import { Fonts } from '@/constants/theme';
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { Input } from '@/src/ui';
+import { Text } from '@/src/ui/primitives/Text';
+import { colors } from '@/src/ui/tokens/colors';
+import { space } from '@/src/ui/tokens/spacing';
 
 type LocationInputFieldProps = {
   label: string;
@@ -27,6 +28,11 @@ type LocationInputFieldProps = {
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightIconPress?: () => void;
 } & Omit<TextInputProps, 'style'>;
+
+/**
+ * LocationInputField - Wraps design system Input with location-specific UX
+ * Unique features: locked state with checkmark, optional right icon button
+ */
 
 export const LocationInputField = forwardRef<TextInput, LocationInputFieldProps>(
   function LocationInputField(
@@ -48,83 +54,40 @@ export const LocationInputField = forwardRef<TextInput, LocationInputFieldProps>
     },
     ref
   ) {
-    const backgroundColor = useThemeColor(
-      { light: '#FFFFFF', dark: '#1A1A1A' },
-      'surface'
-    );
-    const textColor = useThemeColor(
-      { light: '#262626', dark: '#E5E7EA' },
-      'text'
-    );
-    const placeholderColor = useThemeColor(
-      { light: '#5C5F62', dark: '#8B8F95' },
-      'textSecondary'
-    );
-    const iconColor = useThemeColor(
-      { light: '#5C5F62', dark: '#8B8F95' },
-      'textSecondary'
-    );
-    const lockedTextColor = useThemeColor(
-      { light: '#262626', dark: '#D1D5DB' },
-      'text'
-    );
-    const checkColor = useThemeColor({}, 'tint');
-    const tintColor = useThemeColor({}, 'tint');
-    const baseBorderColor = useThemeColor(
-      { light: '#E3E6E3', dark: '#2F3237' },
-      'border'
-    );
-    const borderColor = isFocused ? tintColor : baseBorderColor;
-
     const displayIcon = iconName || (isLocked ? 'location' : 'search');
+
+    const leftIcon = (
+      <Ionicons
+        name={displayIcon}
+        size={18}
+        color={isLocked ? colors.primary : colors.textMuted}
+      />
+    );
+
+    const rightContent = isLocked ? (
+      <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
+    ) : value && value.length > 0 && onClear && !onPress ? (
+      <Pressable onPress={onClear} hitSlop={8}>
+        <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+      </Pressable>
+    ) : null;
 
     const content = (
       <View style={styles.container}>
-        <ThemedText style={styles.label}>{label}</ThemedText>
         <View style={styles.rowContainer}>
-          <View
-            style={[
-              styles.inputContainer,
-              { backgroundColor, borderColor },
-              isLocked && styles.lockedContainer,
-              isFocused && styles.focusedContainer,
-            ]}
-          >
-            <Ionicons
-              name={displayIcon}
-              size={18}
-              color={isLocked ? checkColor : iconColor}
-              style={styles.icon}
+          <View style={styles.inputWrapper}>
+            <Input
+              label={label}
+              value={isLocked ? (value || 'Current location') : value}
+              placeholder={placeholder}
+              onChangeText={onChangeText}
+              onFocus={onFocus}
+              autoFocus={autoFocus}
+              editable={!onPress && !isLocked}
+              left={leftIcon}
+              right={rightContent}
+              {...textInputProps}
             />
-            {isLocked ? (
-              <View style={styles.lockedContent}>
-                <ThemedText style={[styles.lockedText, { color: lockedTextColor }]}>
-                  {value || 'Current location'}
-                </ThemedText>
-                <Ionicons name="checkmark-circle" size={18} color={checkColor} />
-              </View>
-            ) : (
-              <>
-                <TextInput
-                  ref={ref}
-                  style={[styles.input, { color: textColor }]}
-                  placeholder={placeholder}
-                  placeholderTextColor={placeholderColor}
-                  value={value}
-                  onChangeText={onChangeText}
-                  onFocus={onFocus}
-                  autoFocus={autoFocus}
-                  editable={!onPress}
-                  pointerEvents={onPress ? 'none' : 'auto'}
-                  {...textInputProps}
-                />
-                {value && value.length > 0 && onClear && !onPress && (
-                  <Pressable onPress={onClear} hitSlop={8} style={styles.clearButton}>
-                    <Ionicons name="close-circle" size={18} color={iconColor} />
-                  </Pressable>
-                )}
-              </>
-            )}
           </View>
           {rightIcon && (
             <Pressable
@@ -133,7 +96,7 @@ export const LocationInputField = forwardRef<TextInput, LocationInputFieldProps>
               hitSlop={8}
               disabled={!onRightIconPress}
             >
-              <Ionicons name={rightIcon} size={20} color={iconColor} />
+              <Ionicons name={rightIcon} size={20} color={colors.textMuted} />
             </Pressable>
           )}
         </View>
@@ -158,47 +121,14 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    opacity: 0.8,
   },
   rowContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    alignItems: 'flex-start',
+    gap: space[3],
   },
-  inputContainer: {
+  inputWrapper: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  lockedContainer: {
-    opacity: 0.9,
-  },
-  focusedContainer: {
-    borderWidth: 2,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '400',
-    fontFamily: Fonts?.sans,
-    padding: 0,
-    margin: 0,
-  },
-  clearButton: {
-    marginLeft: 8,
   },
   rightIconButton: {
     width: 44,
@@ -206,16 +136,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  lockedContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  lockedText: {
-    fontSize: 16,
-    fontWeight: '400',
-    fontFamily: Fonts?.sans,
+    marginTop: 24, // Align with input field (label height + gap)
   },
 });

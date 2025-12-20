@@ -15,6 +15,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { getVenueById } from '@/data/venues';
 import { googleMapsService } from '@/services/google-maps.service';
 import { useRouteStore } from '@/store/route-store';
+import { useLocationStore } from '@/store/location-store';
 import { calculatePrice } from '@/utils/pricing';
 import { extractRouteData } from '@/utils/route-validation';
 
@@ -26,8 +27,9 @@ export default function VenueDetailScreen() {
   const [isSaved, setIsSaved] = useState(false);
   const [showRideSheet, setShowRideSheet] = useState(false);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
-  
+
   const { setOrigin, setDestination, setRouteData, setError } = useRouteStore();
+  const { currentLocation, formattedAddress, permissionGranted } = useLocationStore();
 
   const backgroundColor = useThemeColor(
     { light: '#F9F9F9', dark: '#0E0F0F' },
@@ -59,35 +61,34 @@ export default function VenueDetailScreen() {
 
   const handleGetQuote = useCallback(async () => {
     if (!venue) return;
-    
+
     setIsLoadingRoute(true);
     setShowRideSheet(false);
-    
+
     try {
-      // Get user's current location (for now, using a default Sint Maarten location)
-      // In production, you'd use expo-location to get actual user location
-      const currentLocation = {
+      // Use user's actual location from store, fallback to Sint Maarten
+      const userLocation = currentLocation || {
         latitude: 18.0425,
         longitude: -63.0548,
       };
-      
+
       // Fetch route from Google Maps
       const directions = await googleMapsService.getDirections(
-        currentLocation,
+        userLocation,
         { latitude: venue.latitude, longitude: venue.longitude }
       );
       const { distanceKm, durationMin, coordinates } = extractRouteData(directions);
 
       const price = calculatePrice(distanceKm, durationMin);
-      
-      // Set origin (current location)
+
+      // Set origin with actual location info
       setOrigin({
-        placeId: 'current-location',
-        name: 'Current Location',
-        description: 'Your current location',
-        coordinates: currentLocation,
+        placeId: permissionGranted ? 'current-location' : 'manual-location',
+        name: permissionGranted ? 'Current Location' : formattedAddress || 'Your Location',
+        description: formattedAddress || 'Your current location',
+        coordinates: userLocation,
       });
-      
+
       // Set destination (venue)
       setDestination({
         placeId: venue.id,
@@ -95,7 +96,7 @@ export default function VenueDetailScreen() {
         description: venue.description,
         coordinates: { latitude: venue.latitude, longitude: venue.longitude },
       });
-      
+
       // Set route data
       setRouteData({
         distance: distanceKm,
@@ -103,7 +104,7 @@ export default function VenueDetailScreen() {
         price,
         coordinates: coordinates,
       });
-      
+
       // Navigate to trip preview
       router.push('/trip-preview');
     } catch (error) {
@@ -120,7 +121,7 @@ export default function VenueDetailScreen() {
     } finally {
       setIsLoadingRoute(false);
     }
-  }, [venue, router, setOrigin, setDestination, setRouteData, setError]);
+  }, [venue, currentLocation, permissionGranted, formattedAddress, router, setOrigin, setDestination, setRouteData, setError]);
 
   if (!venue) {
     return (

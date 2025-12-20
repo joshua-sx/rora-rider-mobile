@@ -10,18 +10,18 @@ import { useThemeColor } from "@/hooks/use-theme-color";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { CategoryInfo, Venue } from "@/types/venue";
 import { useRouter } from "expo-router";
-import { useCallback, useRef, useState } from "react";
-import type { TextInput } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Keyboard, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Skeleton } from "@/src/ui/components/Skeleton";
 
 export default function ExploreScreen() {
 	const router = useRouter();
 	const insets = useSafeAreaInsets();
-	const searchInputRef = useRef<TextInput>(null);
 
 	const [inputValue, setInputValue] = useState("");
 	const [isSearchActive, setIsSearchActive] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const debouncedQuery = useDebouncedValue(inputValue, 300);
 
 	const backgroundColor = useThemeColor(
@@ -64,6 +64,14 @@ export default function ExploreScreen() {
 		router.push("/explore/featured");
 	}, [router]);
 
+	// Simulate data loading (since we're using mock data)
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 600);
+		return () => clearTimeout(timer);
+	}, []);
+
 	return (
 		<ThemedView style={[styles.container, { backgroundColor, paddingTop: insets.top }]}>
 			{/* Header */}
@@ -72,7 +80,6 @@ export default function ExploreScreen() {
 					<ThemedText style={styles.title}>Explore</ThemedText>
 				)}
 				<SearchBar
-					ref={searchInputRef}
 					value={inputValue}
 					onChangeText={setInputValue}
 					onFocus={handleSearchFocus}
@@ -116,21 +123,31 @@ export default function ExploreScreen() {
 						<View style={styles.section}>
 							<View style={styles.sectionHeader}>
 								<ThemedText style={styles.sectionTitle}>FEATURED</ThemedText>
-								<ThemedText
-									style={[styles.seeAll, { color: primaryColor }]}
-									onPress={handleSeeAllPress}
-								>
-									See all →
-								</ThemedText>
+								{!isLoading && (
+									<ThemedText
+										style={[styles.seeAll, { color: primaryColor }]}
+										onPress={handleSeeAllPress}
+									>
+										See all →
+									</ThemedText>
+								)}
 							</View>
 							<View style={styles.sectionContent}>
-								{featuredVenues.map((venue) => (
-									<FeaturedVenueCard
-										key={venue.id}
-										venue={venue}
-										onPress={handleVenuePress}
-									/>
-								))}
+								{isLoading ? (
+									<>
+										<Skeleton width="100%" height={200} borderRadius={12} />
+										<View style={{ height: 12 }} />
+										<Skeleton width="100%" height={200} borderRadius={12} />
+									</>
+								) : (
+									featuredVenues.map((venue) => (
+										<FeaturedVenueCard
+											key={venue.id}
+											venue={venue}
+											onPress={handleVenuePress}
+										/>
+									))
+								)}
 							</View>
 						</View>
 
@@ -140,13 +157,28 @@ export default function ExploreScreen() {
 								<ThemedText style={styles.sectionTitle}>NEAR YOU</ThemedText>
 							</View>
 							<View style={styles.sectionContent}>
-								{nearbyVenues.map((venue) => (
-									<VenueListItem
-										key={venue.id}
-										venue={venue}
-										onPress={handleVenuePress}
-									/>
-								))}
+								{isLoading ? (
+									<>
+										{[1, 2, 3].map((i) => (
+											<View key={i} style={{ marginBottom: 12, flexDirection: "row", gap: 12 }}>
+												<Skeleton width={80} height={80} borderRadius={12} />
+												<View style={{ flex: 1, gap: 8 }}>
+													<Skeleton width="80%" height={20} borderRadius={4} />
+													<Skeleton width="60%" height={16} borderRadius={4} />
+													<Skeleton width="40%" height={16} borderRadius={4} />
+												</View>
+											</View>
+										))}
+									</>
+								) : (
+									nearbyVenues.map((venue) => (
+										<VenueListItem
+											key={venue.id}
+											venue={venue}
+											onPress={handleVenuePress}
+										/>
+									))
+								)}
 							</View>
 						</View>
 

@@ -1,11 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useRef } from "react";
-import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { useRouter } from "expo-router";
 
-import { ThemedText } from "@/components/themed-text";
+import { Text, colors, space } from "@/src/ui";
 import { PopularLocationCard } from "@/components/ui/popular-location-card";
-import { Colors, Spacing, Typography } from "@/constants/design-tokens";
 import { getVenueById } from "@/data/venues";
 import { useLocationStore } from "@/store/location-store";
 import { useRouteStore } from "@/store/route-store";
@@ -20,14 +20,14 @@ const POPULAR_VENUE_IDS = [
 ];
 
 export function HomePopularCarousel() {
-	const flatListRef = useRef<FlatList>(null);
+	const flatListRef = useRef<BottomSheetFlatList<any>>(null);
 	const router = useRouter();
 	const { setOrigin, setDestination } = useRouteStore();
 	const { currentLocation, formattedAddress } = useLocationStore();
 
 	const { width: screenWidth } = useWindowDimensions();
 	const CARD_WIDTH = screenWidth * 0.5; // 50% screen width
-	const CARD_GAP = Spacing.lg; // 16px gap between cards
+	const CARD_GAP = space[4]; // 16px gap between cards
 
 	// Get venue data for popular locations
 	const venues = POPULAR_VENUE_IDS.map((id) => getVenueById(id)).filter(
@@ -84,12 +84,12 @@ export function HomePopularCarousel() {
 		<View style={styles.container}>
 			{/* Header with star icon */}
 			<View style={styles.headerRow}>
-				<Ionicons name="star" size={20} color={Colors.primary} />
-				<ThemedText style={styles.headerText}>Popular locations</ThemedText>
+				<Ionicons name="star" size={20} color={colors.primary} />
+				<Text variant="h2">Popular locations</Text>
 			</View>
 
 			{/* Horizontal scrollable cards */}
-			<FlatList
+			<BottomSheetFlatList
 				ref={flatListRef}
 				data={venues}
 				horizontal
@@ -97,7 +97,7 @@ export function HomePopularCarousel() {
 				decelerationRate="fast"
 				showsHorizontalScrollIndicator={false}
 				contentContainerStyle={{
-					paddingHorizontal: Spacing.xl, // 20px on sides
+					paddingHorizontal: space[5], // 20px on sides
 					gap: CARD_GAP, // 16px gap between cards
 				}}
 				renderItem={({ item }) => (
@@ -127,12 +127,8 @@ const styles = StyleSheet.create({
 	headerRow: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: Spacing.xl, // 20px to align with cards
-		marginBottom: Spacing.lg, // 16px gap before cards
-		gap: Spacing.sm, // 8px between star and text
-	},
-	headerText: {
-		fontSize: Typography.sizes.h5, // 18px
-		fontWeight: Typography.weights.semiBold, // 600
+		paddingHorizontal: space[5], // 20px to align with cards
+		marginBottom: space[4], // 16px gap before cards
+		gap: space[2], // 8px between star and text
 	},
 });
