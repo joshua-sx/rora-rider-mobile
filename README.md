@@ -1,67 +1,242 @@
-# Welcome to your Expo app 👋
+<p align="center">
+	<h1 align="center"><b>Rora Ride</b></h1>
+<p align="center">
+    Find Verified Taxis. Transparent Fares. Safe Rides.
+    <br />
+    <br />
+    <a href="https://github.com/joshua-sx/rora-ride/issues">Issues</a>
+  </p>
+</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  <a href="https://supabase.com">
+    <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  </a>
+  <a href="https://expo.dev">
+    <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+  </a>
+  <a href="https://reactnative.dev">
+    <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
+  </a>
+</p>
+
+## About Rora Ride
+
+Rora Ride helps riders (especially tourists) **find verified taxis**, **see transparent fare estimates**, and **log rides safely** using a **QR handshake** between rider and driver. Built for Sint Maarten's taxi ecosystem, Rora respects real-world norms: cash-first culture, price negotiation, and trust through verification.
+
+The Rora Fare is a single authoritative price anchor aligned with government and taxi association rates. Drivers may accept, counter, or decline. Rora provides price clarity without price control.
+
+## Features
+
+**Verified Taxi Directory**: Browse verified drivers with service area tags, vehicle capacity, languages spoken, and verification badges.<br/>
+**Transparent Fare Estimates**: Get the Rora Fare—a single price anchor based on zone and distance pricing, aligned with official rates.<br/>
+**QR Ride Sessions**: Generate a QR code to broadcast your ride request to nearby drivers or request a specific driver directly.<br/>
+**Smart Discovery**: Drivers respond with Accept or Counter offers. Compare multiple offers with price context labels (Good deal, Pricier than usual).<br/>
+**Guest Mode**: Use the app without an account for browsing and ride requests (rate-limited). Claim your history after signup.<br/>
+**Ride History**: Track your completed rides with full details, driver info, and the ability to favorite drivers for future requests.<br/>
 
 ## Get started
 
-1. Install dependencies
+We are working on comprehensive documentation. For local development setup, see [LOCAL_DEV.md](./LOCAL_DEV.md).
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Native integrations
-
-This app includes several native-facing dependencies that may require config or device testing:
-
-- Maps: `react-native-maps` + Google Maps web services.
-  - Env vars: `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, `EXPO_PUBLIC_GOOGLE_PLACES_API_KEY`
-  - Optional proxy: `EXPO_PUBLIC_GOOGLE_MAPS_PROXY_URL`, `EXPO_PUBLIC_GOOGLE_MAPS_PROXY_TOKEN`
-  - Native keys are injected via `app.config.ts` for iOS/Android.
-  - Setup/testing: `GOOGLE_MAPS_SETUP.md`, `TESTING_GUIDE.md`
-- Location: `expo-location`
-  - Permissions are declared in `app.json` (iOS/Android).
-  - Testing flow: `LOCATION_PERMISSION_TEST_GUIDE.md`
-- Blur: `expo-blur`
-  - Used by the location permission modal; no extra native config required in Expo managed.
-- QR: `react-native-qrcode-svg` (via `react-native-svg`)
-  - Render-only QR codes; no camera or native permission requirements.
-
-## Get a fresh project
-
-When you're ready, run:
+### Quick Start
 
 ```bash
-npm run reset-project
+# Clone the repository
+git clone https://github.com/joshua-sx/rora-ride.git
+cd rora-ride
+
+# Install dependencies
+npm install
+# or
+yarn install
+
+# Set up Supabase local development
+npx supabase init
+npx supabase start  # Requires Docker
+# Copy the anon key from the output to .env.local
+
+# Set up environment variables
+cp .env.example .env.local  # If .env.example exists
+# Edit .env.local with your Supabase credentials, Google Maps API key, etc.
+# Required variables:
+#   EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+#   EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key-from-supabase-start>
+
+# Test Supabase connection
+node scripts/test-supabase-connection.js
+
+# Start Expo development server
+npx expo start
+
+# Run on iOS simulator
+npx expo start --ios
+
+# Run on Android emulator
+npx expo start --android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## App Architecture
 
-## Learn more
+- **Framework**: Expo / React Native
+- **Language**: TypeScript
+- **State Management**: Zustand (or similar)
+- **Database**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth (SMS OTP + Email magic link)
+- **Maps**: Google Maps (react-native-maps)
+- **Real-time**: Supabase Realtime
+- **Push Notifications**: Expo Push Notifications
+- **QR Generation**: QR code library
+- **Backend Logic**: Supabase Edge Functions
 
-To learn more about developing your project with Expo, look at the following resources:
+### Hosting
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- **Supabase** (database, auth, realtime, edge functions)
+- **Expo EAS** (app builds and distribution)
+- **App Store / Play Store** (native app distribution)
 
-## Join the community
+### Services
 
-Join our community of developers creating universal apps.
+- **GitHub Actions** (CI/CD)
+- **PostHog** (analytics - self-hosted)
+- **Sentry** (error tracking)
+- **Twilio** (SMS OTP)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Security & Privacy
+
+Rora Ride is built with security and privacy in mind:
+
+- **Verified drivers**: All drivers baseline verified through government and/or taxi association onboarding
+- **JWT tokens**: Short-lived, revocable tokens for QR sessions
+- **Audit trail**: Append-only ride events ledger for accountability
+- **Privacy-first**: Store coordinates and coarse labels; avoid full address strings
+- **Guest mode**: Rate-limited guest access with secure token management
+
+## Project Structure
+
+```
+rora-ride/
+├── app/                        # Expo Router app directory
+│   ├── (auth)/                 # Authentication screens
+│   ├── (tabs)/                 # Main app tabs
+│   └── _layout.tsx             # Root layout
+├── components/                 # React Native components
+│   ├── features/               # Feature-specific components
+│   └── ui/                     # Reusable UI components
+├── lib/                        # Utilities and helpers
+│   ├── supabase/               # Supabase client & helpers
+│   ├── maps/                   # Maps integration
+│   └── pricing/                # Pricing calculation logic
+├── hooks/                      # React hooks
+├── store/                      # State management (Zustand)
+├── types/                      # TypeScript types
+├── supabase/                   # Supabase config & migrations
+│   ├── migrations/             # Database migrations
+│   └── functions/              # Edge Functions
+├── scripts/                    # Build & utility scripts
+└── docs/                       # Documentation
+```
+
+## Development
+
+```bash
+# Start Expo development server
+npx expo start
+
+# Start with iOS simulator
+npx expo start --ios
+
+# Start with Android emulator
+npx expo start --android
+
+# Type check
+npx tsc --noEmit
+
+# Lint
+npm run lint
+
+# Build for development
+eas build --profile development --platform ios
+eas build --profile development --platform android
+
+# Build for production
+eas build --profile production --platform all
+```
+
+## Database
+
+### Supabase Setup
+
+Rora Ride uses Supabase for the database, authentication, and real-time features.
+
+**Initial Setup:**
+```bash
+# Install Supabase CLI (already included as dev dependency)
+# Initialize Supabase in your project
+npx supabase init
+
+# Start local Supabase instance (requires Docker)
+npx supabase start
+
+# Copy the anon key from the output and add to .env.local:
+# EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+# EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon-key-from-output>
+
+# Test the connection
+node scripts/test-supabase-connection.js
+```
+
+**Development Workflow:**
+```bash
+# Create a new migration
+npx supabase migration create <migration-name>
+
+# Apply migrations locally
+npx supabase db reset
+
+# Generate TypeScript types from database schema
+npx supabase gen types typescript --local > src/types/database.ts
+
+# Open Supabase Studio (web UI for database management)
+npx supabase studio
+
+# Stop local Supabase
+npx supabase stop
+```
+
+**Linking to Cloud Project (Optional):**
+```bash
+# Link to your Supabase cloud project
+npx supabase link --project-ref <your-project-ref>
+
+# Pull remote migrations
+npx supabase db pull
+```
+
+**Supabase Client:**
+The Supabase client is initialized in `src/lib/supabase.ts` and automatically configured from environment variables.
+
+## Repo Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/e55f0c74b33085545ccf3410aae537fa0cd917af.svg "Repobeats analytics image")
+
+## License
+
+License is not finalized yet. If you plan to deploy Rora Ride commercially, please open an issue to discuss licensing.
+
+## Market & Target
+
+**Primary Market**: Sint Maarten (Dutch side initially, expanding to French side)  
+**Target Users**: Tourists, visitors, and locals seeking verified taxi transportation  
+**Driver App**: Separate product (not included in this repository)
+
+## Core Workflow
+
+1. **Estimate** → Rider selects origin and destination, sees Rora Fare
+2. **Generate QR** → Create ride session with QR code
+3. **Discover** → Broadcast to nearby drivers or request specific driver
+4. **Compare Offers** → Review driver responses (Accept/Counter)
+5. **Confirm** → Select driver and proceed with ride
+6. **Complete** → Mark ride complete, rate driver (optional), save to history
+
+For detailed specifications, see [SPEC.md](./SPEC.md).
