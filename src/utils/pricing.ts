@@ -3,7 +3,9 @@
  * Formula: $5.00 base + ($1.50 × distance_km) + ($0.25 × duration_min)
  */
 
-export function calculatePrice(distanceKm: number, durationMin: number): number {
+export const PRICING_VERSION = 'v1.0';
+
+export function calculatePrice(distanceKm: number, durationMin: number): { price: number; version: string } {
   const BASE_FARE = 5.0;
   const PER_KM_RATE = 1.5;
   const PER_MIN_RATE = 0.25;
@@ -11,7 +13,10 @@ export function calculatePrice(distanceKm: number, durationMin: number): number 
   const total = BASE_FARE + distanceKm * PER_KM_RATE + durationMin * PER_MIN_RATE;
 
   // Round to 2 decimal places
-  return Math.round(total * 100) / 100;
+  return {
+    price: Math.round(total * 100) / 100,
+    version: PRICING_VERSION,
+  };
 }
 
 export function formatPrice(price: number): string {

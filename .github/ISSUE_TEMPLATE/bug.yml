@@ -1,0 +1,142 @@
+name: Bug
+description: Something isn't working as expected
+title: "[Bug] "
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to report bugs. Include reproduction steps, expected vs actual behavior, and environment details.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's broken in one sentence
+      placeholder: QR code doesn't display when device is offline, even though it should be cached.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step how to reproduce the bug
+      placeholder: |
+        1. Generate QR code for a ride (online)
+        2. Turn off Wi-Fi and cellular data
+        3. Navigate away from QR screen
+        4. Return to QR screen
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen
+      placeholder: QR code should display from cache (see DECISIONS.md D3 - QR cached locally for offline display).
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happens
+      placeholder: QR screen shows "No connection" error and QR doesn't display.
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      description: iOS, Android, or Both
+      placeholder: Both
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: OS Version
+      description: iOS version, Android version, or Both
+      placeholder: iOS 17.0, Android 13
+
+  - type: input
+    id: app-version
+    attributes:
+      label: App Version
+      description: Current app version
+      placeholder: 1.0.0
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Device model(s) where bug occurs
+      placeholder: iPhone 14 Pro, Pixel 7
+
+  - type: textarea
+    id: screenshots-logs
+    attributes:
+      label: Screenshots / Logs
+      description: If applicable, add screenshots or error logs
+      placeholder: |
+        [Screenshot or log output here]
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: QR generation works fine when online. Issue is with offline cache retrieval.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the codebase is affected
+      options:
+        - Auth
+        - Ride Loop
+        - Pricing
+        - Maps
+        - Driver Directory
+        - Notifications
+        - History
+        - Ratings
+        - Admin
+        - Database
+        - Infra
+        - UI/UX
+        - Testing
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Urgency and importance (P0 for critical production bugs)
+      options:
+        - P0: Critical
+        - P1: High
+        - P2: Medium
+        - P3: Low
+      default: 1
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimated effort to fix
+      options:
+        - XS (< 2h)
+        - S (2-4h)
+        - M (1 day)
+        - L (2-3 days)
+        - XL (> 3 days)
+      default: 1
+

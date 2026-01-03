@@ -1,0 +1,119 @@
+name: Story
+description: User-facing feature or requirement
+title: "[Story] "
+labels: ["type:story"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for user-facing features or requirements.
+        Follow the user story format: "As a [user], I want [goal] so that [benefit]."
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: As a [user type], I want [goal] so that [benefit]
+      placeholder: As a rider, I want to compare multiple driver offers so that I can choose the best deal.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Links to SPEC.md, related issues, screenshots/mockups
+      placeholder: |
+        Drivers respond with Accept or Counter offers. Rider needs to see all offers with price context.
+        See SPEC.md §15 (Ride Offers).
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Specific, testable criteria (required)
+      placeholder: |
+        - [ ] Rider sees all pending offers in a scrollable list
+        - [ ] Each offer shows: driver name, vehicle, price, price label (Good deal/Normal/Pricier)
+        - [ ] Offers update in real-time via Supabase Realtime
+        - [ ] Rider can tap an offer to select it
+        - [ ] Selected offer moves to "confirmed" state
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Implementation details, edge cases, dependencies
+      placeholder: |
+        - Use Supabase Realtime subscription on `ride_offers` table
+        - Filter by `ride_session_id` and `status = 'pending'`
+        - Price labels calculated server-side (Edge Function)
+        - Handle offline: show cached offers, sync when online
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related
+      description: Links to SPEC.md, Epic issue, related issues
+      placeholder: |
+        - Spec: SPEC.md §X
+        - Epic: #123 (if part of epic)
+        - Related issue: #456
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the codebase is affected
+      options:
+        - Auth
+        - Ride Loop
+        - Pricing
+        - Maps
+        - Driver Directory
+        - Notifications
+        - History
+        - Ratings
+        - Admin
+        - Database
+        - Infra
+        - UI/UX
+        - Testing
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Urgency and importance
+      options:
+        - P0: Critical
+        - P1: High
+        - P2: Medium
+        - P3: Low
+      default: 2
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimated effort
+      options:
+        - XS (< 2h)
+        - S (2-4h)
+        - M (1 day)
+        - L (2-3 days)
+        - XL (> 3 days)
+      default: 2
+
+  - type: textarea
+    id: risks-notes
+    attributes:
+      label: Risks / Notes
+      description: Any risks, dependencies, or additional context
+

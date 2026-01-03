@@ -30,3 +30,13 @@ export function getHeaderTopPadding(
   return Math.max(calculatedPadding, minimumPadding);
 }
 
+/**
+ * Calculates bottom padding to account for the tab bar and safe area insets.
+ * - iOS: 49pt tab bar + safe area bottom inset
+ * - Android: 60dp tab bar (approximate native height)
+ */
+export function getTabBarHeight(insets: EdgeInsets): number {
+  const TAB_BAR_BASE_HEIGHT = Platform.OS === 'ios' ? 49 : 60;
+  return TAB_BAR_BASE_HEIGHT + insets.bottom;
+}
+

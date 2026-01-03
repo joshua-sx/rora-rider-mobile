@@ -1,9 +1,11 @@
 import { StyleSheet, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/src/ui/components/themed-text';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Venue } from '@/src/types/venue';
+import { getTabBarHeight } from '@/src/utils/safe-area';
 
 type RideCtaCardProps = {
   venue: Venue;
@@ -11,6 +13,9 @@ type RideCtaCardProps = {
 };
 
 export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = getTabBarHeight(insets);
+
   const backgroundColor = useThemeColor(
     { light: '#FFFFFF', dark: '#161616' },
     'surface'
@@ -20,13 +25,13 @@ export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
     'text'
   );
   const subtextColor = useThemeColor(
-    { light: '#5C5F62', dark: '#A0A5AA' },
+    { light: '#5C5F62', dark: '#8B8F95' },
     'textSecondary'
   );
   const primaryColor = useThemeColor({}, 'tint');
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View style={[styles.container, { backgroundColor, bottom: tabBarHeight }]}>
       <View style={styles.content}>
         <ThemedText style={[styles.title, { color: textColor }]}>
           Get a ride to {venue.name}
@@ -61,7 +66,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 34,
+    paddingBottom: 16,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     shadowColor: '#000',

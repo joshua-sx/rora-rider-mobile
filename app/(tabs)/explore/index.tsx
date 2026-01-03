@@ -14,10 +14,12 @@ import { useCallback, useEffect, useState } from "react";
 import { FlatList, Keyboard, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Skeleton } from "@/src/ui/components/Skeleton";
+import { getTabBarHeight } from "@/src/utils/safe-area";
 
 export default function ExploreScreen() {
 	const router = useRouter();
 	const insets = useSafeAreaInsets();
+	const tabBarHeight = getTabBarHeight(insets);
 
 	const [inputValue, setInputValue] = useState("");
 	const [isSearchActive, setIsSearchActive] = useState(false);
@@ -183,7 +185,7 @@ export default function ExploreScreen() {
 						</View>
 
 						{/* Bottom Padding */}
-						<View style={{ height: 100 }} />
+						<View style={{ height: tabBarHeight + 20 }} />
 					</View>
 				</ScrollView>
 			)}

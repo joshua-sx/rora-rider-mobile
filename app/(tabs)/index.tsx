@@ -4,12 +4,14 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView from "react-native-maps";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DestinationBottomSheet } from "@/src/features/home/components/destination-bottom-sheet";
 import { LocationPermissionModal } from "@/src/features/home/components/location-permission-modal";
 import { locationService } from "@/src/services/location.service";
 import { locationStorageService } from "@/src/services/location-storage.service";
 import { useLocationStore } from "@/src/store/location-store";
+import { getTabBarHeight } from "@/src/utils/safe-area";
 
 // Default location: St. Maarten (matching the reference images)
 const INITIAL_REGION = {
@@ -19,11 +21,11 @@ const INITIAL_REGION = {
 	longitudeDelta: 0.0421,
 };
 
-// Tab bar height estimate for iOS native tabs
-const TAB_BAR_HEIGHT = 85;
-
 export default function HomeScreen() {
 	const router = useRouter();
+	const insets = useSafeAreaInsets();
+	const tabBarHeight = getTabBarHeight(insets);
+
 	const {
 		setCurrentLocation,
 		setFormattedAddress,
@@ -237,7 +239,7 @@ export default function HomeScreen() {
 					showsMyLocationButton={false}
 					showsCompass={false}
 				/>
-				<DestinationBottomSheet bottomInset={TAB_BAR_HEIGHT} />
+				<DestinationBottomSheet bottomInset={tabBarHeight} />
 
 				{/* Custom Location Permission Modal */}
 				<LocationPermissionModal

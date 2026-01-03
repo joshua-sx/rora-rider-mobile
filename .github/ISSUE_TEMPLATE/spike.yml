@@ -1,0 +1,121 @@
+name: Spike
+description: Research or exploration task
+title: "[Spike] "
+labels: ["type:spike"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for research or exploration tasks. Spikes have a timebox and produce an output artifact (doc, decision, proof-of-concept).
+
+  - type: textarea
+    id: research-question
+    attributes:
+      label: Research Question
+      description: What we need to learn or decide
+      placeholder: What are Google Maps Places API rate limits and pricing for our use case (autocomplete, directions, geocoding)?
+    validations:
+      required: true
+
+  - type: input
+    id: timebox
+    attributes:
+      label: Timebox
+      description: Maximum time for this research (e.g., "2 hours")
+      placeholder: 2 hours
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this research is needed, what decision depends on it
+      placeholder: |
+        We need to understand costs and limits before MVP launch.
+        May need to implement caching or rate limiting.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: What artifact is expected (doc, decision, proof-of-concept, etc.)
+      placeholder: |
+        Document with:
+        - Rate limits per API
+        - Pricing structure
+        - Recommendations for caching/optimization
+        - Decision on whether to use proxy or direct calls
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How we'll know the spike is complete
+      placeholder: |
+        - [ ] Research question answered
+        - [ ] Output artifact created
+        - [ ] Decision documented (if applicable)
+    validations:
+      required: true
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related
+      description: Links to related issues, decisions, or docs
+      placeholder: |
+        - Related issue: #123
+        - Decision: DECISIONS.md D#X
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the codebase is affected
+      options:
+        - Auth
+        - Ride Loop
+        - Pricing
+        - Maps
+        - Driver Directory
+        - Notifications
+        - History
+        - Ratings
+        - Admin
+        - Database
+        - Infra
+        - UI/UX
+        - Testing
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Urgency and importance
+      options:
+        - P0: Critical
+        - P1: High
+        - P2: Medium
+        - P3: Low
+      default: 2
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimated effort (should match timebox)
+      options:
+        - XS (< 2h)
+        - S (2-4h)
+        - M (1 day)
+        - L (2-3 days)
+        - XL (> 3 days)
+      default: 1
+

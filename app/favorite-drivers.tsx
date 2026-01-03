@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Badge } from '@/src/ui/components/Badge';
 import { Card } from '@/src/ui/components/Card';
 import { EmptyState } from '@/src/ui/components/EmptyState';
@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function FavoriteDriversScreen() {
   const { favoriteDriverIds, removeFavorite } = useFavoriteDriversStore();
+  const insets = useSafeAreaInsets();
 
   // Get actual driver objects for favorite IDs
   const favoriteDrivers = MOCK_DRIVERS.filter((driver) =>
@@ -48,16 +49,21 @@ export default function FavoriteDriversScreen() {
           icon={<Ionicons name="arrow-back" size={24} color={colors.text} />}
           onPress={() => router.back()}
         />
-        <Text variant="h3" style={styles.headerTitle}>
+        <Text variant="h2" style={styles.headerTitle}>
           Favorite Drivers
         </Text>
         <View style={{ width: 40 }} />
       </Box>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: Math.max(insets.bottom, space[4]) },
+        ]}>
         {favoriteDrivers.length === 0 ? (
           <EmptyState
-            icon={<Ionicons name="star-outline" size={48} color={colors.muted} />}
+            icon={<Ionicons name="star-outline" size={48} color={colors.textMuted} />}
             message="No favorite drivers yet. Star drivers you like for quick access."
             actionLabel="Browse Drivers"
             onAction={() => router.push('/(tabs)/drivers')}
@@ -78,7 +84,7 @@ export default function FavoriteDriversScreen() {
                     </Box>
                     <Box style={{ flex: 1 }}>
                       <Box style={styles.nameRow}>
-                        <Text variant="h4" style={styles.driverName}>
+                        <Text variant="body" style={styles.driverName}>
                           {driver.name}
                         </Text>
                         <IconButton
@@ -118,13 +124,13 @@ export default function FavoriteDriversScreen() {
                   {/* Vehicle Info */}
                   <Box style={styles.vehicleInfo}>
                     <Box style={styles.infoRow}>
-                      <Ionicons name="car" size={16} color={colors.muted} />
+                      <Ionicons name="car" size={16} color={colors.textMuted} />
                       <Text variant="sub" muted>
                         {driver.vehicleType} - {driver.vehicleModel}
                       </Text>
                     </Box>
                     <Box style={styles.infoRow}>
-                      <Ionicons name="card-outline" size={16} color={colors.muted} />
+                      <Ionicons name="card-outline" size={16} color={colors.textMuted} />
                       <Text variant="sub" muted>
                         {driver.licensePlate}
                       </Text>
@@ -133,7 +139,7 @@ export default function FavoriteDriversScreen() {
 
                   {/* Languages */}
                   <Box style={styles.languagesRow}>
-                    <Ionicons name="language" size={16} color={colors.muted} />
+                    <Ionicons name="language" size={16} color={colors.textMuted} />
                     <Text variant="sub" muted>
                       {driver.languages.join(', ')}
                     </Text>
@@ -188,12 +194,12 @@ export default function FavoriteDriversScreen() {
                       <Ionicons
                         name="navigate"
                         size={18}
-                        color={driver.onDuty ? colors.primaryText : colors.muted}
+                        color={driver.onDuty ? colors.primaryText : colors.textMuted}
                       />
                       <Text
                         variant="sub"
                         style={{
-                          color: driver.onDuty ? colors.primaryText : colors.muted,
+                          color: driver.onDuty ? colors.primaryText : colors.textMuted,
                           fontWeight: '600',
                         }}>
                         Book Ride
@@ -213,7 +219,7 @@ export default function FavoriteDriversScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   header: {
     flexDirection: 'row',

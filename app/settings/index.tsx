@@ -43,7 +43,7 @@ export default function SettingsScreen() {
           icon={<Ionicons name="arrow-back" size={24} color={colors.text} />}
           onPress={() => router.back()}
         />
-        <Text variant="h3" style={styles.headerTitle}>
+        <Text variant="h2" style={styles.headerTitle}>
           Settings
         </Text>
         <View style={{ width: 40 }} />
@@ -52,7 +52,7 @@ export default function SettingsScreen() {
       <ScrollView style={styles.scrollView}>
         {/* Notifications Section */}
         <Box style={styles.section}>
-          <Text variant="h4" style={styles.sectionTitle}>
+          <Text variant="body" style={styles.sectionTitle}>
             Notifications
           </Text>
 
@@ -130,7 +130,7 @@ export default function SettingsScreen() {
 
         {/* Appearance Section */}
         <Box style={styles.section}>
-          <Text variant="h4" style={styles.sectionTitle}>
+          <Text variant="body" style={styles.sectionTitle}>
             Appearance
           </Text>
 
@@ -140,14 +140,14 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Theme', 'Theme selection coming soon');
             }}
-            leading={<Ionicons name="moon-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="moon-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
         {/* Language & Region Section */}
         <Box style={styles.section}>
-          <Text variant="h4" style={styles.sectionTitle}>
+          <Text variant="body" style={styles.sectionTitle}>
             Language & Region
           </Text>
 
@@ -157,14 +157,14 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Language', 'Language selection coming soon');
             }}
-            leading={<Ionicons name="language-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="language-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
         {/* Privacy Section */}
         <Box style={styles.section}>
-          <Text variant="h4" style={styles.sectionTitle}>
+          <Text variant="body" style={styles.sectionTitle}>
             Privacy
           </Text>
 
@@ -174,8 +174,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Privacy', 'Privacy settings coming soon');
             }}
-            leading={<Ionicons name="shield-checkmark-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="shield-checkmark-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
@@ -185,14 +185,14 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Location', 'Open system settings to manage location permissions');
             }}
-            leading={<Ionicons name="location-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="location-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
         {/* Payment Section */}
         <Box style={styles.section}>
-          <Text variant="h4" style={styles.sectionTitle}>
+          <Text variant="body" style={styles.sectionTitle}>
             Payment
           </Text>
 
@@ -202,14 +202,14 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Payment Methods', 'Payment management coming soon');
             }}
-            leading={<Ionicons name="card-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="card-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
         {/* About Section */}
         <Box style={styles.section}>
-          <Text variant="h4" style={styles.sectionTitle}>
+          <Text variant="body" style={styles.sectionTitle}>
             About
           </Text>
 
@@ -219,8 +219,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Help Center', 'Help center coming soon');
             }}
-            leading={<Ionicons name="help-circle-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="help-circle-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
@@ -229,8 +229,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Terms of Service', 'Terms of service coming soon');
             }}
-            leading={<Ionicons name="document-text-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="document-text-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
@@ -239,15 +239,15 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Privacy Policy', 'Privacy policy coming soon');
             }}
-            leading={<Ionicons name="lock-closed-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="lock-closed-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
           <ListItem
             title="App Version"
             subtitle="1.0.0"
-            leading={<Ionicons name="information-circle-outline" size={24} color={colors.muted} />}
+            leading={<Ionicons name="information-circle-outline" size={24} color={colors.textMuted} />}
           />
         </Box>
 
@@ -262,7 +262,7 @@ export default function SettingsScreen() {
               ]);
             }}
             leading={<Ionicons name="log-out-outline" size={24} color={colors.danger} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
@@ -275,7 +275,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[4],
     paddingBottom: space[3],
     fontWeight: '600',
-    color: colors.muted,
+    color: colors.textMuted,
   },
   settingItem: {
     flexDirection: 'row',

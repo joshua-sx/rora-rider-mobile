@@ -1,22 +1,28 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/src/ui/components/themed-text';
 import { ThemedView } from '@/src/ui/components/themed-view';
+import { BookingOptionsSheet } from '@/src/ui/components/BookingOptionsSheet';
 import { BorderRadius, Spacing } from '@/src/constants/design-tokens';
 import { getDriverById } from '@/src/features/drivers/data/drivers';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import { useToast } from '@/src/ui/providers/ToastProvider';
+import { useRouteStore } from '@/src/store/route-store';
+import { useTripHistoryStore } from '@/src/store/trip-history-store';
 
 export default function DriverProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
+  const [showBookingOptions, setShowBookingOptions] = useState(false);
 
   const driver = getDriverById(id);
+  const savedTripsCount = useTripHistoryStore((state) => state.getSavedTrips().length);
 
   const backgroundColor = useThemeColor(
     { light: '#F9F9F9', dark: '#0E0F0F' },
@@ -58,7 +64,25 @@ export default function DriverProfileScreen() {
   };
 
   const handleBookRide = () => {
-    router.push('/route-input');
+    setShowBookingOptions(true);
+  };
+
+  const handleBookNow = () => {
+    setShowBookingOptions(false);
+    if (driver) {
+      // Set driver in route store
+      useRouteStore.getState().setSelectedDriver(driver.id);
+      router.push('/route-input');
+    }
+  };
+
+  const handleUseSaved = () => {
+    setShowBookingOptions(false);
+    if (driver) {
+      // Set driver in route store
+      useRouteStore.getState().setSelectedDriver(driver.id);
+      router.push(`/trip-selector?driverId=${driver.id}`);
+    }
   };
 
   if (!driver) {
@@ -231,6 +255,16 @@ export default function DriverProfileScreen() {
           </ThemedText>
         </Pressable>
       </View>
+
+      {/* Booking Options Sheet */}
+      <BookingOptionsSheet
+        driver={driver}
+        isVisible={showBookingOptions}
+        onDismiss={() => setShowBookingOptions(false)}
+        onBookNow={handleBookNow}
+        onUseSaved={handleUseSaved}
+        hasSavedTrips={savedTripsCount > 0}
+      />
     </ThemedView>
   );
 }

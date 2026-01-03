@@ -9,12 +9,15 @@ import { Spacing } from '@/src/constants/design-tokens';
 import { MOCK_DRIVERS, getOnDutyDrivers, getOffDutyDrivers } from '@/src/features/drivers/data/drivers';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Driver } from '@/src/types/driver';
+import { getTabBarHeight } from '@/src/utils/safe-area';
 
 type FilterType = 'all' | 'on_duty' | 'off_duty';
 
 export default function DriversScreen() {
   const insets = useSafeAreaInsets();
+  const tabBarHeight = getTabBarHeight(insets);
   const [filter, setFilter] = useState<FilterType>('all');
+  // ...
 
   const backgroundColor = useThemeColor(
     { light: '#F9F9F9', dark: '#0E0F0F' },
@@ -41,82 +44,81 @@ export default function DriversScreen() {
 
   return (
     <ThemedView style={[styles.container, { backgroundColor, paddingTop: insets.top }]}>
+      <View style={styles.stickyHeader}>
+        <ThemedText style={styles.title}>Available Drivers</ThemedText>
+        <ThemedText style={[styles.subtitle, { color: secondaryTextColor }]}>
+          Browse and contact drivers
+        </ThemedText>
+
+        {/* Filter Pills */}
+        <View style={styles.filterContainer}>
+          <Pressable
+            style={[
+              styles.filterPill,
+              filter === 'all' && {
+                backgroundColor: tintColor,
+              },
+            ]}
+            onPress={() => setFilter('all')}
+          >
+            <ThemedText
+              style={[
+                styles.filterText,
+                filter === 'all' && styles.filterTextActive,
+              ]}
+            >
+              All ({MOCK_DRIVERS.length})
+            </ThemedText>
+          </Pressable>
+
+          <Pressable
+            style={[
+              styles.filterPill,
+              filter === 'on_duty' && {
+                backgroundColor: tintColor,
+              },
+            ]}
+            onPress={() => setFilter('on_duty')}
+          >
+            <ThemedText
+              style={[
+                styles.filterText,
+                filter === 'on_duty' && styles.filterTextActive,
+              ]}
+            >
+              On Duty ({getOnDutyDrivers().length})
+            </ThemedText>
+          </Pressable>
+
+          <Pressable
+            style={[
+              styles.filterPill,
+              filter === 'off_duty' && {
+                backgroundColor: tintColor,
+              },
+            ]}
+            onPress={() => setFilter('off_duty')}
+          >
+            <ThemedText
+              style={[
+                styles.filterText,
+                filter === 'off_duty' && styles.filterTextActive,
+              ]}
+            >
+              Off Duty ({getOffDutyDrivers().length})
+            </ThemedText>
+          </Pressable>
+        </View>
+      </View>
+
       <FlatList
         data={drivers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <DriverCard driver={item} />}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: 16 },
+          { paddingBottom: tabBarHeight + Spacing.lg },
         ]}
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <ThemedText style={styles.title}>Available Drivers</ThemedText>
-            <ThemedText style={[styles.subtitle, { color: secondaryTextColor }]}>
-              Browse and contact drivers
-            </ThemedText>
-
-            {/* Filter Pills */}
-            <View style={styles.filterContainer}>
-              <Pressable
-                style={[
-                  styles.filterPill,
-                  filter === 'all' && {
-                    backgroundColor: tintColor,
-                  },
-                ]}
-                onPress={() => setFilter('all')}
-              >
-                <ThemedText
-                  style={[
-                    styles.filterText,
-                    filter === 'all' && styles.filterTextActive,
-                  ]}
-                >
-                  All ({MOCK_DRIVERS.length})
-                </ThemedText>
-              </Pressable>
-
-              <Pressable
-                style={[
-                  styles.filterPill,
-                  filter === 'on_duty' && {
-                    backgroundColor: tintColor,
-                  },
-                ]}
-                onPress={() => setFilter('on_duty')}
-              >
-                <ThemedText
-                  style={[
-                    styles.filterText,
-                    filter === 'on_duty' && styles.filterTextActive,
-                  ]}
-                >
-                  On Duty ({getOnDutyDrivers().length})
-                </ThemedText>
-              </Pressable>
-
-              <Pressable
-                style={[
-                  styles.filterPill,
-                  filter === 'off_duty' && {
-                    backgroundColor: tintColor,
-                  },
-                ]}
-                onPress={() => setFilter('off_duty')}
-              >
-                <ThemedText
-                  style={[
-                    styles.filterText,
-                    filter === 'off_duty' && styles.filterTextActive,
-                  ]}
-                >
-                  Off Duty ({getOffDutyDrivers().length})
-                </ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <ThemedText style={[styles.emptyText, { color: secondaryTextColor }]}>
@@ -135,10 +137,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xxl,
+    paddingTop: Spacing.md,
   },
-  header: {
-    marginBottom: Spacing.lg,
+  stickyHeader: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(140, 147, 144, 0.1)',
   },
   title: {
     fontSize: 32,

@@ -4,11 +4,11 @@
  */
 
 import {
-  GOOGLE_MAPS_CONFIG,
-  GOOGLE_MAPS_PROXY_TOKEN,
-  GOOGLE_MAPS_PROXY_URL,
-  SEARCH_RADIUS,
-  SINT_MAARTEN_LOCATION,
+    GOOGLE_MAPS_CONFIG,
+    GOOGLE_MAPS_PROXY_TOKEN,
+    GOOGLE_MAPS_PROXY_URL,
+    SEARCH_RADIUS,
+    SINT_MAARTEN_LOCATION,
 } from "@/src/constants/config";
 
 import { decodePolyline as decodePolylineUtil } from "@/src/utils/route-validation";
@@ -130,10 +130,16 @@ class GoogleMapsService {
       return data as T;
     } catch (error: any) {
       // Retry logic for transient failures
-      if (
-        retryCount < GOOGLE_MAPS_CONFIG.retryAttempts &&
-        (error.name === "AbortError" || error.code === "NETWORK_ERROR")
-      ) {
+      // We retry on AbortError (timeout), or network-related TypeErrors (e.g. "Network request failed")
+      const isRetryable =
+        error.name === "AbortError" ||
+        error.code === "NETWORK_ERROR" ||
+        (error instanceof TypeError &&
+          (error.message.includes("network") ||
+            error.message.includes("fetch") ||
+            error.message.includes("Network request failed")));
+
+      if (retryCount < GOOGLE_MAPS_CONFIG.retryAttempts && isRetryable) {
         await this.delay(GOOGLE_MAPS_CONFIG.retryDelay * 2 ** retryCount);
         return this.makeRequest<T>(url, retryCount + 1);
       }
@@ -227,26 +233,6 @@ class GoogleMapsService {
     }
 
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: 'debug-session',
-          runId: 'run1',
-          hypothesisId: 'H1',
-          location: 'google-maps.service.ts:searchPlaces:pre-request',
-          message: 'searchPlaces called',
-          data: {
-            hasQuery: !!query,
-            queryLength: query.length,
-            hasBounds: !!bounds,
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
-
       const params = new URLSearchParams({
         input: query,
         location: `${SINT_MAARTEN_LOCATION.latitude},${SINT_MAARTEN_LOCATION.longitude}`,
@@ -256,31 +242,6 @@ class GoogleMapsService {
 
       const url = `${this.getProxyBaseUrl()}/maps/places/autocomplete?${params}`;
       const response = await this.makeRequest<any>(url);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: 'debug-session',
-          runId: 'run1',
-          hypothesisId: 'H2',
-          location: 'google-maps.service.ts:searchPlaces:post-response',
-          message: 'searchPlaces autocomplete response received',
-          data: {
-            predictionsCount: Array.isArray(response?.predictions)
-              ? response.predictions.length
-              : 0,
-            // Only log minimal, non-PII structural info
-            firstPredictionTypes:
-              Array.isArray(response?.predictions) && response.predictions[0]?.types
-                ? response.predictions[0].types
-                : [],
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
 
       const results: PlaceResult[] = (response.predictions || []).map(
         (prediction: any) => ({

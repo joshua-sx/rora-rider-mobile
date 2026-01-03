@@ -18,6 +18,7 @@ import { useRouteStore } from '@/src/store/route-store';
 import { useLocationStore } from '@/src/store/location-store';
 import { calculatePrice } from '@/src/utils/pricing';
 import { extractRouteData } from '@/src/utils/route-validation';
+import { getTabBarHeight } from '@/src/utils/safe-area';
 
 export default function VenueDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -79,7 +80,7 @@ export default function VenueDetailScreen() {
       );
       const { distanceKm, durationMin, coordinates } = extractRouteData(directions);
 
-      const price = calculatePrice(distanceKm, durationMin);
+      const { price, version } = calculatePrice(distanceKm, durationMin);
 
       // Set origin with actual location info
       setOrigin({
@@ -103,6 +104,12 @@ export default function VenueDetailScreen() {
         duration: durationMin,
         price,
         coordinates: coordinates,
+        quote: {
+          estimatedPrice: price,
+          currency: 'USD' as const,
+          pricingVersion: version,
+          createdAt: new Date().toISOString(),
+        },
       });
 
       // Navigate to trip preview
@@ -222,7 +229,7 @@ export default function VenueDetailScreen() {
           </View>
 
           {/* Bottom Padding for CTA */}
-          <View style={{ height: 140 }} />
+          <View style={{ height: getTabBarHeight(insets) + 160 }} />
         </ScrollView>
 
         {/* Sticky Bottom CTA */}

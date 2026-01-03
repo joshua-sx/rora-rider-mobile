@@ -32,9 +32,9 @@ export function DestinationBottomSheet({
 	const [isExpanded, setIsExpanded] = useState(true);
 	const [carouselHeight, setCarouselHeight] = useState<number | null>(null);
 
-	// Calculate total bottom padding: device safe area + tab bar height
-	// This ensures content never renders under the floating tab bar
-	const totalBottomPadding = insets.bottom + bottomInset;
+	// Calculate total bottom padding: tab bar height (which should include safe area)
+	// Fallback to safe area if no tab bar height provided
+	const totalBottomPadding = bottomInset > 0 ? bottomInset : insets.bottom;
 
 	// Two snap points: collapsed (pill only) and expanded (pill + cards)
 	const snapPoints = useMemo(() => {

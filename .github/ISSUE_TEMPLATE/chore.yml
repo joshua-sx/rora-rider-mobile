@@ -1,0 +1,121 @@
+name: Chore
+description: Maintenance, refactoring, or infrastructure work
+title: "[Chore] "
+labels: ["type:chore"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for maintenance, refactoring, or infrastructure work.
+        Include clear scope boundaries (what's in/out) and why it's needed.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: What needs to be done
+      placeholder: Upgrade Expo SDK from 53 to 54.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Why it's needed (technical debt, dependency update, performance, etc.)
+      placeholder: |
+        - Security updates
+        - New features we need
+        - Dependency compatibility
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope-in
+    attributes:
+      label: In Scope
+      description: What is included (use checkboxes)
+      placeholder: |
+        - [ ] Task 1
+        - [ ] Task 2
+        - [ ] Task 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope-out
+    attributes:
+      label: Out of Scope
+      description: What is explicitly not included (and why)
+      placeholder: |
+        - [ ] Not doing X (explain why)
+        - [ ] Not doing Y (future work)
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How we'll know this is complete
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Implementation approach, risks, dependencies
+      placeholder: |
+        - Check Expo upgrade guide for breaking changes
+        - Test QR generation, maps, push notifications (critical features)
+        - May need to update `app.json` or `app.config.ts`
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the codebase is affected
+      options:
+        - Auth
+        - Ride Loop
+        - Pricing
+        - Maps
+        - Driver Directory
+        - Notifications
+        - History
+        - Ratings
+        - Admin
+        - Database
+        - Infra
+        - UI/UX
+        - Testing
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Urgency and importance
+      options:
+        - P0: Critical
+        - P1: High
+        - P2: Medium
+        - P3: Low
+      default: 2
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimated effort
+      options:
+        - XS (< 2h)
+        - S (2-4h)
+        - M (1 day)
+        - L (2-3 days)
+        - XL (> 3 days)
+      default: 2
+

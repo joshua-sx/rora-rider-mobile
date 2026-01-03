@@ -1,49 +1,44 @@
+import { SINT_MAARTEN_REGION } from "@/src/constants/config";
+import {
+    BorderRadius,
+    Colors,
+    Spacing,
+    Typography,
+} from "@/src/constants/design-tokens";
+import { getDriverById } from "@/src/features/drivers/data/drivers";
+import { useThemeColor } from "@/src/hooks/use-theme-color";
+import {
+    googleMapsService,
+    type PlaceResult,
+} from "@/src/services/google-maps.service";
+import { useLocationStore } from "@/src/store/location-store";
+import { useRouteStore } from "@/src/store/route-store";
+import { ThemedText } from "@/src/ui/components/themed-text";
+import { useToast } from "@/src/ui/providers/ToastProvider";
+import { calculatePrice } from "@/src/utils/pricing";
+import { extractRouteData } from "@/src/utils/route-validation";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-	ActivityIndicator,
-	Alert,
-	FlatList,
-	Keyboard,
-	KeyboardAvoidingView,
-	Platform,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	Text,
-	TextInput,
-	View,
-	useWindowDimensions,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+    useWindowDimensions,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { ThemedText } from "@/src/ui/components/themed-text";
-import { SINT_MAARTEN_REGION } from "@/src/constants/config";
-import {
-	BorderRadius,
-	Colors,
-	Spacing,
-	Typography,
-} from "@/src/constants/design-tokens";
-import { useThemeColor } from "@/src/hooks/use-theme-color";
-import {
-	googleMapsService,
-	type PlaceResult,
-} from "@/src/services/google-maps.service";
-import { useRouteStore } from "@/src/store/route-store";
-import { useLocationStore } from "@/src/store/location-store";
-import { useToast } from "@/src/ui/providers/ToastProvider";
-import {
-	calculatePrice,
-	formatDistance,
-	formatDuration,
-	formatPrice,
-} from "@/src/utils/pricing";
-import { extractRouteData } from "@/src/utils/route-validation";
 
 type ViewState = "input" | "loading";
 
@@ -111,17 +106,24 @@ export default function RouteInputScreen() {
 		setRouteData,
 		setError,
 		swapLocations,
+		selectedDriverId,
+		clearDriver,
 	} = useRouteStore();
 
 	const { setCurrentLocation, setFormattedAddress } = useLocationStore();
+
+	// Driver context
+	const selectedDriver = selectedDriverId ? getDriverById(selectedDriverId) : null;
 
 	const [viewState, setViewState] = useState<ViewState>("input");
 	const [isOriginFocused, setIsOriginFocused] = useState(false);
 	const [isDestinationFocused, setIsDestinationFocused] = useState(false);
 
 	// Custom autocomplete state
-	const [originInput, setOriginInput] = useState("");
-	const [destinationInput, setDestinationInput] = useState("");
+	const [originInput, setOriginInput] = useState(origin?.name || "");
+	const [destinationInput, setDestinationInput] = useState(
+		destination?.name || "",
+	);
 	const [originSuggestions, setOriginSuggestions] = useState<PlaceResult[]>([]);
 	const [destinationSuggestions, setDestinationSuggestions] = useState<
 		PlaceResult[]
@@ -172,6 +174,15 @@ export default function RouteInputScreen() {
 	const handleClose = useCallback(() => {
 		router.back();
 	}, [router]);
+
+	// Clear driver selection when component unmounts or user goes back without route
+	useEffect(() => {
+		return () => {
+			if (!routeData) {
+				clearDriver();
+			}
+		};
+	}, [routeData, clearDriver]);
 
 	const handleSwap = useCallback(() => {
 		swapLocations();
@@ -293,85 +304,56 @@ export default function RouteInputScreen() {
 		[setOrigin, setDestination],
 	);
 
-	// Note: Removed auto-navigation effect to prevent race condition with manual Continue button
-	// The Continue button now handles navigation explicitly
+	// Fetch route via proxied Directions API
+	const handleContinue = useCallback(async () => {
+		if (!origin || !destination) return;
 
-	// Fetch route via proxied Directions API when entering loading state
-	useEffect(() => {
-		let cancelled = false;
+		Keyboard.dismiss();
+		setViewState("loading");
+		setError(null);
+		setRouteData(null);
 
-		const fetchRoute = async () => {
-			if (viewState !== "loading") return;
-			if (!origin || !destination) return;
+		try {
+			const directions = await googleMapsService.getDirections(
+				origin.coordinates,
+				destination.coordinates,
+			);
 
-			setError(null);
-			setRouteData(null);
+			const { distanceKm, durationMin, coordinates } =
+				extractRouteData(directions);
 
-			try {
-				const directions = await googleMapsService.getDirections(
-					origin.coordinates,
-					destination.coordinates,
-				);
+			const { price, version } = calculatePrice(distanceKm, durationMin);
 
-				const { distanceKm, durationMin, coordinates } = extractRouteData(directions);
+			setRouteData({
+				distance: distanceKm,
+				duration: durationMin,
+				price,
+				coordinates: coordinates,
+				quote: {
+					estimatedPrice: price,
+					currency: 'USD' as const,
+					pricingVersion: version,
+					createdAt: new Date().toISOString(),
+				},
+			});
 
-				const price = calculatePrice(distanceKm, durationMin);
-				const leg = directions.routes?.[0]?.legs?.[0];
-
-				// #region agent log
-				fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:292',message:'Route calculated from Google Directions API',data:{hypothesisId:'H2',originName:origin?.name,destinationName:destination?.name,distanceMeters:leg.distance?.value,distanceKm:distanceKm,durationSeconds:leg.duration?.value,durationMin:durationMin,calculatedPrice:price,coordinatesCount:coordinates.length,formattedDistance:formatDistance(distanceKm),formattedDuration:formatDuration(durationMin),formattedPrice:formatPrice(price)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
-				// #endregion
-
-				if (cancelled) return;
-
-				setRouteData({
-					distance: distanceKm,
-					duration: durationMin,
-					price,
-					coordinates: coordinates,
-				});
-
-				// Navigate directly to trip-preview after route is calculated
-				router.push("/trip-preview");
-			} catch (e: unknown) {
-				const message =
-					e instanceof Error ? e.message : "Failed to fetch directions";
-				console.error("[route-input] Directions error:", e);
-				if (cancelled) return;
-				setError(message);
-				const isNoRoute = message === "No route found";
-				Alert.alert(
-					isNoRoute ? "No route found" : "Service error",
-					isNoRoute
-						? "Try a different pickup or destination."
-						: "We couldn't calculate this route. Please try again."
-				);
-				setViewState("input");
-			}
-		};
-
-		fetchRoute();
-
-		return () => {
-			cancelled = true;
-		};
-	}, [viewState, origin, destination, setError, setRouteData, router]);
-
-	// Sync input text with store values on mount/change
-	// Don't include input values in deps to avoid clearing auto-filled values
-	useEffect(() => {
-		if (origin && !originInput) {
-			setOriginInput(origin.name);
+			// Navigate directly to trip-preview after route is calculated
+			router.push("/trip-preview");
+		} catch (e: unknown) {
+			const message =
+				e instanceof Error ? e.message : "Failed to fetch directions";
+			console.error("[route-input] Directions error:", e);
+			setError(message);
+			const isNoRoute = message === "No route found";
+			Alert.alert(
+				isNoRoute ? "No route found" : "Service error",
+				isNoRoute
+					? "Try a different pickup or destination."
+					: "We couldn't calculate this route. Please try again.",
+			);
+			setViewState("input");
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [origin]);
-
-	useEffect(() => {
-		if (destination && !destinationInput) {
-			setDestinationInput(destination.name);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [destination]);
+	}, [origin, destination, setError, setRouteData, router]);
 
 	// Handle manual entry mode - when origin is selected, save to location store and go back
 	useEffect(() => {
@@ -383,7 +365,14 @@ export default function RouteInputScreen() {
 				router.back();
 			}, 800);
 		}
-	}, [manualEntry, origin, setCurrentLocation, setFormattedAddress, showToast, router]);
+	}, [
+		manualEntry,
+		origin,
+		setCurrentLocation,
+		setFormattedAddress,
+		showToast,
+		router,
+	]);
 
 	// Render autocomplete suggestion item with highlighted text
 	const renderSuggestionItem = useCallback(
@@ -412,7 +401,10 @@ export default function RouteInputScreen() {
 						<HighlightedText
 							text={item.secondaryText}
 							query={currentQuery}
-							style={[styles.suggestionSecondaryText, { color: secondaryTextColor }]}
+							style={[
+								styles.suggestionSecondaryText,
+								{ color: secondaryTextColor },
+							]}
 							highlightColor={tintColor}
 						/>
 					</View>
@@ -433,9 +425,6 @@ export default function RouteInputScreen() {
 
 	// Input State UI
 	if (viewState === "input") {
-		// #region agent log
-		fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:413',message:'Input view rendering',data:{hypothesisId:'H1',hasOriginSuggestions:originSuggestions.length>0,originSuggestionsCount:originSuggestions.length,hasDestinationSuggestions:destinationSuggestions.length>0,destinationSuggestionsCount:destinationSuggestions.length,isScrollViewRendered:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
-		// #endregion
 		return (
 			<KeyboardAvoidingView
 				style={[styles.container, { backgroundColor }]}
@@ -453,12 +442,35 @@ export default function RouteInputScreen() {
 					<View style={{ width: 28 }} />
 				</View>
 
+				{/* Driver Banner */}
+				{selectedDriver && (
+					<View
+						style={[
+							styles.driverBanner,
+							{ backgroundColor: `${tintColor}15`, borderBottomColor: borderColor },
+						]}
+					>
+						<Ionicons name="person-circle-outline" size={24} color={tintColor} />
+						<View style={styles.driverInfo}>
+							<ThemedText style={styles.driverName}>
+								Booking with {selectedDriver.name}
+							</ThemedText>
+							<ThemedText style={[styles.driverMeta, { color: secondaryTextColor }]}>
+								★ {selectedDriver.rating} • {selectedDriver.vehicleType}
+							</ThemedText>
+						</View>
+						<Pressable onPress={clearDriver} hitSlop={8}>
+							<Ionicons name="close-circle" size={20} color={iconColor} />
+						</Pressable>
+					</View>
+				)}
+
 				{/* Scrollable Content */}
 				<ScrollView
 					style={styles.scrollView}
 					contentContainerStyle={[
 						styles.scrollContent,
-						{ paddingBottom: insets.bottom + Spacing.xxl }
+						{ paddingBottom: insets.bottom + Spacing.xxl },
 					]}
 					keyboardShouldPersistTaps="handled"
 					showsVerticalScrollIndicator={false}
@@ -466,163 +478,170 @@ export default function RouteInputScreen() {
 				>
 					{/* Input Fields Container */}
 					<View style={styles.inputsContainer}>
-					{/* Origin Input */}
-					<View style={styles.inputWrapper}>
-						<View style={styles.inputRow}>
-							<View style={styles.inputFieldContainer}>
-								<View
-									style={[
-										styles.inputWithIcon,
-										{
-											backgroundColor: surfaceColor,
-											borderColor: isOriginFocused ? tintColor : borderColor,
-											borderWidth: 1,
-										},
-									]}
-								>
-									<Ionicons
-										name="search"
-										size={20}
-										color={iconColor}
-										style={styles.inputIcon}
-									/>
-									<TextInput
-										ref={originAutocompleteRef}
-										style={[styles.input, { color: textColor }]}
-										placeholder="Pickup location"
-										placeholderTextColor={secondaryTextColor}
-										value={originInput}
-										onChangeText={handleOriginChange}
-										onFocus={() => setIsOriginFocused(true)}
-										onBlur={() => {
-											setIsOriginFocused(false);
-											setTimeout(() => setOriginSuggestions([]), 150);
-										}}
-										returnKeyType="search"
-										autoCapitalize="none"
-										autoCorrect={false}
-									/>
-									{/* Clear Button - Only show when location is selected */}
-									{origin && (
-										<Pressable
-											onPress={() => {
-												setOrigin(null);
-												setOriginInput("");
-												setOriginSuggestions([]);
+						{/* Origin Input */}
+						<View style={styles.inputWrapper}>
+							<View style={styles.inputRow}>
+								<View style={styles.inputFieldContainer}>
+									<View
+										style={[
+											styles.inputWithIcon,
+											{
+												backgroundColor: surfaceColor,
+												borderColor: isOriginFocused ? tintColor : borderColor,
+												borderWidth: 1,
+											},
+										]}
+									>
+										<Ionicons
+											name="search"
+											size={20}
+											color={iconColor}
+											style={styles.inputIcon}
+										/>
+										<TextInput
+											ref={originAutocompleteRef}
+											style={[styles.input, { color: textColor }]}
+											placeholder="Pickup location"
+											placeholderTextColor={secondaryTextColor}
+											value={originInput}
+											onChangeText={handleOriginChange}
+											onFocus={() => setIsOriginFocused(true)}
+											onBlur={() => {
+												setIsOriginFocused(false);
+												setTimeout(() => setOriginSuggestions([]), 150);
 											}}
-											hitSlop={8}
-											style={styles.clearButton}
-										>
-											<Ionicons name="close-circle" size={20} color={iconColor} />
-										</Pressable>
+											returnKeyType="search"
+											autoCapitalize="none"
+											autoCorrect={false}
+										/>
+										{/* Clear Button - Only show when location is selected */}
+										{origin && (
+											<Pressable
+												onPress={() => {
+													setOrigin(null);
+													setOriginInput("");
+													setOriginSuggestions([]);
+												}}
+												hitSlop={8}
+												style={styles.clearButton}
+											>
+												<Ionicons
+													name="close-circle"
+													size={20}
+													color={iconColor}
+												/>
+											</Pressable>
+										)}
+									</View>
+									{/* Loading Indicator */}
+									{isOriginLoading && (
+										<ActivityIndicator
+											size="small"
+											color={tintColor}
+											style={styles.inputLoader}
+										/>
 									)}
 								</View>
-								{/* Loading Indicator */}
-								{isOriginLoading && (
-									<ActivityIndicator
-										size="small"
-										color={tintColor}
-										style={styles.inputLoader}
-									/>
-								)}
+								{/* Time Icon Button */}
+								<Pressable
+									style={[
+										styles.sideIconButton,
+										{ borderColor, backgroundColor: surfaceColor },
+									]}
+									onPress={() => {
+										// TODO: Implement time picker
+									}}
+								>
+									<Ionicons name="time-outline" size={20} color={iconColor} />
+								</Pressable>
 							</View>
-							{/* Time Icon Button */}
-							<Pressable
-								style={[
-									styles.sideIconButton,
-									{ borderColor, backgroundColor: surfaceColor },
-								]}
-								onPress={() => {
-									// TODO: Implement time picker
-								}}
-							>
-								<Ionicons name="time-outline" size={20} color={iconColor} />
-							</Pressable>
 						</View>
-					</View>
 
-					{/* Destination Input */}
-					<View style={styles.inputWrapper}>
-						<View style={styles.inputRow}>
-							<View style={styles.inputFieldContainer}>
-								<View
-									style={[
-										styles.inputWithIcon,
-										{
-											backgroundColor: surfaceColor,
-											borderColor: isDestinationFocused ? tintColor : borderColor,
-											borderWidth: 1,
-										},
-									]}
-								>
-									<Ionicons
-										name="search"
-										size={20}
-										color={iconColor}
-										style={styles.inputIcon}
-									/>
-									<TextInput
-										ref={destinationAutocompleteRef}
-										style={[styles.input, { color: textColor }]}
-										placeholder="Dropoff location"
-										placeholderTextColor={secondaryTextColor}
-										value={destinationInput}
-										onChangeText={handleDestinationChange}
-										onFocus={() => setIsDestinationFocused(true)}
-										onBlur={() => {
-											setIsDestinationFocused(false);
-											setTimeout(() => setDestinationSuggestions([]), 150);
-										}}
-										returnKeyType="search"
-										autoCapitalize="none"
-										autoCorrect={false}
-									/>
-									{/* Clear Button - Only show when location is selected */}
-									{destination && (
-										<Pressable
-											onPress={() => {
-												setDestination(null);
-												setDestinationInput("");
-												setDestinationSuggestions([]);
+						{/* Destination Input */}
+						<View style={styles.inputWrapper}>
+							<View style={styles.inputRow}>
+								<View style={styles.inputFieldContainer}>
+									<View
+										style={[
+											styles.inputWithIcon,
+											{
+												backgroundColor: surfaceColor,
+												borderColor: isDestinationFocused
+													? tintColor
+													: borderColor,
+												borderWidth: 1,
+											},
+										]}
+									>
+										<Ionicons
+											name="search"
+											size={20}
+											color={iconColor}
+											style={styles.inputIcon}
+										/>
+										<TextInput
+											ref={destinationAutocompleteRef}
+											style={[styles.input, { color: textColor }]}
+											placeholder="Dropoff location"
+											placeholderTextColor={secondaryTextColor}
+											value={destinationInput}
+											onChangeText={handleDestinationChange}
+											onFocus={() => setIsDestinationFocused(true)}
+											onBlur={() => {
+												setIsDestinationFocused(false);
+												setTimeout(() => setDestinationSuggestions([]), 150);
 											}}
-											hitSlop={8}
-											style={styles.clearButton}
-										>
-											<Ionicons name="close-circle" size={20} color={iconColor} />
-										</Pressable>
+											returnKeyType="search"
+											autoCapitalize="none"
+											autoCorrect={false}
+										/>
+										{/* Clear Button - Only show when location is selected */}
+										{destination && (
+											<Pressable
+												onPress={() => {
+													setDestination(null);
+													setDestinationInput("");
+													setDestinationSuggestions([]);
+												}}
+												hitSlop={8}
+												style={styles.clearButton}
+											>
+												<Ionicons
+													name="close-circle"
+													size={20}
+													color={iconColor}
+												/>
+											</Pressable>
+										)}
+									</View>
+									{/* Loading Indicator */}
+									{isDestinationLoading && (
+										<ActivityIndicator
+											size="small"
+											color={tintColor}
+											style={styles.inputLoader}
+										/>
 									)}
 								</View>
-								{/* Loading Indicator */}
-								{isDestinationLoading && (
-									<ActivityIndicator
-										size="small"
-										color={tintColor}
-										style={styles.inputLoader}
-									/>
-								)}
+								{/* Swap Icon Button */}
+								<Pressable
+									style={[
+										styles.sideIconButton,
+										{ borderColor, backgroundColor: surfaceColor },
+									]}
+									onPress={handleSwap}
+								>
+									<Ionicons name="swap-vertical" size={20} color={iconColor} />
+								</Pressable>
 							</View>
-							{/* Swap Icon Button */}
-							<Pressable
-								style={[
-									styles.sideIconButton,
-									{ borderColor, backgroundColor: surfaceColor },
-								]}
-								onPress={handleSwap}
-							>
-								<Ionicons name="swap-vertical" size={20} color={iconColor} />
-							</Pressable>
 						</View>
 					</View>
-				</View>
 
 					{/* Continue Button - Only show when both locations selected */}
 					{origin && destination && (
 						<View style={styles.continueButtonContainer}>
 							<Pressable
-								onPress={() => {
-									Keyboard.dismiss();
-									setViewState("loading");
-								}}
+								onPress={handleContinue}
 								style={[styles.continueButton, { backgroundColor: tintColor }]}
 							>
 								<ThemedText style={styles.continueButtonText}>
@@ -634,7 +653,9 @@ export default function RouteInputScreen() {
 				</ScrollView>
 
 				{/* Origin Suggestions Dropdown - Rendered outside ScrollView to avoid nesting warning */}
-				{(originSuggestions.length > 0 || showOriginEmpty || originSearchError) && (
+				{(originSuggestions.length > 0 ||
+					showOriginEmpty ||
+					originSearchError) && (
 					<View
 						style={[
 							styles.suggestionsContainer,
@@ -647,11 +668,17 @@ export default function RouteInputScreen() {
 								style={styles.emptyStateContainer}
 								onPress={() => searchPlaces(originInput, true)}
 							>
-								<Ionicons name="alert-circle-outline" size={24} color={iconColor} />
+								<Ionicons
+									name="alert-circle-outline"
+									size={24}
+									color={iconColor}
+								/>
 								<ThemedText style={styles.emptyStateText}>
 									Couldn&apos;t load results
 								</ThemedText>
-								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+								<ThemedText
+									style={[styles.emptyStateSubtext, { color: iconColor }]}
+								>
 									Check connection and try again
 								</ThemedText>
 							</Pressable>
@@ -661,7 +688,9 @@ export default function RouteInputScreen() {
 								<ThemedText style={styles.emptyStateText}>
 									No results found
 								</ThemedText>
-								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+								<ThemedText
+									style={[styles.emptyStateSubtext, { color: iconColor }]}
+								>
 									Try a broader search
 								</ThemedText>
 							</View>
@@ -688,7 +717,9 @@ export default function RouteInputScreen() {
 				)}
 
 				{/* Destination Suggestions Dropdown - Rendered outside ScrollView to avoid nesting warning */}
-				{(destinationSuggestions.length > 0 || showDestinationEmpty || destinationSearchError) && (
+				{(destinationSuggestions.length > 0 ||
+					showDestinationEmpty ||
+					destinationSearchError) && (
 					<View
 						style={[
 							styles.suggestionsContainer,
@@ -701,11 +732,17 @@ export default function RouteInputScreen() {
 								style={styles.emptyStateContainer}
 								onPress={() => searchPlaces(destinationInput, false)}
 							>
-								<Ionicons name="alert-circle-outline" size={24} color={iconColor} />
+								<Ionicons
+									name="alert-circle-outline"
+									size={24}
+									color={iconColor}
+								/>
 								<ThemedText style={styles.emptyStateText}>
 									Couldn&apos;t load results
 								</ThemedText>
-								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+								<ThemedText
+									style={[styles.emptyStateSubtext, { color: iconColor }]}
+								>
 									Check connection and try again
 								</ThemedText>
 							</Pressable>
@@ -715,7 +752,9 @@ export default function RouteInputScreen() {
 								<ThemedText style={styles.emptyStateText}>
 									No results found
 								</ThemedText>
-								<ThemedText style={[styles.emptyStateSubtext, { color: iconColor }]}>
+								<ThemedText
+									style={[styles.emptyStateSubtext, { color: iconColor }]}
+								>
 									Try a broader search
 								</ThemedText>
 							</View>
@@ -856,6 +895,25 @@ const styles = StyleSheet.create({
 	headerTitle: {
 		fontSize: Typography.sizes.h4,
 		fontWeight: Typography.weights.semiBold,
+	},
+	driverBanner: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: Spacing.md,
+		paddingHorizontal: Spacing.xl,
+		paddingVertical: Spacing.md,
+		borderBottomWidth: 1,
+	},
+	driverInfo: {
+		flex: 1,
+	},
+	driverName: {
+		fontSize: Typography.sizes.bodySmall,
+		fontWeight: Typography.weights.semiBold,
+	},
+	driverMeta: {
+		fontSize: Typography.sizes.caption,
+		marginTop: 2,
 	},
 	inputsContainer: {
 		paddingHorizontal: Spacing.xl,

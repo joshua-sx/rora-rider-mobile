@@ -1,0 +1,126 @@
+name: Epic
+description: Large feature or initiative spanning multiple issues
+title: "[Epic] "
+labels: ["type:epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for large features or initiatives that span multiple issues.
+        The epic issue describes the goal; child issues (stories/bugs) link to this epic.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: High-level goal or outcome
+      placeholder: Enable riders to use the app without creating an account (guest mode) while preventing abuse and enabling history migration.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this is needed, links to SPEC.md, DECISIONS.md, user research
+      placeholder: |
+        Tourists need immediate access without signup friction. See DECISIONS.md D1 for architectural decision.
+        Related to SPEC.md §7 (Authentication - Guest Mode).
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope-in
+    attributes:
+      label: In Scope
+      description: What is included in this epic (use checkboxes)
+      placeholder: |
+        - [ ] Feature 1
+        - [ ] Feature 2
+        - [ ] Feature 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope-out
+    attributes:
+      label: Out of Scope
+      description: What is explicitly not included (and why)
+      placeholder: |
+        - [ ] Not doing X (explain why)
+        - [ ] Not doing Y (future work)
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How we'll know this epic is complete
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related
+      description: Links to SPEC.md, DECISIONS.md, related issues
+      placeholder: |
+        - Spec: SPEC.md §X
+        - Decision: DECISIONS.md D#X
+        - Related issue: #123
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the codebase is affected (can select multiple via labels)
+      options:
+        - Auth
+        - Ride Loop
+        - Pricing
+        - Maps
+        - Driver Directory
+        - Notifications
+        - History
+        - Ratings
+        - Admin
+        - Database
+        - Infra
+        - UI/UX
+        - Testing
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Urgency and importance
+      options:
+        - P0: Critical
+        - P1: High
+        - P2: Medium
+        - P3: Low
+      default: 2
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimated effort (epics are typically XL, but estimate total)
+      options:
+        - XS (< 2h)
+        - S (2-4h)
+        - M (1 day)
+        - L (2-3 days)
+        - XL (> 3 days)
+      default: 4
+
+  - type: textarea
+    id: risks-notes
+    attributes:
+      label: Risks / Notes
+      description: Any risks, dependencies, or additional context
+

@@ -113,7 +113,7 @@ export default function SavedLocationsScreen() {
     return (
       <Card key={`add-${type}`} style={styles.quickAddCard}>
         <Box style={styles.quickAddContent}>
-          <Ionicons name={icon} size={32} color={colors.muted} />
+          <Ionicons name={icon} size={32} color={colors.textMuted} />
           <Box style={{ flex: 1 }}>
             <Text variant="body" style={styles.quickAddLabel}>
               Add {label}
@@ -139,7 +139,7 @@ export default function SavedLocationsScreen() {
           icon={<Ionicons name="arrow-back" size={24} color={colors.text} />}
           onPress={() => router.back()}
         />
-        <Text variant="h3" style={styles.headerTitle}>
+        <Text variant="h2" style={styles.headerTitle}>
           Saved Locations
         </Text>
         <IconButton
@@ -151,7 +151,7 @@ export default function SavedLocationsScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Home & Work Quick Add */}
         <Box style={styles.section}>
-          <Text variant="h4" style={styles.sectionTitle}>
+          <Text variant="body" style={styles.sectionTitle}>
             Quick Access
           </Text>
           {!homeLocation && renderQuickAddCard('home')}
@@ -164,7 +164,7 @@ export default function SavedLocationsScreen() {
         {/* Custom Locations */}
         {customLocations.length > 0 && (
           <Box style={styles.section}>
-            <Text variant="h4" style={styles.sectionTitle}>
+            <Text variant="body" style={styles.sectionTitle}>
               Other Locations
             </Text>
             {customLocations.map((location) => renderLocationCard(location, 'custom'))}
@@ -174,7 +174,7 @@ export default function SavedLocationsScreen() {
         {/* Empty State */}
         {locations.length === 0 && (
           <EmptyState
-            icon={<Ionicons name="bookmark-outline" size={48} color={colors.muted} />}
+            icon={<Ionicons name="bookmark-outline" size={48} color={colors.textMuted} />}
             message="No saved locations yet. Add your home, work, or favorite places for quick access."
             actionLabel="Add Location"
             onAction={() => handleAddLocation('custom')}
@@ -186,7 +186,7 @@ export default function SavedLocationsScreen() {
           <Card style={styles.infoCard}>
             <Box style={styles.infoContent}>
               <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
-              <Text variant="sub" style={{ flex: 1, color: colors.muted }}>
+              <Text variant="sub" style={{ flex: 1, color: colors.textMuted }}>
                 Saved locations appear as quick options when planning a route
               </Text>
             </Box>
@@ -200,7 +200,7 @@ export default function SavedLocationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontWeight: '600',
-    color: colors.muted,
+    color: colors.textMuted,
     marginBottom: space[2],
   },
   locationCard: {

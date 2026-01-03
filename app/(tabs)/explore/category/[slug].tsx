@@ -16,6 +16,7 @@ import { VenueListItem } from '@/src/features/explore/components/venue-list-item
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import { getCategoryBySlug, getVenuesByCategory } from '@/src/features/explore/data/venues';
 import type { Venue, VenueCategory } from '@/src/types/venue';
+import { getTabBarHeight } from '@/src/utils/safe-area';
 
 type FilterType = 'all' | 'near_me' | 'top_rated' | 'quiet';
 
@@ -23,6 +24,7 @@ export default function CategoryListingScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = getTabBarHeight(insets);
 
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [refreshing, setRefreshing] = useState(false);
@@ -139,7 +141,10 @@ export default function CategoryListingScreen() {
       <FlatList
         data={filteredVenues}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: tabBarHeight + 20 },
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -227,7 +232,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingBottom: 100,
   },
   emptyContainer: {
     alignItems: 'center',

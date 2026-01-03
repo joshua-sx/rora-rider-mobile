@@ -2,6 +2,7 @@ import React, { forwardRef, useMemo } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import type { SharedValue } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "../tokens/colors";
 import { radius } from "../tokens/radius";
@@ -48,8 +49,9 @@ export const Sheet = forwardRef<BottomSheet, Props>(
       failOffsetX,
       contentContainerStyle,
     },
-    ref
+    ref,
   ) => {
+    const insets = useSafeAreaInsets();
     const snaps = useMemo(() => snapPoints, [snapPoints]);
 
     const defaultBackgroundStyle = {
@@ -83,7 +85,12 @@ export const Sheet = forwardRef<BottomSheet, Props>(
         activeOffsetY={activeOffsetY}
         failOffsetX={failOffsetX}
       >
-        <BottomSheetView style={[{ flex: 1 }, contentContainerStyle]}>
+        <BottomSheetView
+          style={[
+            { flex: 1, paddingBottom: Math.max(insets.bottom, space[4]) },
+            contentContainerStyle,
+          ]}
+        >
           {children}
         </BottomSheetView>
       </BottomSheet>
