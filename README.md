@@ -25,6 +25,23 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Native integrations
+
+This app includes several native-facing dependencies that may require config or device testing:
+
+- Maps: `react-native-maps` + Google Maps web services.
+  - Env vars: `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, `EXPO_PUBLIC_GOOGLE_PLACES_API_KEY`
+  - Optional proxy: `EXPO_PUBLIC_GOOGLE_MAPS_PROXY_URL`, `EXPO_PUBLIC_GOOGLE_MAPS_PROXY_TOKEN`
+  - Native keys are injected via `app.config.ts` for iOS/Android.
+  - Setup/testing: `GOOGLE_MAPS_SETUP.md`, `TESTING_GUIDE.md`
+- Location: `expo-location`
+  - Permissions are declared in `app.json` (iOS/Android).
+  - Testing flow: `LOCATION_PERMISSION_TEST_GUIDE.md`
+- Blur: `expo-blur`
+  - Used by the location permission modal; no extra native config required in Expo managed.
+- QR: `react-native-qrcode-svg` (via `react-native-svg`)
+  - Render-only QR codes; no camera or native permission requirements.
+
 ## Get a fresh project
 
 When you're ready, run:

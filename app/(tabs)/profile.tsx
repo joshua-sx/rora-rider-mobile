@@ -1,77 +1,244 @@
-import { Image } from 'expo-image';
-import { StyleSheet } from 'react-native';
-
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { Divider } from "@/src/ui/components/Divider";
+import { ListItem } from "@/src/ui/components/ListItem";
+import { Box } from "@/src/ui/primitives/Box";
+import { Text } from "@/src/ui/primitives/Text";
+import { colors } from "@/src/ui/tokens/colors";
+import { space } from "@/src/ui/tokens/spacing";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { getTabBarHeight } from "@/src/utils/safe-area";
 
 export default function ProfileScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#E9F8EE', dark: '#0F160F' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#00BE3C"
-          name="person.circle.fill"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Profile
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>
-        Manage your account settings and preferences.
-      </ThemedText>
-      <ThemedView style={styles.contentContainer}>
-        <ThemedText type="subtitle">Account Information</ThemedText>
-        <ThemedText>
-          View and edit your personal information, contact details, and account preferences.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.contentContainer}>
-        <ThemedText type="subtitle">Settings</ThemedText>
-        <ThemedText>
-          • Notification preferences{'\n'}
-          • Privacy settings{'\n'}
-          • Payment methods{'\n'}
-          • Language and region{'\n'}
-          • App appearance
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.contentContainer}>
-        <ThemedText type="subtitle">Activity</ThemedText>
-        <ThemedText>
-          Review your ride history, saved locations, and favorite drivers.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+	const insets = useSafeAreaInsets();
+	const tabBarHeight = getTabBarHeight(insets);
+
+	return (
+		<SafeAreaView style={styles.container} edges={["top"]}>
+			{/* Header */}
+			<Box style={styles.header}>
+				<Text variant="title" style={styles.headerTitle}>
+					Profile
+				</Text>
+			</Box>
+
+			<ScrollView style={styles.scrollView}>
+				{/* User Info Section */}
+				<Box style={styles.userSection}>
+					<Box style={styles.avatar}>
+						<Ionicons name="person" size={48} color={colors.primary} />
+					</Box>
+					<Text variant="h2" style={styles.userName}>
+						Joshua Bowers
+					</Text>
+					<Text variant="body" muted>
+						joshua@example.com
+					</Text>
+				</Box>
+
+				{/* Account Section */}
+				<Box style={styles.section}>
+					<Text variant="body" style={styles.sectionTitle}>
+						Account
+					</Text>
+
+					<ListItem
+						title="Personal Information"
+						subtitle="Name, email, phone number"
+						onPress={() => {
+							// Navigate to personal info screen (to be implemented)
+							console.log("Navigate to personal info");
+						}}
+						leading={
+							<Ionicons name="person-outline" size={24} color={colors.textMuted} />
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+					<Divider />
+
+					<ListItem
+						title="Settings"
+						subtitle="Notifications, privacy, preferences"
+						onPress={() => router.push("/settings")}
+						leading={
+							<Ionicons
+								name="settings-outline"
+								size={24}
+								color={colors.textMuted}
+							/>
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+				</Box>
+
+				{/* Activity Section */}
+				<Box style={styles.section}>
+					<Text variant="body" style={styles.sectionTitle}>
+						Activity
+					</Text>
+
+					<ListItem
+						title="Trip History"
+						subtitle="View all your trips"
+						onPress={() => router.push("/trip-history")}
+						leading={
+							<Ionicons name="time-outline" size={24} color={colors.textMuted} />
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+					<Divider />
+
+					<ListItem
+						title="Saved Locations"
+						subtitle="Home, work, and favorite places"
+						onPress={() => router.push("/saved-locations")}
+						leading={
+							<Ionicons
+								name="bookmark-outline"
+								size={24}
+								color={colors.textMuted}
+							/>
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+					<Divider />
+
+					<ListItem
+						title="Favorite Drivers"
+						subtitle="Your preferred drivers"
+						onPress={() => router.push("/favorite-drivers")}
+						leading={
+							<Ionicons name="star-outline" size={24} color={colors.textMuted} />
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+				</Box>
+
+				{/* Payment Section */}
+				<Box style={styles.section}>
+					<Text variant="body" style={styles.sectionTitle}>
+						Payment
+					</Text>
+
+					<ListItem
+						title="Payment Methods"
+						subtitle="Manage cards and payment options"
+						onPress={() => {
+							// Navigate to payment methods (to be implemented)
+							console.log("Navigate to payment methods");
+						}}
+						leading={
+							<Ionicons name="card-outline" size={24} color={colors.textMuted} />
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+				</Box>
+
+				{/* Support Section */}
+				<Box style={styles.section}>
+					<Text variant="body" style={styles.sectionTitle}>
+						Support
+					</Text>
+
+					<ListItem
+						title="Help Center"
+						subtitle="FAQs and support"
+						onPress={() => {
+							// Navigate to help center (to be implemented)
+							console.log("Navigate to help center");
+						}}
+						leading={
+							<Ionicons
+								name="help-circle-outline"
+								size={24}
+								color={colors.textMuted}
+							/>
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+					<Divider />
+
+					<ListItem
+						title="Contact Us"
+						subtitle="Get in touch with support"
+						onPress={() => {
+							// Navigate to contact screen (to be implemented)
+							console.log("Navigate to contact");
+						}}
+						leading={
+							<Ionicons name="mail-outline" size={24} color={colors.textMuted} />
+						}
+						trailing={
+							<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+						}
+					/>
+				</Box>
+
+				<View style={{ height: tabBarHeight + space[4] }} />
+			</ScrollView>
+		</SafeAreaView>
+	);
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#00BE3C',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  contentContainer: {
-    gap: 8,
-    marginBottom: 8,
-    marginTop: 16,
-  },
+	container: {
+		flex: 1,
+		backgroundColor: colors.bg,
+	},
+	header: {
+		paddingHorizontal: space[4],
+		paddingVertical: space[4],
+		borderBottomWidth: 1,
+		borderBottomColor: colors.border,
+	},
+	headerTitle: {
+		fontWeight: "700",
+	},
+	scrollView: {
+		flex: 1,
+	},
+	userSection: {
+		alignItems: "center",
+		paddingVertical: space[6],
+		paddingHorizontal: space[4],
+		borderBottomWidth: 1,
+		borderBottomColor: colors.border,
+	},
+	avatar: {
+		width: 96,
+		height: 96,
+		borderRadius: 48,
+		backgroundColor: colors.bg,
+		alignItems: "center",
+		justifyContent: "center",
+		marginBottom: space[3],
+	},
+	userName: {
+		fontWeight: "600",
+		marginBottom: space[1],
+	},
+	section: {
+		marginTop: space[4],
+	},
+	sectionTitle: {
+		paddingHorizontal: space[4],
+		paddingBottom: space[2],
+		fontWeight: "600",
+		color: colors.textMuted,
+	},
 });

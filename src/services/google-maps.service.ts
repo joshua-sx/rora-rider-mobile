@@ -1,0 +1,432 @@
+/**
+ * Google Maps Service
+ * Wrapper around Google Maps APIs with error handling and request utilities
+ */
+
+import {
+    GOOGLE_MAPS_CONFIG,
+    GOOGLE_MAPS_API_KEY,
+    GOOGLE_PLACES_API_KEY,
+    GOOGLE_MAPS_PROXY_TOKEN,
+    GOOGLE_MAPS_PROXY_URL,
+    SEARCH_RADIUS,
+    SINT_MAARTEN_LOCATION,
+} from "@/src/constants/config";
+
+import { decodePolyline as decodePolylineUtil } from "@/src/utils/route-validation";
+
+// Type definitions for Google Maps API responses
+export interface LatLng {
+  latitude: number;
+  longitude: number;
+}
+
+export interface PlaceResult {
+  placeId: string;
+  description: string;
+  mainText: string;
+  secondaryText: string;
+  location?: LatLng;
+}
+
+export interface DirectionsResult {
+  routes: {
+    legs: {
+      distance: { value: number; text: string };
+      duration: { value: number; text: string };
+      steps: {
+        distance: { value: number; text: string };
+        duration: { value: number; text: string };
+        html_instructions: string;
+        polyline: { points: string };
+      }[];
+    }[];
+    overview_polyline: { points: string };
+  }[];
+  status: string;
+}
+
+export interface DistanceMatrixResult {
+  rows: {
+    elements: {
+      distance: { value: number; text: string };
+      duration: { value: number; text: string };
+      status: string;
+    }[];
+  }[];
+  status: string;
+}
+
+export interface LatLngBounds {
+  northeast: LatLng;
+  southwest: LatLng;
+}
+
+// Custom error types
+export class GoogleMapsError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public originalError?: any
+  ) {
+    super(message);
+    this.name = "GoogleMapsError";
+  }
+}
+
+/**
+ * Google Maps Service Class
+ * Provides methods to interact with Google Maps APIs
+ */
+class GoogleMapsService {
+  private cache: Map<string, { data: any; timestamp: number }> = new Map();
+  private readonly cacheTimeout = 5 * 60 * 1000; // 5 minutes
+
+  /**
+   * Make a request to the Maps proxy with retry logic
+   */
+  private async makeRequest<T>(url: string, retryCount = 0): Promise<T> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        GOOGLE_MAPS_CONFIG.timeout
+      );
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          ...(GOOGLE_MAPS_PROXY_TOKEN
+            ? { Authorization: `Bearer ${GOOGLE_MAPS_PROXY_TOKEN}` }
+            : {}),
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new GoogleMapsError(
+          `HTTP error: ${response.status}`,
+          "HTTP_ERROR",
+          { status: response.status }
+        );
+      }
+
+      const data = await response.json();
+
+      // Check for API-specific errors (Google web services style)
+      if (
+        data.status &&
+        data.status !== "OK" &&
+        data.status !== "ZERO_RESULTS"
+      ) {
+        throw new GoogleMapsError(
+          `API error: ${data.status} - ${
+            data.error_message || "Unknown error"
+          }`,
+          data.status,
+          data
+        );
+      }
+
+      return data as T;
+    } catch (error: any) {
+      // Retry logic for transient failures
+      // We retry on AbortError (timeout), or network-related TypeErrors (e.g. "Network request failed")
+      const isRetryable =
+        error.name === "AbortError" ||
+        error.code === "NETWORK_ERROR" ||
+        (error instanceof TypeError &&
+          (error.message.includes("network") ||
+            error.message.includes("fetch") ||
+            error.message.includes("Network request failed")));
+
+      if (retryCount < GOOGLE_MAPS_CONFIG.retryAttempts && isRetryable) {
+        await this.delay(GOOGLE_MAPS_CONFIG.retryDelay * 2 ** retryCount);
+        return this.makeRequest<T>(url, retryCount + 1);
+      }
+
+      if (error instanceof GoogleMapsError) {
+        throw error;
+      }
+
+      throw new GoogleMapsError(
+        `Request failed: ${error.message}`,
+        "REQUEST_FAILED",
+        error
+      );
+    }
+  }
+
+  /**
+   * Get base URL for API requests
+   * Falls back to direct Google API if proxy is not configured
+   */
+  private getBaseUrl(): string {
+    const proxyUrl = (GOOGLE_MAPS_PROXY_URL || "").trim().replace(/\/+$/, "");
+    if (proxyUrl) {
+      return proxyUrl;
+    }
+    // Fallback to direct Google API
+    return GOOGLE_MAPS_CONFIG.baseUrl;
+  }
+
+  /**
+   * Check if using proxy (vs direct API calls)
+   */
+  private isUsingProxy(): boolean {
+    return !!(GOOGLE_MAPS_PROXY_URL || "").trim();
+  }
+
+  /**
+   * Build API URL for a given endpoint
+   * Handles both proxy and direct Google API calls
+   * @param endpoint - Google API endpoint path (e.g., 'place/autocomplete/json')
+   * @param params - URL search parameters
+   */
+  private buildApiUrl(endpoint: string, params: URLSearchParams): string {
+    const baseUrl = this.getBaseUrl();
+    
+    if (this.isUsingProxy()) {
+      // Proxy format: {proxy_url}/maps/{endpoint}?{params}
+      return `${baseUrl}/maps/${endpoint}?${params}`;
+    } else {
+      // Direct Google API format: {base_url}/{endpoint}?key={key}&{params}
+      // Ensure endpoint starts with / for proper URL construction
+      const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      const apiKey = endpoint.includes('place') 
+        ? GOOGLE_PLACES_API_KEY 
+        : GOOGLE_MAPS_API_KEY;
+      
+      if (!apiKey) {
+        throw new GoogleMapsError(
+          `Missing API key for ${endpoint}. Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY or EXPO_PUBLIC_GOOGLE_PLACES_API_KEY`,
+          "MISSING_API_KEY"
+        );
+      }
+      
+      params.append('key', apiKey);
+      return `${baseUrl}${endpointPath}?${params}`;
+    }
+  }
+
+  /**
+   * Decode an encoded polyline string into coordinates.
+   * (Google Directions API format)
+   */
+  public decodePolyline(encoded: string): LatLng[] {
+    try {
+      return decodePolylineUtil(encoded) as LatLng[];
+    } catch (error) {
+      throw new GoogleMapsError(
+        "Invalid polyline encoding",
+        "INVALID_POLYLINE",
+        error
+      );
+    }
+  }
+
+  /**
+   * Delay utility for retry logic
+   */
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Get cached data if available and not expired
+   */
+  private getCached<T>(key: string): T | null {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      return cached.data as T;
+    }
+    return null;
+  }
+
+  /**
+   * Set data in cache
+   */
+  private setCache(key: string, data: any): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  /**
+   * Clear cache manually
+   */
+  public clearCache(): void {
+    this.cache.clear();
+  }
+
+  /**
+   * Search for places using Google Places Autocomplete API
+   */
+  async searchPlaces(
+    query: string,
+    bounds?: LatLngBounds
+  ): Promise<PlaceResult[]> {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+
+    const cacheKey = `places_${query}_${JSON.stringify(bounds)}`;
+    const cached = this.getCached<PlaceResult[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        input: query,
+        location: `${SINT_MAARTEN_LOCATION.latitude},${SINT_MAARTEN_LOCATION.longitude}`,
+        radius: SEARCH_RADIUS.toString(),
+        components: "country:sx", // RESTORED: Sint Maarten only
+      });
+
+      const url = this.buildApiUrl('/place/autocomplete/json', params);
+      const response = await this.makeRequest<any>(url);
+
+      const results: PlaceResult[] = (response.predictions || []).map(
+        (prediction: any) => ({
+          placeId: prediction.place_id,
+          description: prediction.description,
+          mainText:
+            prediction.structured_formatting?.main_text ||
+            prediction.description,
+          secondaryText: prediction.structured_formatting?.secondary_text || "",
+        })
+      );
+
+      this.setCache(cacheKey, results);
+      return results;
+    } catch (error) {
+      if (error instanceof GoogleMapsError) {
+        throw error;
+      }
+      throw new GoogleMapsError(
+        "Failed to search places",
+        "SEARCH_FAILED",
+        error
+      );
+    }
+  }
+
+  /**
+   * Get directions between two points using Google Directions API
+   */
+  async getDirections(
+    origin: LatLng,
+    destination: LatLng
+  ): Promise<DirectionsResult> {
+    const cacheKey = `directions_${origin.latitude},${origin.longitude}_${destination.latitude},${destination.longitude}`;
+    const cached = this.getCached<DirectionsResult>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        origin: `${origin.latitude},${origin.longitude}`,
+        destination: `${destination.latitude},${destination.longitude}`,
+        mode: "driving",
+      });
+
+      const url = this.buildApiUrl('/directions/json', params);
+      const response = await this.makeRequest<DirectionsResult>(url);
+
+      this.setCache(cacheKey, response);
+      return response;
+    } catch (error) {
+      if (error instanceof GoogleMapsError) {
+        throw error;
+      }
+      throw new GoogleMapsError(
+        "Failed to get directions",
+        "DIRECTIONS_FAILED",
+        error
+      );
+    }
+  }
+
+  /**
+   * Get distance matrix between multiple origins and destinations
+   */
+  async getDistanceMatrix(
+    origins: LatLng[],
+    destinations: LatLng[]
+  ): Promise<DistanceMatrixResult> {
+    const cacheKey = `distance_${JSON.stringify(origins)}_${JSON.stringify(
+      destinations
+    )}`;
+    const cached = this.getCached<DistanceMatrixResult>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const originsStr = origins
+        .map((o) => `${o.latitude},${o.longitude}`)
+        .join("|");
+      const destinationsStr = destinations
+        .map((d) => `${d.latitude},${d.longitude}`)
+        .join("|");
+
+      const params = new URLSearchParams({
+        origins: originsStr,
+        destinations: destinationsStr,
+        mode: "driving",
+      });
+
+      const url = this.buildApiUrl('/distancematrix/json', params);
+      const response = await this.makeRequest<DistanceMatrixResult>(url);
+
+      this.setCache(cacheKey, response);
+      return response;
+    } catch (error) {
+      if (error instanceof GoogleMapsError) {
+        throw error;
+      }
+      throw new GoogleMapsError(
+        "Failed to get distance matrix",
+        "DISTANCE_MATRIX_FAILED",
+        error
+      );
+    }
+  }
+
+  /**
+   * Get place details by place ID
+   */
+  async getPlaceDetails(placeId: string): Promise<any> {
+    const cacheKey = `place_details_${placeId}`;
+    const cached = this.getCached<any>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        place_id: placeId,
+        fields: "geometry,formatted_address,name",
+      });
+
+      const url = this.buildApiUrl('/place/details/json', params);
+      const response = await this.makeRequest<any>(url);
+
+      this.setCache(cacheKey, response);
+      return response;
+    } catch (error) {
+      if (error instanceof GoogleMapsError) {
+        throw error;
+      }
+      throw new GoogleMapsError(
+        "Failed to get place details",
+        "PLACE_DETAILS_FAILED",
+        error
+      );
+    }
+  }
+}
+
+// Export singleton instance
+export const googleMapsService = new GoogleMapsService();
