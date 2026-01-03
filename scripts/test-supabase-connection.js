@@ -15,8 +15,16 @@ require('dotenv').config({ path: '.env.local' });
 
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+const defaultSupabaseUrl = 'http://127.0.0.1:54321';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || defaultSupabaseUrl;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!process.env.EXPO_PUBLIC_SUPABASE_URL) {
+  console.warn(
+    '⚠️  EXPO_PUBLIC_SUPABASE_URL is not set in .env.local. ' +
+      `Defaulting to ${defaultSupabaseUrl}.`
+  );
+}
 
 if (!supabaseAnonKey || supabaseAnonKey === 'your-anon-key-here') {
   console.error('❌ EXPO_PUBLIC_SUPABASE_ANON_KEY is not set in .env.local');
@@ -74,4 +82,3 @@ async function testConnection() {
 testConnection().then((success) => {
   process.exit(success ? 0 : 1);
 });
-

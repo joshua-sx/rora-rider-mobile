@@ -13,8 +13,10 @@ COPY server.js ./
 ENV NODE_ENV=production
 ENV PORT=8080
 
+RUN chown -R node:node /app
+USER node
+
 EXPOSE 8080
 
 CMD ["npm", "start"]
-
 

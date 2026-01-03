@@ -1,12 +1,6 @@
 import { create } from 'zustand';
 import type { LatLng } from 'react-native-maps';
 
-// #region agent log
-const DEBUG_LOG = (location: string, message: string, data: any) => {
-	fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location, message, data, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: data.hypothesisId || 'A' }) }).catch(() => {});
-};
-// #endregion
-
 export interface PlaceDetails {
   placeId: string;
   name: string;
@@ -53,18 +47,11 @@ export const useRouteStore = create<RouteStore>((set, get) => ({
     const currentOrigin = get().origin;
     const shouldClearRoute =
       !origin || !currentOrigin || origin.placeId !== currentOrigin.placeId;
-    // #region agent log
-    DEBUG_LOG('route-store.ts:46', 'setOrigin called', { hypothesisId: 'A', origin: origin ? { placeId: origin.placeId, name: origin.name } : null });
-    // #endregion
     set({
       origin,
       error: null,
       routeData: shouldClearRoute ? null : get().routeData,
     });
-    // #region agent log
-    const state = get();
-    DEBUG_LOG('route-store.ts:49', 'setOrigin state after update', { hypothesisId: 'D', origin: state.origin ? { placeId: state.origin.placeId, name: state.origin.name } : null, destination: state.destination ? { placeId: state.destination.placeId, name: state.destination.name } : null });
-    // #endregion
   },
 
   setDestination: (destination) => {
@@ -73,18 +60,11 @@ export const useRouteStore = create<RouteStore>((set, get) => ({
       !destination ||
       !currentDestination ||
       destination.placeId !== currentDestination.placeId;
-    // #region agent log
-    DEBUG_LOG('route-store.ts:48', 'setDestination called', { hypothesisId: 'A', destination: destination ? { placeId: destination.placeId, name: destination.name } : null });
-    // #endregion
     set({
       destination,
       error: null,
       routeData: shouldClearRoute ? null : get().routeData,
     });
-    // #region agent log
-    const state = get();
-    DEBUG_LOG('route-store.ts:51', 'setDestination state after update', { hypothesisId: 'D', origin: state.origin ? { placeId: state.origin.placeId, name: state.origin.name } : null, destination: state.destination ? { placeId: state.destination.placeId, name: state.destination.name } : null });
-    // #endregion
   },
 
   setRouteData: (routeData) => set({ routeData }),

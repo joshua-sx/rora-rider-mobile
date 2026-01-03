@@ -319,7 +319,6 @@ export default function RouteInputScreen() {
 				const leg = directions.routes?.[0]?.legs?.[0];
 
 				// #region agent log
-				fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:292',message:'Route calculated from Google Directions API',data:{hypothesisId:'H2',originName:origin?.name,destinationName:destination?.name,distanceMeters:leg.distance?.value,distanceKm:distanceKm,durationSeconds:leg.duration?.value,durationMin:durationMin,calculatedPrice:price,coordinatesCount:coordinates.length,formattedDistance:formatDistance(distanceKm),formattedDuration:formatDuration(durationMin),formattedPrice:formatPrice(price)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
 				// #endregion
 
 				if (cancelled) return;
@@ -434,7 +433,6 @@ export default function RouteInputScreen() {
 	// Input State UI
 	if (viewState === "input") {
 		// #region agent log
-		fetch('http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route-input.tsx:413',message:'Input view rendering',data:{hypothesisId:'H1',hasOriginSuggestions:originSuggestions.length>0,originSuggestionsCount:originSuggestions.length,hasDestinationSuggestions:destinationSuggestions.length>0,destinationSuggestionsCount:destinationSuggestions.length,isScrollViewRendered:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1'})}).catch(()=>{});
 		// #endregion
 		return (
 			<KeyboardAvoidingView

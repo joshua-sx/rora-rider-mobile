@@ -20,4 +20,4 @@ jobs:
         with:
           # For PRs, scan only commits in the PR (not entire history)
           # This prevents false positives from old commits that have been fixed
-          extra_args: ${{ github.event_name == 'pull_request' && format('--baseline {0}', github.event.pull_request.base.sha) || '' }}
+          extra_args: ${{ github.event_name == 'pull_request' && format('--log-opts=--first-parent {0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || '' }}

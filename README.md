@@ -186,6 +186,16 @@ npx supabase start
 node scripts/test-supabase-connection.js
 ```
 
+**Environment Variables:**
+- `EXPO_PUBLIC_SUPABASE_URL` (defaults to `http://127.0.0.1:54321` for local Supabase)
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY` (required)
+
+**How to test:**
+1. Start Supabase locally: `npx supabase start`
+2. Confirm `.env.local` has `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+3. Run the connection check: `node scripts/test-supabase-connection.js`
+4. Expect: `✅ Supabase connection successful!`
+
 **Development Workflow:**
 ```bash
 # Create a new migration

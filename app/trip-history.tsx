@@ -56,9 +56,11 @@ export default function TripHistoryScreen() {
       {/* Header */}
       <Box style={styles.header}>
         <IconButton
-          icon={<Ionicons name="arrow-back" size={24} color={colors.text} />}
           onPress={() => router.back()}
-        />
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </IconButton>
         <Text variant="h3" style={styles.headerTitle}>
           Trip History
         </Text>
@@ -103,7 +105,7 @@ export default function TripHistoryScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {filteredTrips.length === 0 ? (
           <EmptyState
-            icon={<Ionicons name="car-outline" size={48} color={colors.muted} />}
+            icon={<Ionicons name="car-outline" size={48} color={colors.textMuted} />}
             message={
               activeFilter === 'all'
                 ? 'No trips yet. Book your first ride!'
@@ -144,7 +146,7 @@ export default function TripHistoryScreen() {
                     </Box>
                     <Box style={styles.routeDivider}>
                       <View style={styles.routeLine} />
-                      <Ionicons name="arrow-down" size={16} color={colors.muted} />
+                      <Ionicons name="arrow-down" size={16} color={colors.textMuted} />
                     </Box>
                     <Box style={styles.routeRow}>
                       <Ionicons name="location" size={20} color={colors.danger} />
@@ -157,13 +159,13 @@ export default function TripHistoryScreen() {
                   <Box style={styles.tripFooter}>
                     <Box style={styles.tripStats}>
                       <Box style={styles.statItem}>
-                        <Ionicons name="speedometer-outline" size={16} color={colors.muted} />
+                        <Ionicons name="speedometer-outline" size={16} color={colors.textMuted} />
                         <Text variant="sub" muted>
                           {trip.distance.toFixed(1)} km
                         </Text>
                       </Box>
                       <Box style={styles.statItem}>
-                        <Ionicons name="time-outline" size={16} color={colors.muted} />
+                        <Ionicons name="time-outline" size={16} color={colors.textMuted} />
                         <Text variant="sub" muted>
                           {trip.duration} min
                         </Text>
@@ -176,7 +178,7 @@ export default function TripHistoryScreen() {
 
                   {trip.driverId && (
                     <Box style={styles.driverInfo}>
-                      <Ionicons name="person-circle-outline" size={20} color={colors.muted} />
+                      <Ionicons name="person-circle-outline" size={20} color={colors.textMuted} />
                       <Text variant="sub" muted>
                         Driver assigned
                       </Text>
@@ -195,7 +197,7 @@ export default function TripHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   header: {
     flexDirection: 'row',

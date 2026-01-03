@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { decodePolyline, extractRouteData } = require("../src/utils/route-validation");
+const { decodePolyline, extractRouteData } = require("../src/utils/route-validation.js");
 
 const validDirections = {
   status: "OK",

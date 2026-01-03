@@ -18,31 +18,6 @@
 
 import Constants from "expo-constants";
 
-// #region agent log
-const DEBUG_LOG = (
-	location: string,
-	message: string,
-	data: {
-		hypothesisId?: string;
-		[k: string]: unknown;
-	},
-) => {
-	fetch("http://127.0.0.1:7245/ingest/3b0f41df-1efc-4a19-8400-3cd0c3ae335a", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location,
-			message,
-			data,
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: data.hypothesisId || "KEY",
-		}),
-	}).catch(() => {});
-};
-// #endregion
-
 type ExpoExtra = Partial<{
 	EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: string;
 	EXPO_PUBLIC_GOOGLE_PLACES_API_KEY: string;
@@ -73,14 +48,6 @@ const proxyToken =
 	process.env.EXPO_PUBLIC_GOOGLE_MAPS_PROXY_TOKEN ||
 	extra.EXPO_PUBLIC_GOOGLE_MAPS_PROXY_TOKEN ||
 	"";
-
-// #region agent log
-DEBUG_LOG("constants/config.ts:KEYS", "Loaded Google API key presence", {
-	hypothesisId: "KEY",
-	hasMapsKey: Boolean(mapsKey),
-	hasPlacesKey: Boolean(placesKey),
-});
-// #endregion
 
 // Prefer separate keys (Maps vs Places). We keep a fallback to reduce breakage in dev,
 // but production should set both and restrict them appropriately in Google Cloud Console.

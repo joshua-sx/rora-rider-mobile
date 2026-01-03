@@ -40,9 +40,11 @@ export default function SettingsScreen() {
       {/* Header */}
       <Box style={styles.header}>
         <IconButton
-          icon={<Ionicons name="arrow-back" size={24} color={colors.text} />}
           onPress={() => router.back()}
-        />
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </IconButton>
         <Text variant="h3" style={styles.headerTitle}>
           Settings
         </Text>
@@ -140,8 +142,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Theme', 'Theme selection coming soon');
             }}
-            leading={<Ionicons name="moon-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="moon-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
@@ -157,8 +159,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Language', 'Language selection coming soon');
             }}
-            leading={<Ionicons name="language-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="language-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
@@ -174,8 +176,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Privacy', 'Privacy settings coming soon');
             }}
-            leading={<Ionicons name="shield-checkmark-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="shield-checkmark-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
@@ -185,8 +187,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Location', 'Open system settings to manage location permissions');
             }}
-            leading={<Ionicons name="location-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="location-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
@@ -202,8 +204,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Payment Methods', 'Payment management coming soon');
             }}
-            leading={<Ionicons name="card-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="card-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
@@ -219,8 +221,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Help Center', 'Help center coming soon');
             }}
-            leading={<Ionicons name="help-circle-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="help-circle-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
@@ -229,8 +231,8 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Terms of Service', 'Terms of service coming soon');
             }}
-            leading={<Ionicons name="document-text-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="document-text-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
@@ -239,15 +241,15 @@ export default function SettingsScreen() {
             onPress={() => {
               Alert.alert('Privacy Policy', 'Privacy policy coming soon');
             }}
-            leading={<Ionicons name="lock-closed-outline" size={24} color={colors.muted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            leading={<Ionicons name="lock-closed-outline" size={24} color={colors.textMuted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
           <Divider />
 
           <ListItem
             title="App Version"
             subtitle="1.0.0"
-            leading={<Ionicons name="information-circle-outline" size={24} color={colors.muted} />}
+            leading={<Ionicons name="information-circle-outline" size={24} color={colors.textMuted} />}
           />
         </Box>
 
@@ -262,7 +264,7 @@ export default function SettingsScreen() {
               ]);
             }}
             leading={<Ionicons name="log-out-outline" size={24} color={colors.danger} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.muted} />}
+            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
 
@@ -275,7 +277,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -301,7 +303,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[4],
     paddingBottom: space[3],
     fontWeight: '600',
-    color: colors.muted,
+    color: colors.textMuted,
   },
   settingItem: {
     flexDirection: 'row',
