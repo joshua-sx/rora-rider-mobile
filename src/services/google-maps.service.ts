@@ -5,6 +5,8 @@
 
 import {
     GOOGLE_MAPS_CONFIG,
+    GOOGLE_MAPS_API_KEY,
+    GOOGLE_PLACES_API_KEY,
     GOOGLE_MAPS_PROXY_TOKEN,
     GOOGLE_MAPS_PROXY_URL,
     SEARCH_RADIUS,
@@ -156,15 +158,56 @@ class GoogleMapsService {
     }
   }
 
-  private getProxyBaseUrl(): string {
-    const base = (GOOGLE_MAPS_PROXY_URL || "").trim().replace(/\/+$/, "");
-    if (!base) {
-      throw new GoogleMapsError(
-        "Missing EXPO_PUBLIC_GOOGLE_MAPS_PROXY_URL",
-        "MISSING_PROXY_URL"
-      );
+  /**
+   * Get base URL for API requests
+   * Falls back to direct Google API if proxy is not configured
+   */
+  private getBaseUrl(): string {
+    const proxyUrl = (GOOGLE_MAPS_PROXY_URL || "").trim().replace(/\/+$/, "");
+    if (proxyUrl) {
+      return proxyUrl;
     }
-    return base;
+    // Fallback to direct Google API
+    return GOOGLE_MAPS_CONFIG.baseUrl;
+  }
+
+  /**
+   * Check if using proxy (vs direct API calls)
+   */
+  private isUsingProxy(): boolean {
+    return !!(GOOGLE_MAPS_PROXY_URL || "").trim();
+  }
+
+  /**
+   * Build API URL for a given endpoint
+   * Handles both proxy and direct Google API calls
+   * @param endpoint - Google API endpoint path (e.g., 'place/autocomplete/json')
+   * @param params - URL search parameters
+   */
+  private buildApiUrl(endpoint: string, params: URLSearchParams): string {
+    const baseUrl = this.getBaseUrl();
+    
+    if (this.isUsingProxy()) {
+      // Proxy format: {proxy_url}/maps/{endpoint}?{params}
+      return `${baseUrl}/maps/${endpoint}?${params}`;
+    } else {
+      // Direct Google API format: {base_url}/{endpoint}?key={key}&{params}
+      // Ensure endpoint starts with / for proper URL construction
+      const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      const apiKey = endpoint.includes('place') 
+        ? GOOGLE_PLACES_API_KEY 
+        : GOOGLE_MAPS_API_KEY;
+      
+      if (!apiKey) {
+        throw new GoogleMapsError(
+          `Missing API key for ${endpoint}. Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY or EXPO_PUBLIC_GOOGLE_PLACES_API_KEY`,
+          "MISSING_API_KEY"
+        );
+      }
+      
+      params.append('key', apiKey);
+      return `${baseUrl}${endpointPath}?${params}`;
+    }
   }
 
   /**
@@ -240,7 +283,7 @@ class GoogleMapsService {
         components: "country:sx", // RESTORED: Sint Maarten only
       });
 
-      const url = `${this.getProxyBaseUrl()}/maps/places/autocomplete?${params}`;
+      const url = this.buildApiUrl('/place/autocomplete/json', params);
       const response = await this.makeRequest<any>(url);
 
       const results: PlaceResult[] = (response.predictions || []).map(
@@ -288,7 +331,7 @@ class GoogleMapsService {
         mode: "driving",
       });
 
-      const url = `${this.getProxyBaseUrl()}/maps/directions?${params}`;
+      const url = this.buildApiUrl('/directions/json', params);
       const response = await this.makeRequest<DirectionsResult>(url);
 
       this.setCache(cacheKey, response);
@@ -334,7 +377,7 @@ class GoogleMapsService {
         mode: "driving",
       });
 
-      const url = `${this.getProxyBaseUrl()}/maps/distance-matrix?${params}`;
+      const url = this.buildApiUrl('/distancematrix/json', params);
       const response = await this.makeRequest<DistanceMatrixResult>(url);
 
       this.setCache(cacheKey, response);
@@ -367,7 +410,7 @@ class GoogleMapsService {
         fields: "geometry,formatted_address,name",
       });
 
-      const url = `${this.getProxyBaseUrl()}/maps/places/details?${params}`;
+      const url = this.buildApiUrl('/place/details/json', params);
       const response = await this.makeRequest<any>(url);
 
       this.setCache(cacheKey, response);
