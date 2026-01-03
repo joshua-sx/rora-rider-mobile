@@ -11,7 +11,8 @@
     "lint": "expo lint",
     "test:maps": "GOOGLE_MAPS_API_KEY=$EXPO_PUBLIC_GOOGLE_MAPS_API_KEY node scripts/test-google-maps.js",
     "prepare": "bash scripts/setup-githooks.sh",
-    "test:route-validation": "node scripts/test-route-validation.js"
+    "test:route-validation": "node scripts/test-route-validation.js",
+    "test:supabase": "node scripts/test-supabase-connection.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -20,9 +21,13 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@supabase/supabase-js": "^2.89.0",
     "expo": "~54.0.30",
+    "expo-barcode-scanner": "^13.0.1",
     "expo-blur": "^15.0.8",
+    "expo-camera": "~17.0.10",
     "expo-constants": "~18.0.12",
+    "expo-crypto": "~15.0.8",
     "expo-font": "~14.0.10",
     "expo-haptics": "~15.0.8",
     "expo-image": "~3.0.11",
@@ -54,9 +59,11 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "dotenv": "^17.2.3",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "expo-mcp": "~0.2.1",
+    "supabase": "^2.70.5",
     "typescript": "~5.9.2"
   },
   "private": true
