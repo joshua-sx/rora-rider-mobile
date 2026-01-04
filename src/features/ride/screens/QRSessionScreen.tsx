@@ -114,12 +114,10 @@ export const QRSessionScreen = () => {
       pathname: '/ride/discovery',
       params: {
         rideSessionId: rideSession.id,
+        originLabel: params.originLabel,
+        destinationLabel: params.destinationLabel,
+        fareAmount: params.fareAmount,
       },
-    });
-
-    // Track discovery started
-    trackEvent(AnalyticsEvents.DISCOVERY_STARTED, {
-      ride_session_id: rideSession.id,
     });
   };
 
