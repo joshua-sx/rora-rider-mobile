@@ -21,6 +21,10 @@ export default function TabLayout() {
         <Label>Drivers</Label>
         <Icon sf="car.fill" />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="activity">
+        <Label>Activity</Label>
+        <Icon sf="clock.fill" />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Label>Profile</Label>
         <Icon sf="person.circle.fill" />
