@@ -2,8 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
-import { BorderRadius, Spacing } from '@/src/constants/design-tokens';
+import { Text, colors, space, radius } from '@/src/ui';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Driver } from '@/src/types/driver';
 
@@ -45,7 +44,7 @@ export function DriverCard({ driver }: DriverCardProps) {
     { light: '#EEF0F2', dark: '#1D1F24' },
     'surface'
   );
-  const onDutyColor = '#00BE3C';
+  const onDutyColor = colors.primary;
 
   const handlePress = () => {
     router.push(`/driver/${driver.id}`);
@@ -100,9 +99,9 @@ export function DriverCard({ driver }: DriverCardProps) {
                 resizeMode="cover"
               />
             ) : (
-              <ThemedText style={[styles.avatarInitials, { color: secondaryTextColor }]}>
+              <Text style={[styles.avatarInitials, { color: secondaryTextColor }]}>
                 {initials}
-              </ThemedText>
+              </Text>
             )}
           </View>
           {driver.onDuty && (
@@ -113,22 +112,22 @@ export function DriverCard({ driver }: DriverCardProps) {
         {/* Driver Info */}
         <View style={styles.info}>
           {/* Name - wraps to 2 lines */}
-          <ThemedText style={styles.name} numberOfLines={2}>
+          <Text style={styles.name} numberOfLines={2}>
             {driver.name}
-          </ThemedText>
+          </Text>
 
           {/* Rating Row */}
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={16} color="#FFB800" />
-            <ThemedText style={styles.rating}>
+            <Text style={styles.rating}>
               {driver.rating.toFixed(1)}
-            </ThemedText>
-            <ThemedText style={[styles.separator, { color: secondaryTextColor }]}>
+            </Text>
+            <Text style={[styles.separator, { color: secondaryTextColor }]}>
               •
-            </ThemedText>
-            <ThemedText style={[styles.tripCount, { color: secondaryTextColor }]}>
+            </Text>
+            <Text style={[styles.tripCount, { color: secondaryTextColor }]}>
               {driver.reviewCount} trips
-            </ThemedText>
+            </Text>
           </View>
         </View>
       </View>
@@ -139,9 +138,9 @@ export function DriverCard({ driver }: DriverCardProps) {
       {/* Vehicle Info Row */}
       <View style={styles.vehicleRow}>
         <Ionicons name="car-outline" size={16} color={secondaryTextColor} />
-        <ThemedText style={[styles.vehicleText, { color: secondaryTextColor }]}>
+        <Text style={[styles.vehicleText, { color: secondaryTextColor }]}>
           {driver.vehicleType} • {seatCount} seats
-        </ThemedText>
+        </Text>
       </View>
     </Pressable>
   );
@@ -149,14 +148,14 @@ export function DriverCard({ driver }: DriverCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.card,
+    padding: space[4],
+    borderRadius: radius.lg,
     borderWidth: 1,
-    marginBottom: Spacing.md,
+    marginBottom: space[3],
   },
   topSection: {
     flexDirection: 'row',
-    gap: Spacing.md,
+    gap: space[3],
   },
   avatarContainer: {
     position: 'relative',
@@ -184,11 +183,11 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: colors.bg,
   },
   info: {
     flex: 1,
-    gap: Spacing.xs,
+    gap: space[1],
     justifyContent: 'center',
   },
   name: {
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    marginVertical: Spacing.md,
+    marginVertical: space[3],
   },
   vehicleRow: {
     flexDirection: 'row',
