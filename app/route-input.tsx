@@ -110,7 +110,7 @@ export default function RouteInputScreen() {
 		clearDriver,
 	} = useRouteStore();
 
-	const { setCurrentLocation, setFormattedAddress } = useLocationStore();
+	const { setCurrentLocation, setFormattedAddress, currentLocation: userLocation, formattedAddress: userFormattedAddress, permissionGranted: userPermissionGranted } = useLocationStore();
 
 	// Driver context
 	const selectedDriver = selectedDriverId ? getDriverById(selectedDriverId) : null;
@@ -354,6 +354,31 @@ export default function RouteInputScreen() {
 			setViewState("input");
 		}
 	}, [origin, destination, setError, setRouteData, router]);
+
+	// Auto-set origin from current location if destination is pre-filled (e.g., from venue flow)
+	// Track if we've already triggered auto-calculation to avoid loops
+	const autoCalculateTriggeredRef = useRef(false);
+
+	useEffect(() => {
+		// If destination is set but origin is not, try to set origin from current location
+		if (destination && !origin && userLocation && !autoCalculateTriggeredRef.current) {
+			setOrigin({
+				placeId: userPermissionGranted ? 'current-location' : 'manual-location',
+				name: userPermissionGranted ? 'Current Location' : userFormattedAddress || 'Your Location',
+				description: userFormattedAddress || 'Your current location',
+				coordinates: userLocation,
+			});
+			setOriginInput(userPermissionGranted ? 'Current Location' : userFormattedAddress || 'Your Location');
+		}
+	}, [destination, origin, userLocation, userFormattedAddress, userPermissionGranted, setOrigin]);
+
+	// Auto-trigger route calculation when both origin and destination are set
+	useEffect(() => {
+		if (origin && destination && !routeData && !autoCalculateTriggeredRef.current && viewState === 'input') {
+			autoCalculateTriggeredRef.current = true;
+			handleContinue();
+		}
+	}, [origin, destination, routeData, viewState, handleContinue]);
 
 	// Handle manual entry mode - when origin is selected, save to location store and go back
 	useEffect(() => {

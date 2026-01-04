@@ -52,7 +52,7 @@ export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
         ]}
         onPress={onPress}
       >
-        <ThemedText style={styles.buttonText}>Set pickup location</ThemedText>
+        <ThemedText style={styles.buttonText}>View route & pricing</ThemedText>
       </Pressable>
     </View>
   );
