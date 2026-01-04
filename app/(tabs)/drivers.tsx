@@ -3,9 +3,7 @@ import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DriverCard } from '@/src/features/drivers/components/driver-card';
-import { ThemedText } from '@/src/ui/components/themed-text';
-import { ThemedView } from '@/src/ui/components/themed-view';
-import { Spacing } from '@/src/constants/design-tokens';
+import { Text, Box, space } from '@/src/ui';
 import { MOCK_DRIVERS, getOnDutyDrivers, getOffDutyDrivers } from '@/src/features/drivers/data/drivers';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Driver } from '@/src/types/driver';
@@ -43,12 +41,12 @@ export default function DriversScreen() {
   const drivers = getFilteredDrivers();
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor, paddingTop: insets.top }]}>
+    <Box style={[styles.container, { backgroundColor, paddingTop: insets.top }]}>
       <View style={styles.stickyHeader}>
-        <ThemedText style={styles.title}>Available Drivers</ThemedText>
-        <ThemedText style={[styles.subtitle, { color: secondaryTextColor }]}>
+        <Text style={styles.title}>Available Drivers</Text>
+        <Text style={[styles.subtitle, { color: secondaryTextColor }]}>
           Browse and contact drivers
-        </ThemedText>
+        </Text>
 
         {/* Filter Pills */}
         <View style={styles.filterContainer}>
@@ -61,14 +59,14 @@ export default function DriversScreen() {
             ]}
             onPress={() => setFilter('all')}
           >
-            <ThemedText
+            <Text
               style={[
                 styles.filterText,
                 filter === 'all' && styles.filterTextActive,
               ]}
             >
               All ({MOCK_DRIVERS.length})
-            </ThemedText>
+            </Text>
           </Pressable>
 
           <Pressable
@@ -80,14 +78,14 @@ export default function DriversScreen() {
             ]}
             onPress={() => setFilter('on_duty')}
           >
-            <ThemedText
+            <Text
               style={[
                 styles.filterText,
                 filter === 'on_duty' && styles.filterTextActive,
               ]}
             >
               On Duty ({getOnDutyDrivers().length})
-            </ThemedText>
+            </Text>
           </Pressable>
 
           <Pressable
@@ -99,14 +97,14 @@ export default function DriversScreen() {
             ]}
             onPress={() => setFilter('off_duty')}
           >
-            <ThemedText
+            <Text
               style={[
                 styles.filterText,
                 filter === 'off_duty' && styles.filterTextActive,
               ]}
             >
               Off Duty ({getOffDutyDrivers().length})
-            </ThemedText>
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -117,17 +115,17 @@ export default function DriversScreen() {
         renderItem={({ item }) => <DriverCard driver={item} />}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: tabBarHeight + Spacing.lg },
+          { paddingBottom: tabBarHeight + space[4] },
         ]}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <ThemedText style={[styles.emptyText, { color: secondaryTextColor }]}>
+            <Text style={[styles.emptyText, { color: secondaryTextColor }]}>
               No drivers found
-            </ThemedText>
+            </Text>
           </View>
         }
       />
-    </ThemedView>
+    </Box>
   );
 }
 
@@ -136,13 +134,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingHorizontal: space[4],
+    paddingTop: space[3],
   },
   stickyHeader: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
-    paddingBottom: Spacing.lg,
+    paddingHorizontal: space[4],
+    paddingTop: space[4],
+    paddingBottom: space[4],
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(140, 147, 144, 0.1)',
   },
@@ -150,20 +148,20 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '700',
     lineHeight: 42,
-    marginBottom: Spacing.xs,
+    marginBottom: space[1],
   },
   subtitle: {
     fontSize: 16,
-    marginBottom: Spacing.lg,
+    marginBottom: space[4],
   },
   filterContainer: {
     flexDirection: 'row',
-    gap: Spacing.sm,
-    marginTop: Spacing.md,
+    gap: space[2],
+    marginTop: space[3],
   },
   filterPill: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: space[3],
+    paddingVertical: space[2],
     borderRadius: 20,
     backgroundColor: 'rgba(140, 147, 144, 0.2)',
   },
@@ -176,7 +174,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   emptyContainer: {
-    paddingVertical: Spacing.xxl,
+    paddingVertical: space[6],
     alignItems: 'center',
   },
   emptyText: {
