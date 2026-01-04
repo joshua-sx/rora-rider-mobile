@@ -4,10 +4,8 @@ import { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
-import { ThemedView } from '@/src/ui/components/themed-view';
+import { Text, Box, space, radius } from '@/src/ui';
 import { BookingOptionsSheet } from '@/src/ui/components/BookingOptionsSheet';
-import { BorderRadius, Spacing } from '@/src/constants/design-tokens';
 import { getDriverById } from '@/src/features/drivers/data/drivers';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import { useToast } from '@/src/ui/providers/ToastProvider';
@@ -87,21 +85,21 @@ export default function DriverProfileScreen() {
 
   if (!driver) {
     return (
-      <ThemedView style={[styles.container, { backgroundColor }]}>
+      <Box style={[styles.container, { backgroundColor }]}>
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
           <Pressable onPress={handleBack} hitSlop={8}>
             <Ionicons name="arrow-back" size={24} color={textColor} />
           </Pressable>
         </View>
         <View style={styles.errorContainer}>
-          <ThemedText style={styles.errorText}>Driver not found</ThemedText>
+          <Text style={styles.errorText}>Driver not found</Text>
         </View>
-      </ThemedView>
+      </Box>
     );
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor }]}>
+    <Box style={[styles.container, { backgroundColor }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
@@ -123,16 +121,16 @@ export default function DriverProfileScreen() {
             <Ionicons name="person" size={64} color={secondaryTextColor} />
           </View>
 
-          <ThemedText style={styles.name}>{driver.name}</ThemedText>
+          <Text style={styles.name}>{driver.name}</Text>
 
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={20} color="#FFB800" />
-            <ThemedText style={styles.rating}>
+            <Text style={styles.rating}>
               {driver.rating.toFixed(1)}
-            </ThemedText>
-            <ThemedText style={[styles.reviewCount, { color: secondaryTextColor }]}>
+            </Text>
+            <Text style={[styles.reviewCount, { color: secondaryTextColor }]}>
               ({driver.reviewCount} reviews)
-            </ThemedText>
+            </Text>
           </View>
 
           <View
@@ -153,24 +151,24 @@ export default function DriverProfileScreen() {
                 },
               ]}
             />
-            <ThemedText
+            <Text
               style={[
                 styles.statusText,
                 { color: driver.onDuty ? onDutyColor : offDutyColor },
               ]}
             >
               {driver.onDuty ? 'On Duty' : 'Off Duty'}
-            </ThemedText>
+            </Text>
           </View>
         </View>
 
         {/* Contact Section */}
         <View style={[styles.section, { backgroundColor: cardBackgroundColor }]}>
-          <ThemedText style={styles.sectionTitle}>CONTACT</ThemedText>
+          <Text style={styles.sectionTitle}>CONTACT</Text>
 
           <Pressable style={styles.contactRow} onPress={handleCall}>
             <Ionicons name="call-outline" size={20} color={tintColor} />
-            <ThemedText style={styles.contactText}>{driver.phone}</ThemedText>
+            <Text style={styles.contactText}>{driver.phone}</Text>
             <Ionicons name="chevron-forward" size={16} color={secondaryTextColor} />
           </Pressable>
 
@@ -178,7 +176,7 @@ export default function DriverProfileScreen() {
 
           <Pressable style={styles.contactRow} onPress={handleEmail}>
             <Ionicons name="mail-outline" size={20} color={tintColor} />
-            <ThemedText style={styles.contactText}>{driver.email}</ThemedText>
+            <Text style={styles.contactText}>{driver.email}</Text>
             <Ionicons name="chevron-forward" size={16} color={secondaryTextColor} />
           </Pressable>
 
@@ -186,46 +184,46 @@ export default function DriverProfileScreen() {
 
           <View style={styles.infoRow}>
             <Ionicons name="language-outline" size={20} color={secondaryTextColor} />
-            <ThemedText style={[styles.infoText, { color: secondaryTextColor }]}>
+            <Text style={[styles.infoText, { color: secondaryTextColor }]}>
               {driver.languages.join(', ')}
-            </ThemedText>
+            </Text>
           </View>
         </View>
 
         {/* Details Section */}
         <View style={[styles.section, { backgroundColor: cardBackgroundColor }]}>
-          <ThemedText style={styles.sectionTitle}>VEHICLE</ThemedText>
+          <Text style={styles.sectionTitle}>VEHICLE</Text>
 
           <View style={styles.infoRow}>
             <Ionicons name="car-sport-outline" size={20} color={secondaryTextColor} />
-            <ThemedText style={styles.infoText}>
+            <Text style={styles.infoText}>
               {driver.vehicleType} • {driver.vehicleModel}
-            </ThemedText>
+            </Text>
           </View>
 
           <View style={[styles.divider, { backgroundColor: borderColor }]} />
 
           <View style={styles.infoRow}>
             <Ionicons name="card-outline" size={20} color={secondaryTextColor} />
-            <ThemedText style={styles.infoText}>{driver.licensePlate}</ThemedText>
+            <Text style={styles.infoText}>{driver.licensePlate}</Text>
           </View>
 
           <View style={[styles.divider, { backgroundColor: borderColor }]} />
 
           <View style={styles.infoRow}>
             <Ionicons name="time-outline" size={20} color={secondaryTextColor} />
-            <ThemedText style={styles.infoText}>
+            <Text style={styles.infoText}>
               {driver.yearsExperience} years experience
-            </ThemedText>
+            </Text>
           </View>
         </View>
 
         {/* Bio Section */}
         <View style={[styles.section, { backgroundColor: cardBackgroundColor }]}>
-          <ThemedText style={styles.sectionTitle}>ABOUT</ThemedText>
-          <ThemedText style={[styles.bio, { color: secondaryTextColor }]}>
+          <Text style={styles.sectionTitle}>ABOUT</Text>
+          <Text style={[styles.bio, { color: secondaryTextColor }]}>
             {driver.bio}
-          </ThemedText>
+          </Text>
         </View>
       </ScrollView>
 
@@ -234,7 +232,7 @@ export default function DriverProfileScreen() {
         style={[
           styles.footer,
           {
-            paddingBottom: Math.max(insets.bottom, Spacing.lg),
+            paddingBottom: Math.max(insets.bottom, space[4]),
             borderTopColor: borderColor,
           },
         ]}
@@ -250,9 +248,9 @@ export default function DriverProfileScreen() {
           onPress={handleBookRide}
           disabled={!driver.onDuty}
         >
-          <ThemedText style={styles.bookButtonText}>
+          <Text style={styles.bookButtonText}>
             {driver.onDuty ? 'Book Ride' : 'Driver Off Duty'}
-          </ThemedText>
+          </Text>
         </Pressable>
       </View>
 
@@ -265,7 +263,7 @@ export default function DriverProfileScreen() {
         onUseSaved={handleUseSaved}
         hasSavedTrips={savedTripsCount > 0}
       />
-    </ThemedView>
+    </Box>
   );
 }
 
@@ -277,15 +275,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: Spacing.xxl,
+    paddingBottom: space[6],
   },
   header: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: space[4],
+    paddingBottom: space[3],
   },
   profileSection: {
     alignItems: 'center',
-    paddingVertical: Spacing.xl,
+    paddingVertical: space[5],
   },
   profileImage: {
     width: 120,
@@ -293,18 +291,18 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: space[4],
   },
   name: {
     fontSize: 28,
     fontWeight: '700',
-    marginBottom: Spacing.sm,
+    marginBottom: space[2],
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: Spacing.md,
+    marginBottom: space[3],
   },
   rating: {
     fontSize: 16,
@@ -317,8 +315,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: space[3],
+    paddingVertical: space[2],
     borderRadius: 16,
   },
   statusDot: {
@@ -331,23 +329,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   section: {
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.card,
+    marginHorizontal: space[4],
+    marginBottom: space[4],
+    padding: space[4],
+    borderRadius: radius.lg,
   },
   sectionTitle: {
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.5,
     opacity: 0.6,
-    marginBottom: Spacing.md,
+    marginBottom: space[3],
   },
   contactRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
-    paddingVertical: Spacing.sm,
+    gap: space[3],
+    paddingVertical: space[2],
   },
   contactText: {
     flex: 1,
@@ -356,15 +354,15 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
-    paddingVertical: Spacing.sm,
+    gap: space[3],
+    paddingVertical: space[2],
   },
   infoText: {
     fontSize: 15,
   },
   divider: {
     height: 1,
-    marginVertical: Spacing.xs,
+    marginVertical: space[1],
   },
   bio: {
     fontSize: 15,
@@ -384,14 +382,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    paddingHorizontal: space[4],
+    paddingTop: space[4],
     borderTopWidth: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
   },
   bookButton: {
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.button,
+    paddingVertical: space[4],
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1,10 +1,5 @@
 import { SINT_MAARTEN_REGION } from "@/src/constants/config";
-import {
-    BorderRadius,
-    Colors,
-    Spacing,
-    Typography,
-} from "@/src/constants/design-tokens";
+import { Typography } from "@/src/constants/design-tokens";
 import { getDriverById } from "@/src/features/drivers/data/drivers";
 import { useThemeColor } from "@/src/hooks/use-theme-color";
 import {
@@ -13,7 +8,7 @@ import {
 } from "@/src/services/google-maps.service";
 import { useLocationStore } from "@/src/store/location-store";
 import { useRouteStore } from "@/src/store/route-store";
-import { ThemedText } from "@/src/ui/components/themed-text";
+import { Text, colors, space, radius } from "@/src/ui";
 import { useToast } from "@/src/ui/providers/ToastProvider";
 import { calculatePrice } from "@/src/utils/pricing";
 import { extractRouteData } from "@/src/utils/route-validation";
@@ -52,7 +47,7 @@ function HighlightedText({
 	text,
 	query,
 	style,
-	highlightColor = Colors.primary,
+	highlightColor = colors.primary,
 }: {
 	text: string;
 	query: string;
@@ -436,9 +431,9 @@ export default function RouteInputScreen() {
 					<Pressable onPress={handleClose} hitSlop={8}>
 						<Ionicons name="close" size={28} color={textColor} />
 					</Pressable>
-					<ThemedText style={styles.headerTitle}>
+					<Text style={styles.headerTitle}>
 						{manualEntry === "true" ? "Set your location" : "Your route"}
-					</ThemedText>
+					</Text>
 					<View style={{ width: 28 }} />
 				</View>
 
@@ -452,12 +447,12 @@ export default function RouteInputScreen() {
 					>
 						<Ionicons name="person-circle-outline" size={24} color={tintColor} />
 						<View style={styles.driverInfo}>
-							<ThemedText style={styles.driverName}>
+							<Text style={styles.driverName}>
 								Booking with {selectedDriver.name}
-							</ThemedText>
-							<ThemedText style={[styles.driverMeta, { color: secondaryTextColor }]}>
+							</Text>
+							<Text style={[styles.driverMeta, { color: secondaryTextColor }]}>
 								★ {selectedDriver.rating} • {selectedDriver.vehicleType}
-							</ThemedText>
+							</Text>
 						</View>
 						<Pressable onPress={clearDriver} hitSlop={8}>
 							<Ionicons name="close-circle" size={20} color={iconColor} />
@@ -470,7 +465,7 @@ export default function RouteInputScreen() {
 					style={styles.scrollView}
 					contentContainerStyle={[
 						styles.scrollContent,
-						{ paddingBottom: insets.bottom + Spacing.xxl },
+						{ paddingBottom: insets.bottom + space[6] },
 					]}
 					keyboardShouldPersistTaps="handled"
 					showsVerticalScrollIndicator={false}
@@ -644,9 +639,9 @@ export default function RouteInputScreen() {
 								onPress={handleContinue}
 								style={[styles.continueButton, { backgroundColor: tintColor }]}
 							>
-								<ThemedText style={styles.continueButtonText}>
+								<Text style={styles.continueButtonText}>
 									Continue
-								</ThemedText>
+								</Text>
 							</Pressable>
 						</View>
 					)}
@@ -673,26 +668,26 @@ export default function RouteInputScreen() {
 									size={24}
 									color={iconColor}
 								/>
-								<ThemedText style={styles.emptyStateText}>
+								<Text style={styles.emptyStateText}>
 									Couldn&apos;t load results
-								</ThemedText>
-								<ThemedText
+								</Text>
+								<Text
 									style={[styles.emptyStateSubtext, { color: iconColor }]}
 								>
 									Check connection and try again
-								</ThemedText>
+								</Text>
 							</Pressable>
 						) : showOriginEmpty ? (
 							<View style={styles.emptyStateContainer}>
 								<Ionicons name="search-outline" size={24} color={iconColor} />
-								<ThemedText style={styles.emptyStateText}>
+								<Text style={styles.emptyStateText}>
 									No results found
-								</ThemedText>
-								<ThemedText
+								</Text>
+								<Text
 									style={[styles.emptyStateSubtext, { color: iconColor }]}
 								>
 									Try a broader search
-								</ThemedText>
+								</Text>
 							</View>
 						) : (
 							<FlatList
@@ -737,26 +732,26 @@ export default function RouteInputScreen() {
 									size={24}
 									color={iconColor}
 								/>
-								<ThemedText style={styles.emptyStateText}>
+								<Text style={styles.emptyStateText}>
 									Couldn&apos;t load results
-								</ThemedText>
-								<ThemedText
+								</Text>
+								<Text
 									style={[styles.emptyStateSubtext, { color: iconColor }]}
 								>
 									Check connection and try again
-								</ThemedText>
+								</Text>
 							</Pressable>
 						) : showDestinationEmpty ? (
 							<View style={styles.emptyStateContainer}>
 								<Ionicons name="search-outline" size={24} color={iconColor} />
-								<ThemedText style={styles.emptyStateText}>
+								<Text style={styles.emptyStateText}>
 									No results found
-								</ThemedText>
-								<ThemedText
+								</Text>
+								<Text
 									style={[styles.emptyStateSubtext, { color: iconColor }]}
 								>
 									Try a broader search
-								</ThemedText>
+								</Text>
 							</View>
 						) : (
 							<FlatList
@@ -853,17 +848,17 @@ export default function RouteInputScreen() {
 					<BottomSheetView
 						style={[
 							styles.bottomSheetContent,
-							{ paddingBottom: insets.bottom + Spacing.xxl },
+							{ paddingBottom: insets.bottom + space[6] },
 						]}
 					>
 						{/* Loading State */}
 						<View style={styles.loadingContainer}>
 							<ActivityIndicator size="large" color={tintColor} />
-							<ThemedText
+							<Text
 								style={[styles.loadingText, { color: secondaryTextColor }]}
 							>
 								Finding best route...
-							</ThemedText>
+							</Text>
 						</View>
 					</BottomSheetView>
 				</BottomSheet>
@@ -889,8 +884,8 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingHorizontal: Spacing.xl,
-		paddingBottom: Spacing.md,
+		paddingHorizontal: space[5],
+		paddingBottom: space[3],
 	},
 	headerTitle: {
 		fontSize: Typography.sizes.h4,
@@ -899,9 +894,9 @@ const styles = StyleSheet.create({
 	driverBanner: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: Spacing.md,
-		paddingHorizontal: Spacing.xl,
-		paddingVertical: Spacing.md,
+		gap: space[3],
+		paddingHorizontal: space[5],
+		paddingVertical: space[3],
 		borderBottomWidth: 1,
 	},
 	driverInfo: {
@@ -916,33 +911,33 @@ const styles = StyleSheet.create({
 		marginTop: 2,
 	},
 	inputsContainer: {
-		paddingHorizontal: Spacing.xl,
+		paddingHorizontal: space[5],
 	},
 	inputWrapper: {
-		marginBottom: Spacing.lg,
+		marginBottom: space[4],
 	},
 	label: {
 		fontSize: Typography.sizes.bodySmall,
 		fontWeight: Typography.weights.medium,
-		marginBottom: Spacing.sm,
+		marginBottom: space[2],
 	},
 	inputRow: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: Spacing.md,
+		gap: space[3],
 	},
 	inputFieldContainer: {
 		flex: 1,
 	},
 	inputWithIcon: {
 		height: 48,
-		borderRadius: BorderRadius.input,
+		borderRadius: radius.sm,
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: Spacing.lg,
+		paddingHorizontal: space[4],
 	},
 	inputIcon: {
-		marginRight: Spacing.sm,
+		marginRight: space[2],
 	},
 	input: {
 		flex: 1,
@@ -951,7 +946,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 0,
 	},
 	clearButton: {
-		marginLeft: Spacing.sm,
+		marginLeft: space[2],
 		padding: 2,
 	},
 	sideIconButton: {
@@ -965,10 +960,10 @@ const styles = StyleSheet.create({
 	},
 	suggestionsContainer: {
 		position: "absolute",
-		left: Spacing.xl,
-		right: Spacing.xl,
+		left: space[5],
+		right: space[5],
 		maxHeight: 300,
-		borderRadius: BorderRadius.input,
+		borderRadius: radius.sm,
 		borderWidth: 1,
 		zIndex: 9999,
 		shadowColor: "#000",
@@ -986,9 +981,9 @@ const styles = StyleSheet.create({
 	suggestionItem: {
 		flexDirection: "row",
 		alignItems: "center",
-		padding: Spacing.lg,
+		padding: space[4],
 		minHeight: 58,
-		gap: Spacing.md,
+		gap: space[3],
 	},
 	suggestionIcon: {
 		marginTop: 2,
@@ -999,7 +994,7 @@ const styles = StyleSheet.create({
 	suggestionMainText: {
 		fontSize: Typography.sizes.body,
 		fontWeight: Typography.weights.medium,
-		marginBottom: Spacing.xs,
+		marginBottom: space[1],
 	},
 	suggestionSecondaryText: {
 		fontSize: Typography.sizes.bodySmall,
@@ -1009,11 +1004,11 @@ const styles = StyleSheet.create({
 	},
 	emptyStateContainer: {
 		height: 56,
-		paddingHorizontal: Spacing.lg,
-		paddingVertical: Spacing.md,
+		paddingHorizontal: space[4],
+		paddingVertical: space[3],
 		justifyContent: "center",
 		alignItems: "center",
-		gap: Spacing.xs,
+		gap: space[1],
 	},
 	emptyStateText: {
 		fontSize: Typography.sizes.body,
@@ -1027,7 +1022,7 @@ const styles = StyleSheet.create({
 	},
 	inputLoader: {
 		position: "absolute",
-		right: Spacing.lg,
+		right: space[4],
 		top: 12,
 	},
 	closeButtonContainer: {
@@ -1047,8 +1042,8 @@ const styles = StyleSheet.create({
 		elevation: 4,
 	},
 	bottomSheetBackground: {
-		borderTopLeftRadius: BorderRadius.sheet,
-		borderTopRightRadius: BorderRadius.sheet,
+		borderTopLeftRadius: radius.lg,
+		borderTopRightRadius: radius.lg,
 		shadowColor: "#000",
 		shadowOffset: {
 			width: 0,
@@ -1062,35 +1057,35 @@ const styles = StyleSheet.create({
 		width: 40,
 		height: 4,
 		borderRadius: 2,
-		marginTop: Spacing.sm,
+		marginTop: space[2],
 	},
 	bottomSheetContent: {
-		paddingHorizontal: Spacing.xxl,
-		paddingBottom: Spacing.xxl,
+		paddingHorizontal: space[6],
+		paddingBottom: space[6],
 		flex: 1,
 	},
 	loadingContainer: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		gap: Spacing.lg,
+		gap: space[4],
 	},
 	loadingText: {
 		fontSize: Typography.sizes.body,
 	},
 	routeInfo: {
-		marginBottom: Spacing.xl,
+		marginBottom: space[5],
 	},
 	routePoint: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginVertical: Spacing.xs,
+		marginVertical: space[1],
 	},
 	dot: {
 		width: 12,
 		height: 12,
 		borderRadius: 6,
-		marginRight: Spacing.md,
+		marginRight: space[3],
 	},
 	routeLine: {
 		width: 2,
@@ -1104,13 +1099,13 @@ const styles = StyleSheet.create({
 	},
 	tripDetails: {
 		flexDirection: "row",
-		gap: Spacing.xxl,
-		marginBottom: Spacing.xl,
+		gap: space[6],
+		marginBottom: space[5],
 	},
 	detailItem: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: Spacing.sm,
+		gap: space[2],
 	},
 	detailText: {
 		fontSize: Typography.sizes.bodySmall,
@@ -1119,8 +1114,8 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		marginBottom: Spacing.xl,
-		paddingVertical: Spacing.lg,
+		marginBottom: space[5],
+		paddingVertical: space[4],
 		borderTopWidth: StyleSheet.hairlineWidth,
 		borderBottomWidth: StyleSheet.hairlineWidth,
 	},
@@ -1135,18 +1130,18 @@ const styles = StyleSheet.create({
 		lineHeight: Typography.sizes.h2 * 1.2,
 	},
 	continueButton: {
-		paddingVertical: Spacing.lg,
-		borderRadius: BorderRadius.button,
+		paddingVertical: space[4],
+		borderRadius: radius.md,
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	continueButtonText: {
-		color: Colors.surface,
+		color: colors.bg,
 		fontSize: Typography.sizes.body,
 		fontWeight: Typography.weights.semiBold,
 	},
 	continueButtonContainer: {
-		paddingHorizontal: Spacing.xl,
-		paddingVertical: Spacing.lg,
+		paddingHorizontal: space[5],
+		paddingVertical: space[4],
 	},
 });

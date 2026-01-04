@@ -9,10 +9,9 @@ import QRCode from "react-native-qrcode-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 
-import { ThemedText } from "@/src/ui/components/themed-text";
+import { Text, colors, space, radius } from "@/src/ui";
 import { MapErrorBoundary } from "@/src/ui/components/MapErrorBoundary";
 import { SINT_MAARTEN_REGION } from "@/src/constants/config";
-import { Colors, BorderRadius, Spacing } from "@/src/constants/design-tokens";
 import { getDriverById } from "@/src/features/drivers/data/drivers";
 import { useThemeColor } from "@/src/hooks/use-theme-color";
 import { useRouteStore } from "@/src/store/route-store";
@@ -87,7 +86,7 @@ export default function TripPreviewScreen() {
 		() => ({
 			top: insets.top + 80,
 			right: 60,
-			bottom: expandedHeight + Spacing.xl,
+			bottom: expandedHeight + space[5],
 			left: 60,
 		}),
 		[insets.top, expandedHeight],
@@ -293,7 +292,7 @@ export default function TripPreviewScreen() {
 					<Marker
 						coordinate={origin.coordinates}
 						title={origin.name}
-						pinColor={Colors.primary}
+						pinColor={colors.primary}
 					/>
 
 					{/* Destination Marker */}
@@ -307,7 +306,7 @@ export default function TripPreviewScreen() {
 					<Polyline
 						coordinates={routeData.coordinates}
 						strokeWidth={4}
-						strokeColor={Colors.primary}
+						strokeColor={colors.primary}
 					/>
 				</MapView>
 			</MapErrorBoundary>
@@ -326,13 +325,13 @@ export default function TripPreviewScreen() {
 			>
 				<BottomSheetScrollView
 					style={styles.bottomSheetContent}
-					contentContainerStyle={{ paddingBottom: tabBarHeight + Spacing.md }}
+					contentContainerStyle={{ paddingBottom: tabBarHeight + space[3] }}
 					scrollEnabled={true}
 				>
 					{/* Header with X button */}
 					<View style={styles.sheetHeader}>
 						<View style={{ width: 40 }} />
-						<ThemedText style={styles.sheetTitle}>Trip Quote</ThemedText>
+						<Text style={styles.sheetTitle}>Trip Quote</Text>
 						<Pressable
 							onPress={handleClose}
 							style={styles.closeButton}
@@ -374,17 +373,17 @@ export default function TripPreviewScreen() {
 							{/* Page 1: Trip Details */}
 							{currentPage === 0 && (
 								<View style={styles.page}>
-									<ThemedText style={styles.pageTitle}>Trip details</ThemedText>
+									<Text style={styles.pageTitle}>Trip details</Text>
 
 									{/* Route Points */}
 									<View style={styles.routeInfo}>
 										<View style={styles.routePoint}>
 											<View style={[styles.routeDot, { backgroundColor: tintColor }]} />
 											<View style={styles.routePointText}>
-												<ThemedText style={styles.routePointLabel}>Pickup</ThemedText>
-												<ThemedText style={styles.routePointName} numberOfLines={1}>
+												<Text style={styles.routePointLabel}>Pickup</Text>
+												<Text style={styles.routePointName} numberOfLines={1}>
 													{origin.name}
-												</ThemedText>
+												</Text>
 											</View>
 										</View>
 
@@ -393,10 +392,10 @@ export default function TripPreviewScreen() {
 										<View style={styles.routePoint}>
 											<View style={[styles.routeDot, { backgroundColor: "#FF5733" }]} />
 											<View style={styles.routePointText}>
-												<ThemedText style={styles.routePointLabel}>Dropoff</ThemedText>
-												<ThemedText style={styles.routePointName} numberOfLines={1}>
+												<Text style={styles.routePointLabel}>Dropoff</Text>
+												<Text style={styles.routePointName} numberOfLines={1}>
 													{destination.name}
-												</ThemedText>
+												</Text>
 											</View>
 										</View>
 									</View>
@@ -405,39 +404,39 @@ export default function TripPreviewScreen() {
 									<View style={styles.tripDetails}>
 										<View style={styles.detailItem}>
 											<Ionicons name="time-outline" size={20} color={secondaryTextColor} />
-											<ThemedText style={styles.detailText}>
+											<Text style={styles.detailText}>
 												{formatDuration(routeData.duration)}
-											</ThemedText>
+											</Text>
 										</View>
 										<View style={styles.detailItem}>
 											<Ionicons name="car-outline" size={20} color={secondaryTextColor} />
-											<ThemedText style={styles.detailText}>
+											<Text style={styles.detailText}>
 												{formatDistance(routeData.distance)}
-											</ThemedText>
+											</Text>
 										</View>
 									</View>
 
 									{/* Assigned Driver Section */}
 									{selectedDriver && (
 										<View style={[styles.assignedDriverSection, { borderColor }]}>
-											<ThemedText style={styles.sectionTitle}>Assigned Driver</ThemedText>
+											<Text style={styles.sectionTitle}>Assigned Driver</Text>
 											<View style={styles.driverCard}>
 												<View style={[styles.driverAvatar, { backgroundColor: borderColor }]}>
 													<Ionicons name="person" size={24} color={secondaryTextColor} />
 												</View>
 												<View style={styles.driverDetails}>
-													<ThemedText style={styles.driverName}>{selectedDriver.name}</ThemedText>
-													<ThemedText style={[styles.driverMeta, { color: secondaryTextColor }]}>
+													<Text style={styles.driverName}>{selectedDriver.name}</Text>
+													<Text style={[styles.driverMeta, { color: secondaryTextColor }]}>
 														★ {selectedDriver.rating} • {selectedDriver.vehicleType}
-													</ThemedText>
+													</Text>
 												</View>
 												<Pressable
 													onPress={() => router.push(`/driver/${selectedDriver.id}`)}
 													style={[styles.viewProfileButton, { borderColor }]}
 												>
-													<ThemedText style={[styles.viewProfileText, { color: tintColor }]}>
+													<Text style={[styles.viewProfileText, { color: tintColor }]}>
 														View
-													</ThemedText>
+													</Text>
 												</Pressable>
 											</View>
 										</View>
@@ -445,10 +444,10 @@ export default function TripPreviewScreen() {
 
 									{/* Price Display */}
 									<View style={[styles.priceContainer, { borderColor }]}>
-										<ThemedText style={styles.priceLabel}>Estimated fare</ThemedText>
-										<ThemedText style={styles.price}>
+										<Text style={styles.priceLabel}>Estimated fare</Text>
+										<Text style={styles.price}>
 											{formatPrice(routeData.price)}
-										</ThemedText>
+										</Text>
 									</View>
 
 									{/* Action Buttons */}
@@ -462,7 +461,7 @@ export default function TripPreviewScreen() {
 											accessibilityLabel="Save trip and go home"
 										>
 											<Ionicons name="heart-outline" size={24} color="#FFFFFF" />
-											<ThemedText style={styles.saveTripButtonText}>Save Trip</ThemedText>
+											<Text style={styles.saveTripButtonText}>Save Trip</Text>
 										</Pressable>
 
 										{/* Find Drivers Button */}
@@ -477,16 +476,16 @@ export default function TripPreviewScreen() {
 											{isFindingDrivers ? (
 												<>
 													<ActivityIndicator size="small" color={tintColor} />
-													<ThemedText style={[styles.findDriversButtonText, { color: textColor }]}>
+													<Text style={[styles.findDriversButtonText, { color: textColor }]}>
 														Finding drivers...
-													</ThemedText>
+													</Text>
 												</>
 											) : (
 												<>
 													<Ionicons name="search-outline" size={20} color={tintColor} />
-													<ThemedText style={[styles.findDriversButtonText, { color: tintColor }]}>
+													<Text style={[styles.findDriversButtonText, { color: tintColor }]}>
 														Find drivers
-													</ThemedText>
+													</Text>
 												</>
 											)}
 										</Pressable>
@@ -497,7 +496,7 @@ export default function TripPreviewScreen() {
 							{/* Page 2: QR Code */}
 							{currentPage === 1 && (
 								<View style={styles.page}>
-									<ThemedText style={styles.pageTitle}>Your QR Code</ThemedText>
+									<Text style={styles.pageTitle}>Your QR Code</Text>
 
 									{/* QR Code */}
 									<View style={styles.qrContainer}>
@@ -514,22 +513,22 @@ export default function TripPreviewScreen() {
 									</View>
 
 									{/* Instruction Text */}
-									<ThemedText style={styles.qrInstruction}>
+									<Text style={styles.qrInstruction}>
 										{selectedDriver ? `Show this code to ${selectedDriver.name}` : 'Show this code to your driver'}
-									</ThemedText>
-									<ThemedText style={[styles.qrSubtext, { color: secondaryTextColor }]}>
+									</Text>
+									<Text style={[styles.qrSubtext, { color: secondaryTextColor }]}>
 										Let driver scan for verification
-									</ThemedText>
+									</Text>
 
 									{/* Manual Code Fallback */}
 									{manualCode && (
 										<View style={styles.manualCodeContainer}>
-											<ThemedText style={[styles.manualCodeLabel, { color: secondaryTextColor }]}>
+											<Text style={[styles.manualCodeLabel, { color: secondaryTextColor }]}>
 												Manual Code (if scanner fails)
-											</ThemedText>
-											<ThemedText style={styles.manualCodeText}>
+											</Text>
+											<Text style={styles.manualCodeText}>
 												{manualCode}
-											</ThemedText>
+											</Text>
 										</View>
 									)}
 								</View>
@@ -539,9 +538,9 @@ export default function TripPreviewScreen() {
 
 					{/* Collapsed State Hint (visible when collapsed) */}
 					<View style={styles.collapsedHint}>
-						<ThemedText style={[styles.collapsedHintText, { color: secondaryTextColor }]}>
+						<Text style={[styles.collapsedHintText, { color: secondaryTextColor }]}>
 							Swipe up to see details
-						</ThemedText>
+						</Text>
 					</View>
 				</BottomSheetScrollView>
 			</BottomSheet>
@@ -557,8 +556,8 @@ const styles = StyleSheet.create({
 		...StyleSheet.absoluteFillObject,
 	},
 	bottomSheetBackground: {
-		borderTopLeftRadius: BorderRadius.sheet,
-		borderTopRightRadius: BorderRadius.sheet,
+		borderTopLeftRadius: radius.lg,
+		borderTopRightRadius: radius.lg,
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: -4 },
 		shadowOpacity: 0.1,
@@ -578,8 +577,8 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingHorizontal: Spacing.lg,
-		paddingVertical: Spacing.md,
+		paddingHorizontal: space[4],
+		paddingVertical: space[3],
 	},
 	sheetTitle: {
 		fontSize: 18,
@@ -595,7 +594,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		gap: 8,
 		justifyContent: "center",
-		paddingVertical: Spacing.sm,
+		paddingVertical: space[2],
 		marginBottom: Spacing.xs,
 	},
 	dot: {
@@ -604,22 +603,22 @@ const styles = StyleSheet.create({
 		borderRadius: 4,
 	},
 	page: {
-		paddingHorizontal: Spacing.lg,
+		paddingHorizontal: space[4],
 		minHeight: 400,
 	},
 	pageTitle: {
 		fontSize: 20,
 		fontWeight: "700",
-		marginBottom: Spacing.md,
+		marginBottom: space[3],
 	},
 	routeInfo: {
 		paddingVertical: Spacing.xs,
-		marginBottom: Spacing.sm,
+		marginBottom: space[2],
 	},
 	routePoint: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: Spacing.md,
+		gap: space[3],
 	},
 	routeDot: {
 		width: 12,
@@ -647,38 +646,38 @@ const styles = StyleSheet.create({
 	},
 	tripDetails: {
 		flexDirection: "row",
-		gap: Spacing.xl,
+		gap: space[5],
 		paddingVertical: Spacing.xs,
-		marginBottom: Spacing.md,
+		marginBottom: space[3],
 	},
 	detailItem: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: Spacing.sm,
+		gap: space[2],
 	},
 	detailText: {
 		fontSize: 15,
 		fontWeight: "500",
 	},
 	assignedDriverSection: {
-		paddingVertical: Spacing.md,
-		paddingHorizontal: Spacing.lg,
+		paddingVertical: space[3],
+		paddingHorizontal: space[4],
 		borderWidth: 1,
-		borderRadius: BorderRadius.card,
-		marginBottom: Spacing.md,
+		borderRadius: radius.lg,
+		marginBottom: space[3],
 	},
 	sectionTitle: {
 		fontSize: 13,
 		fontWeight: "600",
 		opacity: 0.6,
-		marginBottom: Spacing.md,
+		marginBottom: space[3],
 		letterSpacing: 0.5,
 		textTransform: "uppercase",
 	},
 	driverCard: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: Spacing.md,
+		gap: space[3],
 	},
 	driverAvatar: {
 		width: 48,
@@ -699,21 +698,21 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 	},
 	viewProfileButton: {
-		paddingHorizontal: Spacing.md,
-		paddingVertical: Spacing.sm,
+		paddingHorizontal: space[3],
+		paddingVertical: space[2],
 		borderWidth: 1,
-		borderRadius: BorderRadius.button,
+		borderRadius: radius.md,
 	},
 	viewProfileText: {
 		fontSize: 14,
 		fontWeight: "600",
 	},
 	priceContainer: {
-		paddingVertical: Spacing.md,
-		paddingHorizontal: Spacing.lg,
+		paddingVertical: space[3],
+		paddingHorizontal: space[4],
 		borderWidth: 1,
-		borderRadius: BorderRadius.card,
-		marginBottom: Spacing.md,
+		borderRadius: radius.lg,
+		marginBottom: space[3],
 	},
 	priceLabel: {
 		fontSize: 13,
@@ -727,16 +726,16 @@ const styles = StyleSheet.create({
 		lineHeight: 38,
 	},
 	actionButtons: {
-		gap: Spacing.md,
-		marginBottom: Spacing.lg,
+		gap: space[3],
+		marginBottom: space[4],
 	},
 	saveTripButton: {
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
-		gap: Spacing.md,
-		paddingVertical: Spacing.lg,
-		borderRadius: BorderRadius.button,
+		gap: space[3],
+		paddingVertical: space[4],
+		borderRadius: radius.md,
 	},
 	saveTripButtonText: {
 		color: "#FFFFFF",
@@ -747,9 +746,9 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
-		gap: Spacing.sm,
-		paddingVertical: Spacing.md,
-		borderRadius: BorderRadius.button,
+		gap: space[2],
+		paddingVertical: space[3],
+		borderRadius: radius.md,
 		borderWidth: 1,
 	},
 	findDriversButtonText: {
@@ -759,32 +758,32 @@ const styles = StyleSheet.create({
 	qrContainer: {
 		alignItems: "center",
 		justifyContent: "center",
-		paddingVertical: Spacing.xxl,
-		marginVertical: Spacing.lg,
+		paddingVertical: space[6],
+		marginVertical: space[4],
 	},
 	qrInstruction: {
 		fontSize: 24,
 		fontWeight: "700",
 		textAlign: "center",
-		marginTop: Spacing.md,
+		marginTop: space[3],
 	},
 	qrSubtext: {
 		fontSize: 14,
 		fontWeight: "500",
 		textAlign: "center",
-		marginTop: Spacing.sm,
-		paddingHorizontal: Spacing.lg,
+		marginTop: space[2],
+		paddingHorizontal: space[4],
 	},
 	manualCodeContainer: {
-		marginTop: Spacing.lg,
-		paddingVertical: Spacing.lg,
-		paddingHorizontal: Spacing.xl,
+		marginTop: space[4],
+		paddingVertical: space[4],
+		paddingHorizontal: space[5],
 		alignItems: "center",
 	},
 	manualCodeLabel: {
 		fontSize: 12,
 		fontWeight: "500",
-		marginBottom: Spacing.sm,
+		marginBottom: space[2],
 		textAlign: "center",
 	},
 	manualCodeText: {
@@ -795,7 +794,7 @@ const styles = StyleSheet.create({
 	},
 	collapsedHint: {
 		alignItems: "center",
-		paddingVertical: Spacing.md,
+		paddingVertical: space[3],
 	},
 	collapsedHintText: {
 		fontSize: 14,
