@@ -186,27 +186,27 @@ class GoogleMapsService {
    */
   private buildApiUrl(endpoint: string, params: URLSearchParams): string {
     const baseUrl = this.getBaseUrl();
-    
+    // Normalize endpoint - remove leading slash to avoid double slashes
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+
     if (this.isUsingProxy()) {
       // Proxy format: {proxy_url}/maps/{endpoint}?{params}
-      return `${baseUrl}/maps/${endpoint}?${params}`;
+      return `${baseUrl}/maps/${normalizedEndpoint}?${params}`;
     } else {
       // Direct Google API format: {base_url}/{endpoint}?key={key}&{params}
-      // Ensure endpoint starts with / for proper URL construction
-      const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-      const apiKey = endpoint.includes('place') 
-        ? GOOGLE_PLACES_API_KEY 
+      const apiKey = normalizedEndpoint.includes('place')
+        ? GOOGLE_PLACES_API_KEY
         : GOOGLE_MAPS_API_KEY;
-      
+
       if (!apiKey) {
         throw new GoogleMapsError(
-          `Missing API key for ${endpoint}. Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY or EXPO_PUBLIC_GOOGLE_PLACES_API_KEY`,
+          `Missing API key for ${normalizedEndpoint}. Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY or EXPO_PUBLIC_GOOGLE_PLACES_API_KEY`,
           "MISSING_API_KEY"
         );
       }
-      
+
       params.append('key', apiKey);
-      return `${baseUrl}${endpointPath}?${params}`;
+      return `${baseUrl}/${normalizedEndpoint}?${params}`;
     }
   }
 
