@@ -5,13 +5,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { googleMapsService } from '../../../services/google-maps.service';
 import { calculateFare, formatFare } from '../../../services/pricing.service';
 import { trackEvent, AnalyticsEvents } from '../../../lib/posthog';
+import { Skeleton } from '@/src/ui/components/Skeleton';
+import { useToast } from '@/src/ui/providers/ToastProvider';
 
 interface Location {
   lat: number;
@@ -22,6 +22,7 @@ interface Location {
 export const RouteEstimateScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { showToast } = useToast();
 
   const [origin, setOrigin] = useState<Location | null>(null);
   const [destination, setDestination] = useState<Location | null>(null);
@@ -71,7 +72,7 @@ export const RouteEstimateScreen = () => {
       });
     } catch (error) {
       console.error('Failed to calculate fare:', error);
-      Alert.alert('Error', 'Failed to calculate fare. Please try again.');
+      showToast('Failed to calculate fare. Please try again.');
     } finally {
       setIsCalculating(false);
     }
@@ -134,8 +135,9 @@ export const RouteEstimateScreen = () => {
       {/* Fare Display */}
       {isCalculating ? (
         <View style={styles.fareContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.calculatingText}>Calculating fare...</Text>
+          <Skeleton width={100} height={16} />
+          <Skeleton width={150} height={48} style={{ marginTop: 8 }} />
+          <Skeleton width={120} height={12} style={{ marginTop: 8 }} />
         </View>
       ) : fare ? (
         <View style={styles.fareContainer}>

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
   Alert,
   Animated,
 } from 'react-native';
@@ -13,6 +12,8 @@ import { supabase } from '../../../lib/supabase';
 import { trackEvent, AnalyticsEvents } from '../../../lib/posthog';
 import { useAuth } from '../../../hooks/useAuth';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { Skeleton } from '@/src/ui/components/Skeleton';
+import { useToast } from '@/src/ui/providers/ToastProvider';
 
 const DISCOVERY_MESSAGES = [
   'Finding drivers near you...',
@@ -28,6 +29,7 @@ export const DiscoveryScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { user, guestToken } = useAuth();
+  const { showToast } = useToast();
 
   const [rideSessionId, setRideSessionId] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(true);
@@ -81,7 +83,7 @@ export const DiscoveryScreen = () => {
       const sessionId = params.rideSessionId as string;
 
       if (!sessionId) {
-        Alert.alert('Error', 'Invalid ride session');
+        showToast('Invalid ride session');
         router.back();
         return;
       }
@@ -128,10 +130,7 @@ export const DiscoveryScreen = () => {
       }, 10 * 60 * 1000); // 10 minutes
     } catch (error) {
       console.error('Failed to start discovery:', error);
-      Alert.alert(
-        'Error',
-        'Failed to start looking for drivers. Please try again.'
-      );
+      showToast('Failed to start looking for drivers. Please try again.');
       router.back();
     }
   };
@@ -201,7 +200,7 @@ export const DiscoveryScreen = () => {
       // TODO: Call expand-discovery-wave Edge Function (Wave 2+)
       // For now, just dismiss the prompt
       setShowExpandPrompt(false);
-      Alert.alert('Expanding search', 'Looking for drivers farther away...');
+      showToast('Looking for drivers farther away...');
 
       trackEvent(AnalyticsEvents.DISCOVERY_EXPANDED, {
         ride_session_id: rideSessionId,
@@ -247,7 +246,7 @@ export const DiscoveryScreen = () => {
               router.replace('/');
             } catch (error) {
               console.error('Failed to cancel ride:', error);
-              Alert.alert('Error', 'Failed to cancel ride. Please try again.');
+              showToast('Failed to cancel ride. Please try again.');
             }
           },
         },
@@ -268,7 +267,7 @@ export const DiscoveryScreen = () => {
 
       {/* Animated Status Message */}
       <View style={styles.statusContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <Skeleton width={60} height={60} borderRadius={30} />
         <Animated.View style={{ opacity: fadeAnim, marginTop: 20 }}>
           <Text style={styles.statusText}>
             {DISCOVERY_MESSAGES[currentMessageIndex]}
