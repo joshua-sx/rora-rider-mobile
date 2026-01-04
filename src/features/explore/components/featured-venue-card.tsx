@@ -2,7 +2,7 @@ import { StyleSheet, Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
+import { Text } from '@/src/ui';
 import type { Venue } from '@/src/types/venue';
 
 type FeaturedVenueCardProps = {
@@ -41,15 +41,15 @@ export function FeaturedVenueCard({
       
       {venue.isPopular && (
         <View style={styles.badge}>
-          <ThemedText style={styles.badgeText}>POPULAR</ThemedText>
+          <Text style={styles.badgeText}>POPULAR</Text>
         </View>
       )}
 
       <View style={styles.content}>
-        <ThemedText style={styles.title}>{venue.name}</ThemedText>
-        <ThemedText style={styles.subtitle} numberOfLines={2}>
+        <Text style={styles.title}>{venue.name}</Text>
+        <Text style={styles.subtitle} numberOfLines={2}>
           {venue.shortDescription}
-        </ThemedText>
+        </Text>
       </View>
     </Pressable>
   );

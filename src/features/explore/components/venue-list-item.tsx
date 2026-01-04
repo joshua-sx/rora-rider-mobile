@@ -2,7 +2,7 @@ import { StyleSheet, Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
+import { Text } from '@/src/ui';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Venue } from '@/src/types/venue';
 
@@ -51,38 +51,38 @@ export function VenueListItem({
         />
         {venue.isPopular && (
           <View style={[styles.popularBadge, { backgroundColor: primaryColor }]}>
-            <ThemedText style={styles.popularText}>Popular</ThemedText>
+            <Text style={styles.popularText}>Popular</Text>
           </View>
         )}
       </View>
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <ThemedText style={styles.title} numberOfLines={1}>
+          <Text style={styles.title} numberOfLines={1}>
             {venue.name}
-          </ThemedText>
+          </Text>
           <View style={styles.ratingContainer}>
             <Ionicons name="star" size={14} color={starColor} />
-            <ThemedText style={styles.rating}>{venue.rating}</ThemedText>
+            <Text style={styles.rating}>{venue.rating}</Text>
           </View>
         </View>
 
-        <ThemedText style={[styles.subtext, { color: subtextColor }]} numberOfLines={1}>
+        <Text style={[styles.subtext, { color: subtextColor }]} numberOfLines={1}>
           ({venue.reviewCount} reviews) · {venue.shortDescription}
-        </ThemedText>
+        </Text>
 
         <View style={styles.footer}>
           <View style={styles.distanceContainer}>
             <Ionicons name="location-outline" size={14} color={subtextColor} />
-            <ThemedText style={[styles.distance, { color: subtextColor }]}>
+            <Text style={[styles.distance, { color: subtextColor }]}>
               {venue.distance} km away
-            </ThemedText>
+            </Text>
           </View>
           {showCategory && (
             <View style={[styles.categoryBadge, { backgroundColor: primaryColor + '20' }]}>
-              <ThemedText style={[styles.categoryText, { color: primaryColor }]}>
+              <Text style={[styles.categoryText, { color: primaryColor }]}>
                 {venue.category.charAt(0).toUpperCase() + venue.category.slice(1)}
-              </ThemedText>
+              </Text>
             </View>
           )}
         </View>

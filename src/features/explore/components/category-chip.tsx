@@ -1,7 +1,7 @@
 import { StyleSheet, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
+import { Text } from '@/src/ui';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { CategoryInfo } from '@/src/types/venue';
 
@@ -50,14 +50,14 @@ export function CategoryChip({
           color={isActive ? activeTextColor : category.color}
         />
       </View>
-      <ThemedText
+      <Text
         style={[
           styles.label,
           { color: isActive ? activeTextColor : textColor },
         ]}
       >
         {category.name}
-      </ThemedText>
+      </Text>
     </Pressable>
   );
 }

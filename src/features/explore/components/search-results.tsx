@@ -2,7 +2,7 @@ import { StyleSheet, View, Pressable, ScrollView, Keyboard } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
+import { Text } from '@/src/ui';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import { VenueListItem } from '@/src/features/explore/components/venue-list-item';
 import type { Venue, CategoryInfo } from '@/src/types/venue';
@@ -62,10 +62,10 @@ export function SearchResults({
     return (
       <View style={[styles.emptyContainer, { backgroundColor }]}>
         <Ionicons name="telescope-outline" size={64} color={subtextColor} />
-        <ThemedText style={styles.emptyTitle}>No places found</ThemedText>
-        <ThemedText style={[styles.emptySubtext, { color: subtextColor }]}>
+        <Text style={styles.emptyTitle}>No places found</Text>
+        <Text style={[styles.emptySubtext, { color: subtextColor }]}>
           Try a different search or browse categories
-        </ThemedText>
+        </Text>
       </View>
     );
   }
@@ -99,12 +99,12 @@ export function SearchResults({
                 />
               </View>
               <View style={styles.categoryContent}>
-                <ThemedText style={styles.categoryTitle}>
+                <Text style={styles.categoryTitle}>
                   Search &quot;{category.name}&quot;
-                </ThemedText>
-                <ThemedText style={[styles.categorySubtitle, { color: subtextColor }]}>
+                </Text>
+                <Text style={[styles.categorySubtitle, { color: subtextColor }]}>
                   Explore category
-                </ThemedText>
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={subtextColor} />
             </Pressable>
@@ -115,9 +115,9 @@ export function SearchResults({
       {/* Venue Results */}
       {venues.length > 0 && (
         <View style={styles.section}>
-          <ThemedText style={[styles.sectionTitle, { color: subtextColor }]}>
+          <Text style={[styles.sectionTitle, { color: subtextColor }]}>
             PLACES
-          </ThemedText>
+          </Text>
           {venues.slice(0, 5).map((venue) => (
             <VenueListItem
               key={venue.id}

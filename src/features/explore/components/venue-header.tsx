@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
+import { Text } from '@/src/ui';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Venue } from '@/src/types/venue';
 
@@ -76,25 +76,25 @@ export function VenueHeader({
       {/* Content */}
       <View style={[styles.content, { backgroundColor }]}>
         <View style={styles.titleRow}>
-          <ThemedText style={[styles.title, { color: textColor }]}>
+          <Text style={[styles.title, { color: textColor }]}>
             {venue.name}
-          </ThemedText>
+          </Text>
         </View>
 
         <View style={styles.metaRow}>
           <View style={styles.ratingContainer}>
             <Ionicons name="star" size={16} color={starColor} />
-            <ThemedText style={[styles.rating, { color: textColor }]}>
+            <Text style={[styles.rating, { color: textColor }]}>
               {venue.rating}
-            </ThemedText>
+            </Text>
           </View>
-          <ThemedText style={[styles.metaText, { color: subtextColor }]}>
+          <Text style={[styles.metaText, { color: subtextColor }]}>
             {venue.reviewCount} reviews
-          </ThemedText>
-          <ThemedText style={[styles.metaDot, { color: subtextColor }]}>·</ThemedText>
-          <ThemedText style={[styles.metaText, { color: subtextColor }]}>
+          </Text>
+          <Text style={[styles.metaDot, { color: subtextColor }]}>·</Text>
+          <Text style={[styles.metaText, { color: subtextColor }]}>
             {venue.category.charAt(0).toUpperCase() + venue.category.slice(1)}
-          </ThemedText>
+          </Text>
         </View>
 
         {venue.tags.length > 0 && (
@@ -104,9 +104,9 @@ export function VenueHeader({
                 key={index}
                 style={[styles.tag, { backgroundColor: chipBackgroundColor }]}
               >
-                <ThemedText style={[styles.tagText, { color: subtextColor }]}>
+                <Text style={[styles.tagText, { color: subtextColor }]}>
                   {tag}
-                </ThemedText>
+                </Text>
               </View>
             ))}
           </View>

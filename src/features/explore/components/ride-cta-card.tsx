@@ -2,7 +2,7 @@ import { StyleSheet, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
+import { Text } from '@/src/ui';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Venue } from '@/src/types/venue';
 import { getTabBarHeight } from '@/src/utils/safe-area';
@@ -33,14 +33,14 @@ export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
   return (
     <View style={[styles.container, { backgroundColor, bottom: tabBarHeight }]}>
       <View style={styles.content}>
-        <ThemedText style={[styles.title, { color: textColor }]}>
+        <Text style={[styles.title, { color: textColor }]}>
           Get a ride to {venue.name}
-        </ThemedText>
+        </Text>
         <View style={styles.metaRow}>
           <Ionicons name="time-outline" size={14} color={subtextColor} />
-          <ThemedText style={[styles.metaText, { color: subtextColor }]}>
+          <Text style={[styles.metaText, { color: subtextColor }]}>
             Est. trip: {venue.estimatedDuration || 12} min
-          </ThemedText>
+          </Text>
         </View>
       </View>
 
@@ -52,7 +52,7 @@ export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
         ]}
         onPress={onPress}
       >
-        <ThemedText style={styles.buttonText}>Set pickup location</ThemedText>
+        <Text style={styles.buttonText}>Set pickup location</Text>
       </Pressable>
     </View>
   );

@@ -10,8 +10,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
-import { ThemedView } from '@/src/ui/components/themed-view';
+import { Text, Box } from '@/src/ui';
 import { VenueListItem } from '@/src/features/explore/components/venue-list-item';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import { getFeaturedVenues } from '@/src/features/explore/data/venues';
@@ -76,7 +75,7 @@ export default function FeaturedVenuesScreen() {
   }, []);
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor }]}>
+    <Box style={[styles.container, { backgroundColor }]}>
       {/* Header */}
       <View
         style={[
@@ -88,7 +87,7 @@ export default function FeaturedVenuesScreen() {
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color={subtextColor} />
           </Pressable>
-          <ThemedText style={styles.headerTitle}>Featured</ThemedText>
+          <Text style={styles.headerTitle}>Featured</Text>
           <View style={styles.headerRight} />
         </View>
 
@@ -105,14 +104,14 @@ export default function FeaturedVenuesScreen() {
               ]}
               onPress={() => handleFilterPress(filter.key)}
             >
-              <ThemedText
+              <Text
                 style={[
                   styles.filterChipText,
                   activeFilter === filter.key && styles.filterChipTextActive,
                 ]}
               >
                 {filter.label}
-              </ThemedText>
+              </Text>
             </Pressable>
           ))}
         </View>
@@ -133,19 +132,19 @@ export default function FeaturedVenuesScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="star-outline" size={48} color={subtextColor} />
-            <ThemedText style={styles.emptyTitle}>No featured venues found</ThemedText>
+            <Text style={styles.emptyTitle}>No featured venues found</Text>
             <Pressable
               style={[styles.resetButton, { borderColor: primaryColor }]}
               onPress={() => setActiveFilter('all')}
             >
-              <ThemedText style={[styles.resetButtonText, { color: primaryColor }]}>
+              <Text style={[styles.resetButtonText, { color: primaryColor }]}>
                 Reset filters
-              </ThemedText>
+              </Text>
             </Pressable>
           </View>
         }
       />
-    </ThemedView>
+    </Box>
   );
 }
 

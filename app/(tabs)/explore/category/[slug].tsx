@@ -10,8 +10,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { ThemedText } from '@/src/ui/components/themed-text';
-import { ThemedView } from '@/src/ui/components/themed-view';
+import { Text, Box } from '@/src/ui';
 import { VenueListItem } from '@/src/features/explore/components/venue-list-item';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import { getCategoryBySlug, getVenuesByCategory } from '@/src/features/explore/data/venues';
@@ -84,14 +83,14 @@ export default function CategoryListingScreen() {
 
   if (!category) {
     return (
-      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-        <ThemedText>Category not found</ThemedText>
-      </ThemedView>
+      <Box style={[styles.container, { paddingTop: insets.top }]}>
+        <Text>Category not found</Text>
+      </Box>
     );
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor }]}>
+    <Box style={[styles.container, { backgroundColor }]}>
       {/* Header */}
       <View
         style={[
@@ -103,7 +102,7 @@ export default function CategoryListingScreen() {
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color={subtextColor} />
           </Pressable>
-          <ThemedText style={styles.headerTitle}>{category.name}</ThemedText>
+          <Text style={styles.headerTitle}>{category.name}</Text>
           <View style={styles.headerRight}>
             <Pressable style={styles.filterButton}>
               <Ionicons name="options-outline" size={22} color={subtextColor} />
@@ -124,14 +123,14 @@ export default function CategoryListingScreen() {
               ]}
               onPress={() => handleFilterPress(filter.key)}
             >
-              <ThemedText
+              <Text
                 style={[
                   styles.filterChipText,
                   activeFilter === filter.key && styles.filterChipTextActive,
                 ]}
               >
                 {filter.label}
-              </ThemedText>
+              </Text>
             </Pressable>
           ))}
         </View>
@@ -155,19 +154,19 @@ export default function CategoryListingScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="search-outline" size={48} color={subtextColor} />
-            <ThemedText style={styles.emptyTitle}>No places found here</ThemedText>
+            <Text style={styles.emptyTitle}>No places found here</Text>
             <Pressable
               style={[styles.resetButton, { borderColor: primaryColor }]}
               onPress={() => setActiveFilter('all')}
             >
-              <ThemedText style={[styles.resetButtonText, { color: primaryColor }]}>
+              <Text style={[styles.resetButtonText, { color: primaryColor }]}>
                 Reset filters
-              </ThemedText>
+              </Text>
             </Pressable>
           </View>
         }
       />
-    </ThemedView>
+    </Box>
   );
 }
 
