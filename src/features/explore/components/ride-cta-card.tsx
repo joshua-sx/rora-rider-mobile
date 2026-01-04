@@ -1,20 +1,30 @@
 import { StyleSheet, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/src/ui/components/themed-text';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
+import { useStickyCta } from '@/src/hooks/use-sticky-cta';
 import type { Venue } from '@/src/types/venue';
-import { getTabBarHeight } from '@/src/utils/safe-area';
 
 type RideCtaCardProps = {
   venue: Venue;
   onPress?: () => void;
 };
 
+/**
+ * Approximate card height calculation:
+ * - paddingTop: 16
+ * - title lineHeight: ~22 + marginBottom: 4 = 26
+ * - metaRow: ~20
+ * - content marginBottom: 14
+ * - button: ~48 (paddingVertical 32 + content)
+ * - paddingBottom: 16
+ * Total: ~140px
+ */
+export const RIDE_CTA_CARD_HEIGHT = 140;
+
 export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
-  const insets = useSafeAreaInsets();
-  const tabBarHeight = getTabBarHeight(insets);
+  const { cardBottomPosition } = useStickyCta(RIDE_CTA_CARD_HEIGHT);
 
   const backgroundColor = useThemeColor(
     { light: '#FFFFFF', dark: '#161616' },
@@ -31,7 +41,7 @@ export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
   const primaryColor = useThemeColor({}, 'tint');
 
   return (
-    <View style={[styles.container, { backgroundColor, bottom: tabBarHeight }]}>
+    <View style={[styles.container, { backgroundColor, bottom: cardBottomPosition }]}>
       <View style={styles.content}>
         <ThemedText style={[styles.title, { color: textColor }]}>
           Get a ride to {venue.name}
@@ -52,7 +62,7 @@ export function RideCtaCard({ venue, onPress }: RideCtaCardProps) {
         ]}
         onPress={onPress}
       >
-        <ThemedText style={styles.buttonText}>Set pickup location</ThemedText>
+        <ThemedText style={styles.buttonText}>View route & pricing</ThemedText>
       </Pressable>
     </View>
   );
