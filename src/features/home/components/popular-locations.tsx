@@ -7,32 +7,37 @@ import {
 } from '@/src/ui/legacy/popular-location-card';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 
-// Sample popular locations data
+// Sample popular locations data - using placeholder images
 const POPULAR_LOCATIONS: PopularLocation[] = [
   {
     id: '1',
     name: 'Sonesta Resort',
-    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop',
+    image: '',
+    description: 'Beachfront luxury resort',
   },
   {
     id: '2',
     name: 'Mullet Bay',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
+    image: '',
+    description: 'Crystal clear water',
   },
   {
     id: '3',
     name: 'Lotus Nightclub',
-    image: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=400&h=300&fit=crop',
+    image: '',
+    description: 'Premier nightlife venue',
   },
   {
     id: '4',
     name: 'Princess Juliana Airport',
-    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop',
+    image: '',
+    description: 'Famous plane spotting',
   },
   {
     id: '5',
     name: 'Maho Beach',
-    image: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=400&h=300&fit=crop',
+    image: '',
+    description: 'Watch planes land overhead',
   },
 ];
 

@@ -18,10 +18,7 @@ export const VENUES: Venue[] = [
     description:
       'Famous for the Princess Juliana International Airport right next to the beach. Watch heavy jets land just meters above your head. A unique experience combining aviation and beach fun.',
     shortDescription: 'Famous for plane spotting and turquoise water.',
-    images: [
-      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.8,
     reviewCount: 310,
     distance: 3.4,
@@ -41,9 +38,7 @@ export const VENUES: Venue[] = [
     description:
       'One of the most beautiful beaches on the island with crystal clear water and calm conditions. Perfect for families and swimming.',
     shortDescription: 'Clear water & calm waves. Perfect for families.',
-    images: [
-      'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.9,
     reviewCount: 205,
     distance: 4.1,
@@ -60,9 +55,7 @@ export const VENUES: Venue[] = [
     description:
       'A stunning two-mile stretch of white sand beach on the French side. Known for water sports, beach clubs, and clothing-optional section.',
     shortDescription: 'White sand paradise with water sports.',
-    images: [
-      'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.7,
     reviewCount: 180,
     distance: 8.2,
@@ -78,9 +71,7 @@ export const VENUES: Venue[] = [
     description:
       'Located in Philipsburg, this beach offers calm waters and is walking distance from duty-free shopping and restaurants.',
     shortDescription: 'Philipsburg beachfront with nearby shopping.',
-    images: [
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.5,
     reviewCount: 120,
     distance: 2.1,
@@ -98,9 +89,7 @@ export const VENUES: Venue[] = [
     description:
       'Known as the "Gourmet Capital of the Caribbean," Grand Case offers a strip of world-class restaurants featuring French, Creole, and international cuisine.',
     shortDescription: 'The gourmet capital of the Caribbean.',
-    images: [
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.9,
     reviewCount: 450,
     distance: 6.5,
@@ -117,9 +106,7 @@ export const VENUES: Venue[] = [
     description:
       'Charming beachfront restaurant in Oyster Bay serving fresh seafood and Caribbean dishes with stunning ocean views.',
     shortDescription: 'Beachfront dining in Oyster Bay.',
-    images: [
-      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.6,
     reviewCount: 89,
     distance: 5.3,
@@ -135,9 +122,7 @@ export const VENUES: Venue[] = [
     description:
       'Popular spot for fresh catches and local favorites. Known for their fish tacos and casual island vibe.',
     shortDescription: 'Fresh catches and fish tacos.',
-    images: [
-      'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.4,
     reviewCount: 156,
     distance: 3.8,
@@ -155,9 +140,7 @@ export const VENUES: Venue[] = [
     description:
       'Luxury beachfront resort at Maho Beach with stunning views of the airport runway. Multiple pools, restaurants, and casino on-site.',
     shortDescription: 'Luxury resort at Maho Beach.',
-    images: [
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.5,
     reviewCount: 892,
     distance: 3.2,
@@ -175,9 +158,7 @@ export const VENUES: Venue[] = [
     description:
       'All-inclusive resort on a private peninsula with three beaches and panoramic Caribbean views.',
     shortDescription: 'All-inclusive on a private peninsula.',
-    images: [
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.3,
     reviewCount: 567,
     distance: 1.8,
@@ -195,9 +176,7 @@ export const VENUES: Venue[] = [
     description:
       'Premier nightclub in Sint Maarten featuring international DJs, bottle service, and a high-energy atmosphere.',
     shortDescription: 'Premier nightclub with international DJs.',
-    images: [
-      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.2,
     reviewCount: 234,
     distance: 2.9,
@@ -215,9 +194,7 @@ export const VENUES: Venue[] = [
     description:
       'Famous beach bar at Maho Beach. Watch planes land while enjoying drinks and live music.',
     shortDescription: 'Iconic beach bar under the flight path.',
-    images: [
-      'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.6,
     reviewCount: 567,
     distance: 3.4,
@@ -236,9 +213,7 @@ export const VENUES: Venue[] = [
     description:
       'Main shopping street in Philipsburg with duty-free stores, jewelry shops, and Caribbean souvenirs.',
     shortDescription: 'Duty-free shopping paradise.',
-    images: [
-      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.4,
     reviewCount: 890,
     distance: 2.0,
@@ -254,9 +229,7 @@ export const VENUES: Venue[] = [
     description:
       'Shopping center at Maho Village with boutiques, restaurants, and the famous Casino Royale.',
     shortDescription: 'Shopping and entertainment complex.',
-    images: [
-      'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.1,
     reviewCount: 345,
     distance: 3.3,
@@ -274,9 +247,7 @@ export const VENUES: Venue[] = [
     description:
       'Sail on an actual America\'s Cup yacht and participate in a real racing experience on the Caribbean Sea.',
     shortDescription: 'Race on a real America\'s Cup yacht.',
-    images: [
-      'https://images.unsplash.com/photo-1534854638093-bada1813ca19?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.9,
     reviewCount: 178,
     distance: 2.5,
@@ -293,9 +264,7 @@ export const VENUES: Venue[] = [
     description:
       'Hidden nature reserve with zip lines, hiking trails, and the famous Jungle Pool. A tropical oasis in the hills.',
     shortDescription: 'Zip lines and jungle pool adventure.',
-    images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
-    ],
+    images: [],
     rating: 4.7,
     reviewCount: 234,
     distance: 7.8,

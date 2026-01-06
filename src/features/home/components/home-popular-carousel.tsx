@@ -26,8 +26,10 @@ export function HomePopularCarousel() {
 	const { currentLocation, formattedAddress } = useLocationStore();
 
 	const { width: screenWidth } = useWindowDimensions();
-	const CARD_WIDTH = screenWidth * 0.5; // 50% screen width
+	// Match driver card sizing: (screen - 2*padding - gap) / 2
+	const HORIZONTAL_PADDING = space[4]; // 16px
 	const CARD_GAP = space[4]; // 16px gap between cards
+	const CARD_WIDTH = (screenWidth - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 
 	// Get venue data for popular locations
 	const venues = POPULAR_VENUE_IDS.map((id) => getVenueById(id)).filter(
