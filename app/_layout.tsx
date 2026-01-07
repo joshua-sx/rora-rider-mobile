@@ -119,6 +119,69 @@ export default Sentry.wrap(function RootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="settings/privacy"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="settings/terms"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="settings/privacy-policy"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="settings/language"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="settings/theme"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="profile/personal-info"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="profile/payment-methods"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="profile/help-center"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
+                  name="profile/contact"
+                  options={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                />
+                <Stack.Screen
                   name="offers"
                   options={{
                     headerShown: false,

@@ -46,10 +46,7 @@ export default function ProfileScreen() {
 					<ListItem
 						title="Personal Information"
 						subtitle="Name, email, phone number"
-						onPress={() => {
-							// Navigate to personal info screen (to be implemented)
-							console.log("Navigate to personal info");
-						}}
+						onPress={() => router.push("/profile/personal-info")}
 						leading={
 							<Ionicons name="person-outline" size={24} color={colors.textMuted} />
 						}
@@ -119,10 +116,7 @@ export default function ProfileScreen() {
 					<ListItem
 						title="Payment Methods"
 						subtitle="Manage cards and payment options"
-						onPress={() => {
-							// Navigate to payment methods (to be implemented)
-							console.log("Navigate to payment methods");
-						}}
+						onPress={() => router.push("/profile/payment-methods")}
 						leading={
 							<Ionicons name="card-outline" size={24} color={colors.textMuted} />
 						}
@@ -138,10 +132,7 @@ export default function ProfileScreen() {
 					<ListItem
 						title="Help Center"
 						subtitle="FAQs and support"
-						onPress={() => {
-							// Navigate to help center (to be implemented)
-							console.log("Navigate to help center");
-						}}
+						onPress={() => router.push("/profile/help-center")}
 						leading={
 							<Ionicons
 								name="help-circle-outline"
@@ -155,10 +146,7 @@ export default function ProfileScreen() {
 					<ListItem
 						title="Contact Us"
 						subtitle="Get in touch with support"
-						onPress={() => {
-							// Navigate to contact screen (to be implemented)
-							console.log("Navigate to contact");
-						}}
+						onPress={() => router.push("/profile/contact")}
 						leading={
 							<Ionicons name="mail-outline" size={24} color={colors.textMuted} />
 						}

@@ -140,9 +140,7 @@ export default function SettingsScreen() {
           <ListItem
             title="Theme"
             subtitle={themeNames[selectedTheme]}
-            onPress={() => {
-              Alert.alert('Theme', 'Theme selection coming soon');
-            }}
+            onPress={() => router.push('/settings/theme')}
             leading={<Ionicons name="moon-outline" size={24} color={colors.textMuted} />}
             trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
@@ -157,9 +155,7 @@ export default function SettingsScreen() {
           <ListItem
             title="Language"
             subtitle={languageNames[selectedLanguage]}
-            onPress={() => {
-              Alert.alert('Language', 'Language selection coming soon');
-            }}
+            onPress={() => router.push('/settings/language')}
             leading={<Ionicons name="language-outline" size={24} color={colors.textMuted} />}
             trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
@@ -174,21 +170,8 @@ export default function SettingsScreen() {
           <ListItem
             title="Privacy Settings"
             subtitle="Data sharing and permissions"
-            onPress={() => {
-              Alert.alert('Privacy', 'Privacy settings coming soon');
-            }}
+            onPress={() => router.push('/settings/privacy')}
             leading={<Ionicons name="shield-checkmark-outline" size={24} color={colors.textMuted} />}
-            trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
-          />
-          <Divider />
-
-          <ListItem
-            title="Location Permissions"
-            subtitle="Manage location access"
-            onPress={() => {
-              Alert.alert('Location', 'Open system settings to manage location permissions');
-            }}
-            leading={<Ionicons name="location-outline" size={24} color={colors.textMuted} />}
             trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
         </Box>
@@ -202,9 +185,7 @@ export default function SettingsScreen() {
           <ListItem
             title="Payment Methods"
             subtitle="Manage cards and payment options"
-            onPress={() => {
-              Alert.alert('Payment Methods', 'Payment management coming soon');
-            }}
+            onPress={() => router.push('/profile/payment-methods')}
             leading={<Ionicons name="card-outline" size={24} color={colors.textMuted} />}
             trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
@@ -219,9 +200,7 @@ export default function SettingsScreen() {
           <ListItem
             title="Help Center"
             subtitle="FAQs and support"
-            onPress={() => {
-              Alert.alert('Help Center', 'Help center coming soon');
-            }}
+            onPress={() => router.push('/profile/help-center')}
             leading={<Ionicons name="help-circle-outline" size={24} color={colors.textMuted} />}
             trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
@@ -229,9 +208,7 @@ export default function SettingsScreen() {
 
           <ListItem
             title="Terms of Service"
-            onPress={() => {
-              Alert.alert('Terms of Service', 'Terms of service coming soon');
-            }}
+            onPress={() => router.push('/settings/terms')}
             leading={<Ionicons name="document-text-outline" size={24} color={colors.textMuted} />}
             trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
@@ -239,9 +216,7 @@ export default function SettingsScreen() {
 
           <ListItem
             title="Privacy Policy"
-            onPress={() => {
-              Alert.alert('Privacy Policy', 'Privacy policy coming soon');
-            }}
+            onPress={() => router.push('/settings/privacy-policy')}
             leading={<Ionicons name="lock-closed-outline" size={24} color={colors.textMuted} />}
             trailing={<Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           />
