@@ -72,7 +72,7 @@ test('StickyCtaButton uses useStickyCta with cardHeight parameter', () => {
 
 // Test 2: Venue detail screen uses hook correctly
 test('Venue detail screen uses useStickyCta hook with RIDE_CTA_CARD_HEIGHT', () => {
-  const filePath = path.join(PROJECT_ROOT, 'app/(tabs)/explore/venue/[id].tsx');
+  const filePath = path.join(PROJECT_ROOT, 'app/venue/[id].tsx');
   const content = fs.readFileSync(filePath, 'utf8');
   
   // Check that useStickyCta is imported (allow for @/ or relative paths)
@@ -285,7 +285,7 @@ test('StickyCtaButton uses useStickyCta with cardHeight parameter', () => {
 
 // Test 2
 test('Venue detail screen uses useStickyCta hook with RIDE_CTA_CARD_HEIGHT', () => {
-  const filePath = path.join(PROJECT_ROOT, 'app/(tabs)/explore/venue/[id].tsx');
+  const filePath = path.join(PROJECT_ROOT, 'app/venue/[id].tsx');
   const content = fs.readFileSync(filePath, 'utf8');
   
   // Check that useStickyCta is imported (check for import statement containing use-sticky-cta)

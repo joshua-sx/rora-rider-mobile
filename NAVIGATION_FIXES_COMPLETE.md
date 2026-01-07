@@ -33,7 +33,7 @@ const { cardBottomPosition } = useStickyCta(cardHeight);
 
 ### ✅ Fix 2: Venue Detail Screen Padding
 
-**File:** `app/(tabs)/explore/venue/[id].tsx`
+**File:** `app/venue/[id].tsx`
 
 **Issue:** Manual calculation (`getTabBarHeight(insets) + 180 + insets.bottom`) might not match hook's `scrollViewPadding`
 
@@ -212,7 +212,7 @@ const paddingBottom = useScrollPadding(false, 16);
 
 ### Modified Files:
 1. `src/ui/templates/StickyCtaButton.tsx` - Fixed hook parameter
-2. `app/(tabs)/explore/venue/[id].tsx` - Uses hook's scrollViewPadding
+2. `app/venue/[id].tsx` - Uses hook's scrollViewPadding
 3. `app/trip-preview.tsx` - Removed tab bar calculation
 4. `src/ui/templates/DetailScreenTemplate.tsx` - Fixed hook usage
 

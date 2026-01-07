@@ -21,7 +21,7 @@ Successfully implemented the complete ride booking flow with driver profiles, tr
 - ✅ "Find Driver" button replaces "Confirm Ride"
 - ✅ Navigates to intermediate explanation screen
 
-#### Venue Detail (`app/(tabs)/explore/venue/[id].tsx`)
+#### Venue Detail (`app/venue/[id].tsx`)
 - ✅ `handleGetQuote` now fetches real route data from Google Maps
 - ✅ Calculates price based on distance and duration
 - ✅ Saves route data to store and navigates to trip preview
@@ -137,7 +137,7 @@ Successfully implemented the complete ride booking flow with driver profiles, tr
 
 ## Files Modified (3 files)
 1. `app/trip-preview.tsx` - Auto-save, Find Driver button
-2. `app/(tabs)/explore/venue/[id].tsx` - Route fetching logic
+2. `app/venue/[id].tsx` - Route fetching logic
 3. `app/(tabs)/drivers.tsx` - Complete rebuild
 
 ## Testing Notes

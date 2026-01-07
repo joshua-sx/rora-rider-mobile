@@ -24,7 +24,7 @@
 
 ### Issue: Buttons Behind Tab Bar
 
-**Affected Screen:** `app/(tabs)/explore/venue/[id].tsx`
+**Affected Screen:** `app/venue/[id].tsx`
 
 **Problem:**
 ```tsx
@@ -301,7 +301,7 @@ const totalBottom = tabBarHeight + insets.bottom;
 2. ✅ `(tabs)/explore/index.tsx` - Explore search
 3. ✅ `(tabs)/explore/featured.tsx` - Featured venues
 4. ✅ `(tabs)/explore/category/[slug].tsx` - Category listing
-5. ⚠️ `(tabs)/explore/venue/[id].tsx` - **HAS OVERLAP ISSUE**
+5. ⚠️ `venue/[id].tsx` - **HAS OVERLAP ISSUE**
 6. ✅ `(tabs)/drivers.tsx` - Drivers directory
 7. ✅ `(tabs)/profile.tsx` - Profile
 

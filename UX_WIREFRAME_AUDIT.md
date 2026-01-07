@@ -154,7 +154,7 @@ This audit evaluates key screens and user flows against the UX Wireframe Checkli
 
 ---
 
-### 5. Venue Detail Screen (`app/(tabs)/explore/venue/[id].tsx`)
+### 5. Venue Detail Screen (`app/venue/[id].tsx`)
 
 **Purpose:** Show venue details and enable ride booking
 
@@ -444,7 +444,7 @@ This audit evaluates key screens and user flows against the UX Wireframe Checkli
 - [app/route-input.tsx](app/route-input.tsx) - Empty states, error recovery
 - [app/trip-preview.tsx](app/trip-preview.tsx) - CTA clarity, success states
 - [app/(tabs)/index.tsx](app/(tabs)/index.tsx) - Permission denial handling
-- [app/(tabs)/explore/venue/[id].tsx](app/(tabs)/explore/venue/[id].tsx) - Location integration
+- [app/venue/[id].tsx](app/venue/[id].tsx) - Location integration
 
 ### Medium Priority
 - [src/features/explore/components/ride-cta-sheet.tsx](src/features/explore/components/ride-cta-sheet.tsx) - Editable pickup

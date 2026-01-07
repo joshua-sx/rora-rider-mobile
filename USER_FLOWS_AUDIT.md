@@ -104,7 +104,7 @@ Explore Tab
 - [app/(tabs)/explore/index.tsx](app/(tabs)/explore/index.tsx)
 - [app/(tabs)/explore/category/[slug].tsx](app/(tabs)/explore/category/[slug].tsx)
 - [app/(tabs)/explore/featured.tsx](app/(tabs)/explore/featured.tsx)
-- [app/(tabs)/explore/venue/[id].tsx](app/(tabs)/explore/venue/[id].tsx)
+- [app/venue/[id].tsx](app/venue/[id].tsx)
 
 **UX Quality:** ✅ Excellent
 - Debounced search (no lag)
@@ -202,7 +202,7 @@ RideCtaSheet (bottom sheet) opens
 **Expected Next Step:** Book driver ❌ **BROKEN**
 
 **Screens Required:**
-- [app/(tabs)/explore/venue/[id].tsx](app/(tabs)/explore/venue/[id].tsx) ✅
+- [app/venue/[id].tsx](app/venue/[id].tsx) ✅
 - [src/features/explore/components/ride-cta-sheet.tsx](src/features/explore/components/ride-cta-sheet.tsx) ✅
 - [app/trip-preview.tsx](app/trip-preview.tsx) ✅
 - **MISSING:** [app/find-driver-info.tsx](app/find-driver-info.tsx) ❌
@@ -1460,7 +1460,7 @@ c. **Custom Backend**
 2. ✅ [app/(tabs)/explore/index.tsx](app/(tabs)/explore/index.tsx) - Explore search
 3. ✅ [app/(tabs)/explore/featured.tsx](app/(tabs)/explore/featured.tsx) - Featured venues
 4. ✅ [app/(tabs)/explore/category/[slug].tsx](app/(tabs)/explore/category/[slug].tsx) - Category listing
-5. ✅ [app/(tabs)/explore/venue/[id].tsx](app/(tabs)/explore/venue/[id].tsx) - Venue detail
+5. ✅ [app/venue/[id].tsx](app/venue/[id].tsx) - Venue detail
 6. ✅ [app/(tabs)/drivers.tsx](app/(tabs)/drivers.tsx) - Drivers directory
 7. ✅ [app/(tabs)/profile.tsx](app/(tabs)/profile.tsx) - Profile (placeholder)
 8. ✅ [app/route-input.tsx](app/route-input.tsx) - Route planning

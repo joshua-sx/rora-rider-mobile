@@ -198,7 +198,7 @@ contentContainerStyle={[
 
 ---
 
-### ⚠️ Venue Detail Screen (`app/(tabs)/explore/venue/[id].tsx`)
+### ⚠️ Venue Detail Screen (`app/venue/[id].tsx`)
 
 **Navigation:** ✅ Good
 - Back button in header works
@@ -426,7 +426,7 @@ paddingBottom: Math.max(insets.bottom, Spacing.lg),
 
 2. **Fix Venue Detail ScrollView Padding**
    ```tsx
-   // In app/(tabs)/explore/venue/[id].tsx
+   // In app/venue/[id].tsx
    const { scrollViewPadding } = useStickyCta(RIDE_CTA_CARD_HEIGHT);
    
    <ScrollView

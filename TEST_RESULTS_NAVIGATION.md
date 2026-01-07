@@ -42,7 +42,7 @@ Passed: 12
 ---
 
 ### ✅ Test 2: Venue Detail Screen
-**File:** `app/(tabs)/explore/venue/[id].tsx`
+**File:** `app/venue/[id].tsx`
 
 **Verification:**
 - ✅ `useStickyCta` hook imported from `@/src/hooks/use-sticky-cta`
@@ -131,7 +131,7 @@ Passed: 12
 All navigation-related files compile correctly:
 - ✅ `src/ui/templates/StickyCtaButton.tsx`
 - ✅ `src/ui/templates/DetailScreenTemplate.tsx`
-- ✅ `app/(tabs)/explore/venue/[id].tsx`
+- ✅ `app/venue/[id].tsx`
 - ✅ `app/trip-preview.tsx`
 - ✅ `src/hooks/use-scroll-padding.ts`
 - ✅ `src/hooks/use-sticky-cta.ts`
