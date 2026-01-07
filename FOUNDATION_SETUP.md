@@ -41,7 +41,7 @@ The MVP foundation infrastructure has been successfully set up. This includes:
 All migrations are located in `supabase/migrations/`:
 
 #### **Migration 1: Regions and Users**
-`20260104_setup_regions_and_users.sql`
+`20260104000000_setup_regions_and_users.sql`
 
 **Tables:**
 - `regions` - Island/region configuration with discovery radius config
@@ -54,7 +54,7 @@ All migrations are located in `supabase/migrations/`:
 - Seeded Sint Maarten region
 
 #### **Migration 2: Pricing**
-`20260104_setup_pricing.sql`
+`20260104010000_setup_pricing.sql`
 
 **Tables:**
 - `pricing_zones` - Geographic zones (radius circles)
@@ -69,7 +69,7 @@ All migrations are located in `supabase/migrations/`:
 - Night and weekend peak modifiers (disabled by default)
 
 #### **Migration 3: Rides and Offers**
-`20260104_setup_rides.sql`
+`20260104020000_setup_rides.sql`
 
 **Tables:**
 - `ride_sessions` - Core ride session with state machine
@@ -88,7 +88,7 @@ All migrations are located in `supabase/migrations/`:
 - RLS policies for riders and drivers
 
 #### **Migration 4: Drivers and Social**
-`20260104_setup_drivers_and_social.sql`
+`20260104030000_setup_drivers_and_social.sql`
 
 **Tables:**
 - `driver_profiles` - Driver info, vehicle, service areas
@@ -108,7 +108,7 @@ All migrations are located in `supabase/migrations/`:
 - Rora Pro flag
 
 #### **Migration 5: Notifications**
-`20260104_setup_notifications.sql`
+`20260104040000_setup_notifications.sql`
 
 **Tables:**
 - `devices` - Push notification tokens (Expo Push)
@@ -272,11 +272,11 @@ Continue with **`tasks/tasks-01-auth.md`** to implement:
 supabase/
   config.toml
   migrations/
-    20260104_setup_regions_and_users.sql
-    20260104_setup_pricing.sql
-    20260104_setup_rides.sql
-    20260104_setup_drivers_and_social.sql
-    20260104_setup_notifications.sql
+    20260104000000_setup_regions_and_users.sql
+    20260104010000_setup_pricing.sql
+    20260104020000_setup_rides.sql
+    20260104030000_setup_drivers_and_social.sql
+    20260104040000_setup_notifications.sql
 
 src/
   lib/
