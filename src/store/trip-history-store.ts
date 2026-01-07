@@ -3,22 +3,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Trip, TripStatus } from '@/src/types/trip';
 
-// Valid status transitions
-const VALID_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
-  not_taken: ['pending', 'cancelled'],
-  pending: ['in_progress', 'cancelled'],
-  in_progress: ['completed', 'cancelled'],
-  completed: [],
-  cancelled: [],
-};
+// NOTE: Ride state transitions are enforced server-side via Edge Functions.
+// This store only reflects server-validated state changes locally.
+// See docs/security-validation.md for the authoritative state machine.
 
 interface TripHistoryStore {
   trips: Trip[];
   _hasSeededDemo: boolean;
   addTrip: (trip: Trip) => void;
   updateTripStatus: (id: string, status: TripStatus, driverId?: string) => void;
-  confirmTrip: (id: string, method: 'qr_scan' | 'manual_code') => void;
-  completeTrip: (id: string, completedBy: 'passenger' | 'driver') => void;
   toggleSaved: (id: string) => void;
   getTripById: (id: string) => Trip | undefined;
   getRecentTrips: (limit?: number) => Trip[];
@@ -93,18 +86,12 @@ export const useTripHistoryStore = create<TripHistoryStore>()(
     }));
   },
 
+  // Updates local state to reflect server-validated status changes.
+  // State transition validation happens server-side in Edge Functions.
   updateTripStatus: (id, status, driverId) => {
     set((state) => ({
       trips: state.trips.map((trip) => {
         if (trip.id !== id) return trip;
-
-        // Validate transition
-        const validNext = VALID_TRANSITIONS[trip.status];
-        if (!validNext.includes(status)) {
-          console.warn(`[trip-store] Invalid status transition: ${trip.status} -> ${status}`);
-          return trip;
-        }
-
         return {
           ...trip,
           status,
@@ -112,51 +99,6 @@ export const useTripHistoryStore = create<TripHistoryStore>()(
             status === 'not_taken' || status === 'cancelled'
               ? undefined
               : driverId ?? trip.driverId,
-        };
-      }),
-    }));
-  },
-
-  confirmTrip: (id, method) => {
-    set((state) => ({
-      trips: state.trips.map((trip) => {
-        if (trip.id !== id) return trip;
-
-        // Validate transition to in_progress
-        const validNext = VALID_TRANSITIONS[trip.status];
-        if (!validNext.includes('in_progress')) {
-          console.warn(`[trip-store] Cannot confirm trip from status: ${trip.status}`);
-          return trip;
-        }
-
-        return {
-          ...trip,
-          status: 'in_progress',
-          confirmationMethod: method,
-          confirmedAt: new Date().toISOString(),
-          confirmedBy: 'driver',
-        };
-      }),
-    }));
-  },
-
-  completeTrip: (id, completedBy) => {
-    set((state) => ({
-      trips: state.trips.map((trip) => {
-        if (trip.id !== id) return trip;
-
-        // Validate transition to completed
-        const validNext = VALID_TRANSITIONS[trip.status];
-        if (!validNext.includes('completed')) {
-          console.warn(`[trip-store] Cannot complete trip from status: ${trip.status}`);
-          return trip;
-        }
-
-        return {
-          ...trip,
-          status: 'completed',
-          completedAt: new Date().toISOString(),
-          completedBy,
         };
       }),
     }));

@@ -105,31 +105,31 @@ export function calculatePrice(distanceKm: number, durationMin: number):
 ---
 
 ### 6. Trip Store Enhancements (P0)
-**Status:** ✅ Complete
+**Status:** ✅ Complete (Security Hardened)
 
 **File:** [src/store/trip-history-store.ts](src/store/trip-history-store.ts)
 
-**New methods:**
+**Architecture Note:**
+Per security requirements, ride state transitions are enforced **server-side only** via Edge Functions.
+The client store reflects server-validated state changes but does NOT perform transition validation.
+
+See [docs/security-validation.md](docs/security-validation.md) for the authoritative state machine.
+
+**Available methods:**
 ```typescript
-confirmTrip(id, method: 'qr_scan' | 'manual_code'): void
-completeTrip(id, completedBy: 'passenger' | 'driver'): void
+addTrip(trip: Trip): void
+updateTripStatus(id, status, driverId?): void  // Reflects server-validated changes
+toggleSaved(id): void
+getTripById(id): Trip | undefined
+getRecentTrips(limit?): Trip[]
+deleteTrip(id): void
+reset(): void
 ```
 
-**Status transition validation:**
-```typescript
-const VALID_TRANSITIONS = {
-  not_taken: ['pending', 'cancelled'],
-  pending: ['in_progress', 'cancelled'],
-  in_progress: ['completed', 'cancelled'],
-  completed: [],
-  cancelled: [],
-};
-```
-
-**Impact:**
-- Invalid status transitions are prevented
-- Trip confirmation and completion properly tracked
-- Console warnings for debugging invalid transitions
+**Security principle:**
+- Client-side validation removed (UI is not a security boundary)
+- State transitions must go through server Edge Functions
+- Store only updates local state after server validation
 
 ---
 
