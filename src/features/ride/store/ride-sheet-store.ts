@@ -8,6 +8,8 @@ import {
   startDiscovery,
   subscribeToRideOffers,
   placeDetailsToRideLocation,
+  selectOffer,
+  cancelRide,
 } from '@/src/services/rides.service';
 
 // ============================================================================
@@ -15,7 +17,30 @@ import {
 // ============================================================================
 
 /**
- * RideSheet state machine states
+ * RideSheet UI State Machine
+ *
+ * IMPORTANT: This is a CLIENT-SIDE UI state machine that controls the ride
+ * booking flow screens. It is SEPARATE from the SERVER-SIDE ride session
+ * state machine (created → discovery → hold → confirmed → active → completed).
+ *
+ * UI State Machine (this store):
+ *   IDLE → ROUTE_SET → QR_READY → DISCOVERING → OFFERS_RECEIVED → CONFIRMING → MATCHED
+ *
+ * Server State Machine (ride_sessions.status):
+ *   created → discovery → [offers] → hold → confirmed → active → completed
+ *                                                              ↘ canceled
+ *
+ * SECURITY BOUNDARY:
+ * - UI states control what screens/components are shown (visual only)
+ * - Server states enforce business rules and are the source of truth
+ * - All state transitions that affect the ride must go through Edge Functions
+ * - The UI MUST NOT trust its own state for security decisions
+ *
+ * See docs/security-validation.md for full details.
+ */
+
+/**
+ * RideSheet UI state machine states
  *
  * IDLE          → Home state, "Where to?" search pill
  * ROUTE_SET     → Route calculated, showing fare summary
@@ -546,9 +571,23 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
     set({ data: { ...data, isConfirmingRide: true, error: null } });
 
     try {
-      // TODO: Call select-offer Edge Function when implemented
-      // For now, simulate confirmation
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Call select-offer Edge Function (server-side validation)
+      // This validates ownership, state transitions, and logs events
+      const response = await selectOffer(
+        data.rideSessionId,
+        data.selectedOffer.id
+      );
+
+      if (!response.success) {
+        set({
+          data: {
+            ...get().data,
+            error: response.error || 'Failed to confirm ride',
+            isConfirmingRide: false,
+          },
+        });
+        return false;
+      }
 
       set({
         data: {
@@ -604,8 +643,14 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
       return;
     }
 
-    // TODO: If rideSessionId exists, call cancel-ride Edge Function
-    // to update server state
+    // If we have a ride session, notify the server (fire-and-forget for better UX)
+    // Server validates ownership and state, logs event, notifies affected drivers
+    if (data.rideSessionId) {
+      cancelRide(data.rideSessionId, 'user_canceled').catch((error) => {
+        // Log but don't block - local state is already reset
+        console.warn('[ride-sheet-store] Failed to cancel ride on server:', error);
+      });
+    }
 
     _cleanupSubscriptions();
 
