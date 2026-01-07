@@ -78,27 +78,31 @@ export async function createRideSession(
   request: CreateRideSessionRequest
 ): Promise<CreateRideSessionResponse> {
   // Helper to create mock ride session data
-  const createMockResponse = (prefix: string): CreateRideSessionResponse => ({
-    success: true,
-    isMockData: true,
-    ride_session: {
-      id: `${prefix}-ride-${Date.now()}`,
-      region_id: `${prefix}-region`,
-      rider_user_id: null,
-      guest_token_id: null,
-      status: 'created',
-      origin_lat: request.origin.lat,
-      origin_lng: request.origin.lng,
-      origin_label: request.origin.label,
-      destination_lat: request.destination.lat,
-      destination_lng: request.destination.lng,
-      destination_label: request.destination.label,
-      rora_fare_amount: request.rora_fare_amount,
-      qr_token_jti: `${prefix}-qr-${Date.now()}`,
-      created_at: new Date().toISOString(),
-    },
-    qr_token_jti: `${prefix}-qr-${Date.now()}`,
-  });
+  const createMockResponse = (prefix: string): CreateRideSessionResponse => {
+    const timestamp = Date.now();
+    const qrTokenJti = `${prefix}-qr-${timestamp}`;
+    return {
+      success: true,
+      isMockData: true,
+      ride_session: {
+        id: `${prefix}-ride-${timestamp}`,
+        region_id: `${prefix}-region`,
+        rider_user_id: null,
+        guest_token_id: null,
+        status: 'created',
+        origin_lat: request.origin.lat,
+        origin_lng: request.origin.lng,
+        origin_label: request.origin.label,
+        destination_lat: request.destination.lat,
+        destination_lng: request.destination.lng,
+        destination_label: request.destination.label,
+        rora_fare_amount: request.rora_fare_amount,
+        qr_token_jti: qrTokenJti,
+        created_at: new Date(timestamp).toISOString(),
+      },
+      qr_token_jti: qrTokenJti,
+    };
+  };
 
   if (!isSupabaseConfigured()) {
     console.warn('[rides.service] Supabase not configured, returning mock response');
