@@ -36,11 +36,14 @@ interface LocationStore {
 	// Location subscription for continuous tracking
 	locationSubscription: Location.LocationSubscription | null;
 
+	// Last persistence error (if any)
+	persistenceError: string | null;
+
 	// Actions
-	setCurrentLocation: (location: LatLng | null) => void;
-	setFormattedAddress: (address: string | null) => void;
-	setPermissionGranted: (granted: boolean) => void;
-	setPermissionStatus: (status: Location.PermissionStatus) => void;
+	setCurrentLocation: (location: LatLng | null) => Promise<void>;
+	setFormattedAddress: (address: string | null) => Promise<void>;
+	setPermissionGranted: (granted: boolean) => Promise<void>;
+	setPermissionStatus: (status: Location.PermissionStatus) => Promise<void>;
 	setPermissionRequested: (requested: boolean) => void;
 	setShowPermissionModal: (show: boolean) => void;
 	setIsLoadingLocation: (loading: boolean) => void;
@@ -49,6 +52,7 @@ interface LocationStore {
 	) => void;
 	hydrate: (data: PersistedLocationData) => void;
 	reset: () => void;
+	clearPersistenceError: () => void;
 }
 
 export const useLocationStore = create<LocationStore>((set, get) => ({
@@ -60,56 +64,69 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
 	showPermissionModal: false,
 	isLoadingLocation: false,
 	locationSubscription: null,
+	persistenceError: null,
 
-	setCurrentLocation: (location) => {
-		set({ currentLocation: location });
+	setCurrentLocation: async (location) => {
+		set({ currentLocation: location, persistenceError: null });
 		// Persist to AsyncStorage when location changes
 		const state = get();
-		locationStorageService.save({
+		const result = await locationStorageService.save({
 			currentLocation: location,
 			formattedAddress: state.formattedAddress,
 			permissionGranted: state.permissionGranted,
 			permissionStatus: state.permissionStatus,
 		});
+		if (!result.success) {
+			set({ persistenceError: result.error });
+		}
 	},
 
-	setFormattedAddress: (address) => {
-		set({ formattedAddress: address });
+	setFormattedAddress: async (address) => {
+		set({ formattedAddress: address, persistenceError: null });
 		// Persist to AsyncStorage when address changes
 		const state = get();
-		locationStorageService.save({
+		const result = await locationStorageService.save({
 			currentLocation: state.currentLocation,
 			formattedAddress: address,
 			permissionGranted: state.permissionGranted,
 			permissionStatus: state.permissionStatus,
 		});
+		if (!result.success) {
+			set({ persistenceError: result.error });
+		}
 	},
 
-	setPermissionGranted: (granted) => {
+	setPermissionGranted: async (granted) => {
 		const status = granted
 			? Location.PermissionStatus.GRANTED
 			: Location.PermissionStatus.DENIED;
-		set({ permissionGranted: granted, permissionStatus: status });
+		set({ permissionGranted: granted, permissionStatus: status, persistenceError: null });
 		// Persist permission status
 		const state = get();
-		locationStorageService.save({
+		const result = await locationStorageService.save({
 			currentLocation: state.currentLocation,
 			formattedAddress: state.formattedAddress,
 			permissionGranted: granted,
 			permissionStatus: status,
 		});
+		if (!result.success) {
+			set({ persistenceError: result.error });
+		}
 	},
 
-	setPermissionStatus: (status) => {
+	setPermissionStatus: async (status) => {
 		const granted = status === Location.PermissionStatus.GRANTED;
-		set({ permissionStatus: status, permissionGranted: granted });
+		set({ permissionStatus: status, permissionGranted: granted, persistenceError: null });
 		const state = get();
-		locationStorageService.save({
+		const result = await locationStorageService.save({
 			currentLocation: state.currentLocation,
 			formattedAddress: state.formattedAddress,
 			permissionGranted: granted,
 			permissionStatus: status,
 		});
+		if (!result.success) {
+			set({ persistenceError: result.error });
+		}
 	},
 
 	setPermissionRequested: (requested) =>
@@ -144,5 +161,8 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
 			showPermissionModal: false,
 			isLoadingLocation: false,
 			locationSubscription: null,
+			persistenceError: null,
 		}),
+
+	clearPersistenceError: () => set({ persistenceError: null }),
 }));

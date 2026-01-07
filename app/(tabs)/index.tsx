@@ -141,20 +141,22 @@ export default function HomeScreen() {
 		async function initializeLocation() {
 			try {
 				// 1. Load persisted location data from AsyncStorage
-				const persisted = await locationStorageService.load();
-				if (persisted) {
+				const loadResult = await locationStorageService.load();
+				if (loadResult.success && loadResult.data) {
 					console.log("[HomeScreen] Loaded persisted location data");
-					hydrate(persisted);
+					hydrate(loadResult.data);
 
 					// Update map with persisted location if available
-					if (persisted.currentLocation) {
+					if (loadResult.data.currentLocation) {
 						setMapRegion({
-							latitude: persisted.currentLocation.latitude,
-							longitude: persisted.currentLocation.longitude,
+							latitude: loadResult.data.currentLocation.latitude,
+							longitude: loadResult.data.currentLocation.longitude,
 							latitudeDelta: 0.0922,
 							longitudeDelta: 0.0421,
 						});
 					}
+				} else if (!loadResult.success) {
+					console.warn("[HomeScreen] Failed to load persisted location:", loadResult.error);
 				}
 
 				// 2. Check current permission status

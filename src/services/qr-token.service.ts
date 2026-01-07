@@ -12,6 +12,26 @@ import { QR_TOKEN_EXPIRY_MS } from '../utils/constants';
 // This is a client-side implementation for MVP
 
 /**
+ * Error types for QR token operations
+ */
+export type QRTokenErrorType =
+  | 'INVALID_BASE64'
+  | 'INVALID_JSON'
+  | 'MISSING_FIELDS'
+  | 'EXPIRED'
+  | 'ENCODING_FAILED';
+
+/**
+ * Result type for QR token decode operations
+ */
+export interface QRTokenDecodeResult {
+  success: boolean;
+  payload?: QRTokenPayload;
+  error?: string;
+  errorType?: QRTokenErrorType;
+}
+
+/**
  * Generate a QR token payload
  */
 export const generateQRTokenPayload = (
@@ -45,16 +65,61 @@ export const encodeQRToken = (payload: QRTokenPayload): string => {
 };
 
 /**
- * Decode QR token from string
+ * Decode QR token from string with detailed error information
+ * Returns a result object that distinguishes between different failure types
  */
-export const decodeQRToken = (token: string): QRTokenPayload | null => {
-  try {
-    const jsonString = atob(token);
-    return JSON.parse(jsonString) as QRTokenPayload;
-  } catch (error) {
-    console.error('Failed to decode QR token:', error);
-    return null;
+export const decodeQRToken = (token: string): QRTokenDecodeResult => {
+  if (!token || typeof token !== 'string') {
+    return {
+      success: false,
+      error: 'Token is empty or invalid',
+      errorType: 'INVALID_BASE64',
+    };
   }
+
+  let jsonString: string;
+  try {
+    jsonString = atob(token);
+  } catch {
+    return {
+      success: false,
+      error: 'Token is not valid base64 encoding',
+      errorType: 'INVALID_BASE64',
+    };
+  }
+
+  let payload: QRTokenPayload;
+  try {
+    payload = JSON.parse(jsonString);
+  } catch {
+    return {
+      success: false,
+      error: 'Token contains invalid JSON',
+      errorType: 'INVALID_JSON',
+    };
+  }
+
+  // Validate required fields
+  const requiredFields = ['jti', 'ride_session_id', 'origin_label', 'destination_label', 'rora_fare_amount', 'iat', 'exp'];
+  const missingFields = requiredFields.filter(field => !(field in payload));
+  if (missingFields.length > 0) {
+    return {
+      success: false,
+      error: `Token is missing required fields: ${missingFields.join(', ')}`,
+      errorType: 'MISSING_FIELDS',
+    };
+  }
+
+  return { success: true, payload };
+};
+
+/**
+ * Legacy decode function for backwards compatibility
+ * @deprecated Use decodeQRToken which returns detailed error information
+ */
+export const decodeQRTokenLegacy = (token: string): QRTokenPayload | null => {
+  const result = decodeQRToken(token);
+  return result.success ? result.payload! : null;
 };
 
 /**
@@ -63,6 +128,27 @@ export const decodeQRToken = (token: string): QRTokenPayload | null => {
 export const isQRTokenExpired = (token: QRTokenPayload): boolean => {
   const now = Math.floor(Date.now() / 1000);
   return now >= token.exp;
+};
+
+/**
+ * Decode and validate a QR token in one step
+ * Returns a result with detailed error information
+ */
+export const decodeAndValidateQRToken = (token: string): QRTokenDecodeResult => {
+  const decodeResult = decodeQRToken(token);
+  if (!decodeResult.success) {
+    return decodeResult;
+  }
+
+  if (isQRTokenExpired(decodeResult.payload!)) {
+    return {
+      success: false,
+      error: 'Token has expired',
+      errorType: 'EXPIRED',
+    };
+  }
+
+  return decodeResult;
 };
 
 /**
