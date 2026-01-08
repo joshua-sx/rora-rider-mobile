@@ -296,7 +296,7 @@ export default function TripHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   tripCard: {
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: space[4],
     marginBottom: space[3],
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   calendarBody: {
     width: 120,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
     padding: space[3],
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',

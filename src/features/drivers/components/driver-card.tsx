@@ -6,18 +6,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/src/ui/components/themed-text';
 import { IMAGE_TRANSITION_DURATION } from '@/src/ui/tokens/images';
 import { BorderRadius, Spacing } from '@/src/constants/design-tokens';
+import { VEHICLE_SEATS } from '@/src/constants/vehicle';
 import { useThemeColor } from '@/src/hooks/use-theme-color';
 import type { Driver } from '@/src/types/driver';
 
 type DriverCardProps = {
   driver: Driver;
-};
-
-// Map vehicle types to seat counts
-const VEHICLE_SEATS: Record<string, number> = {
-  Sedan: 4,
-  SUV: 6,
-  Van: 8,
 };
 
 // Extract first name from full name
@@ -32,6 +26,10 @@ const SPECIALIZATION_BADGES: Record<string, { label: string; icon: string; color
   cruise_port: { label: 'Cruise', icon: 'boat', color: '#50C878' }, // Emerald
 };
 
+/**
+ * DriverCard - Grid card displaying driver info
+ * Shows photo, name, rating, vehicle type, and specializations.
+ */
 export function DriverCard({ driver }: DriverCardProps) {
   const router = useRouter();
 

@@ -97,7 +97,7 @@ export function BookingOptionsSheet({
           onPress={onUseSaved}
           variant="secondary"
           disabled={!hasSavedTrips}
-          left={<Ionicons name="bookmark-outline" size={20} color={hasSavedTrips ? colors.text : colors.muted} />}
+          left={<Ionicons name="bookmark-outline" size={20} color={hasSavedTrips ? colors.text : colors.textSecondary} />}
           style={styles.secondaryButton}
         />
         <Text variant="sub" muted style={styles.actionDescription}>

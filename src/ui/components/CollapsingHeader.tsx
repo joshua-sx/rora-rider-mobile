@@ -56,7 +56,7 @@ export function CollapsingHeader({
   showBackButton = false,
   onBackPress,
   rightContent,
-  backgroundColor = colors.bg,
+  backgroundColor = colors.surface,
 }: Props) {
   const insets = useSafeAreaInsets();
 

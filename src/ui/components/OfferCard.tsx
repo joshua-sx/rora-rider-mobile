@@ -144,7 +144,7 @@ export function OfferCard({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
     padding: space[4],
     shadowColor: '#000',

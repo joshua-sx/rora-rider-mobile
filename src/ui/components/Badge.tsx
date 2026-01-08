@@ -10,6 +10,10 @@ type Props = ViewProps & {
   tone?: "neutral" | "success" | "warning" | "danger" | "primary";
 };
 
+/**
+ * Badge - Status indicator pill
+ * Use for status, counts, or labels. Keep text short.
+ */
 export function Badge({ label, tone = "neutral", style, ...rest }: Props) {
   return (
     <View {...rest} style={[styles.base, toneStyles[tone], style]}>
@@ -31,7 +35,7 @@ const styles = StyleSheet.create({
 });
 
 const toneStyles = {
-  neutral: { backgroundColor: colors.bg, borderColor: colors.border },
+  neutral: { backgroundColor: colors.surface, borderColor: colors.border },
   primary: { backgroundColor: colors.primary, borderColor: colors.primary },
   success: { backgroundColor: colors.success, borderColor: colors.success },
   warning: { backgroundColor: colors.warning, borderColor: colors.warning },

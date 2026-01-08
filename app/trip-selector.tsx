@@ -93,7 +93,7 @@ export default function TripSelectorScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {availableTrips.length === 0 ? (
           <EmptyState
-            icon={<Ionicons name="bookmark-outline" size={48} color={colors.muted} />}
+            icon={<Ionicons name="bookmark-outline" size={48} color={colors.textSecondary} />}
             message="No saved rides available. Create one first!"
             actionLabel="Create New Ride"
             onAction={handleCreateNew}

@@ -221,7 +221,7 @@ export default function FavoriteDriversScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     gap: space[1],
     paddingVertical: space[2],
     borderRadius: 8,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   bookButtonDisabled: {
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     borderColor: colors.border,
   },
 });

@@ -112,7 +112,7 @@ interface ScreenProps {
  * </Screen>
  *
  * // Full-bleed screen (no padding, custom background)
- * <Screen padded={false} backgroundColor={colors.bg}>
+ * <Screen padded={false} backgroundColor={colors.surface}>
  *   <MapView />
  * </Screen>
  * ```

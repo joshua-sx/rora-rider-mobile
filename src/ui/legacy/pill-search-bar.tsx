@@ -10,6 +10,10 @@ type PillSearchBarProps = {
 	onSearchPress: () => void;
 };
 
+/**
+ * PillSearchBar - Search input styled as a pill button
+ * Used on the home screen to initiate ride search.
+ */
 export function PillSearchBar({ onSearchPress }: PillSearchBarProps) {
 	return (
 		<Pressable
@@ -81,7 +85,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: space[4], // 16px - more generous
 		paddingVertical: space[2], // 8px - reduced padding
 		borderRadius: 9999, // Pill shape
-		backgroundColor: colors.bg,
+		backgroundColor: colors.surface,
 		// No shadows - flat, clean appearance
 		shadowColor: "transparent",
 		shadowOffset: { width: 0, height: 0 },

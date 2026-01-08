@@ -66,7 +66,7 @@ export const Sheet = forwardRef<BottomSheet, Props>(
     const effectiveBottomInset = bottomInset ?? insets.bottom;
 
     const defaultBackgroundStyle = {
-      backgroundColor: colors.bg,
+      backgroundColor: colors.surface,
       borderTopLeftRadius: radius.lg,
       borderTopRightRadius: radius.lg,
     };
