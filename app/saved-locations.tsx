@@ -206,7 +206,7 @@ export default function SavedLocationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     gap: space[1],
     paddingVertical: space[2],
     borderRadius: 8,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
   },
   quickAddCard: {
     padding: space[4],
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     padding: space[3],
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     marginTop: space[4],
   },
   infoContent: {

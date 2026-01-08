@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BorderRadius, Spacing } from '@/src/constants/design-tokens';
+import { VEHICLE_SEATS } from '@/src/constants/vehicle';
 import { DriverCard } from '@/src/features/drivers/components/driver-card';
 import {
   FilterModal,
@@ -36,13 +37,6 @@ const DEFAULT_FILTERS: DriverFilters = {
   vehicleType: 'Any',
   rating: 'Any',
   specializations: [],
-};
-
-// Map vehicle types to seat counts
-const VEHICLE_SEATS: Record<string, number> = {
-  Sedan: 4,
-  SUV: 6,
-  Van: 8,
 };
 
 export default function DriversScreen() {
@@ -115,7 +109,7 @@ export default function DriversScreen() {
     // Seats filter
     if (filters.seats !== 'Any') {
       result = result.filter((d) => {
-        const driverSeats = VEHICLE_SEATS[d.vehicleType] || 4;
+        const driverSeats = d.seats || VEHICLE_SEATS[d.vehicleType] || 4;
         return driverSeats >= (filters.seats as number);
       });
     }

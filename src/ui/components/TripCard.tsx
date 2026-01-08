@@ -91,7 +91,7 @@ export function TripCard({ trip, onPress, showQuoteAge, warnIfStale }: TripCardP
           </Box>
           <Box style={styles.routeDivider}>
             <View style={styles.routeLine} />
-            <Ionicons name="arrow-down" size={16} color={colors.muted} />
+            <Ionicons name="arrow-down" size={16} color={colors.textSecondary} />
           </Box>
           <Box style={styles.routeRow}>
             <Ionicons name="location" size={20} color={colors.danger} />
@@ -105,13 +105,13 @@ export function TripCard({ trip, onPress, showQuoteAge, warnIfStale }: TripCardP
         <Box style={styles.footer}>
           <Box style={styles.stats}>
             <Box style={styles.statItem}>
-              <Ionicons name="speedometer-outline" size={16} color={colors.muted} />
+              <Ionicons name="speedometer-outline" size={16} color={colors.textSecondary} />
               <Text variant="sub" muted>
                 {formatDistance(trip.routeData.distance ?? 0)}
               </Text>
             </Box>
             <Box style={styles.statItem}>
-              <Ionicons name="time-outline" size={16} color={colors.muted} />
+              <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
               <Text variant="sub" muted>
                 {formatDuration(trip.routeData.duration)}
               </Text>
@@ -125,7 +125,7 @@ export function TripCard({ trip, onPress, showQuoteAge, warnIfStale }: TripCardP
         {/* Driver Info (if assigned) */}
         {trip.driverId && (
           <Box style={styles.driverInfo}>
-            <Ionicons name="person-circle-outline" size={20} color={colors.muted} />
+            <Ionicons name="person-circle-outline" size={20} color={colors.textSecondary} />
             <Text variant="sub" muted>
               Driver assigned
             </Text>

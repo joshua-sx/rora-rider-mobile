@@ -162,7 +162,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: colors.bg,
+		backgroundColor: colors.surface,
 	},
 	header: {
 		paddingHorizontal: space[4],
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
 		width: 96,
 		height: 96,
 		borderRadius: 48,
-		backgroundColor: colors.bg,
+		backgroundColor: colors.surface,
 		alignItems: "center",
 		justifyContent: "center",
 		marginBottom: space[3],

@@ -45,7 +45,7 @@ export function Toast({ message, duration = 3000, onDismiss }: Props) {
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
       <View style={styles.toast}>
-        <Text variant="sub" style={{ color: colors.bg }}>
+        <Text variant="sub" style={{ color: colors.surface }}>
           {message}
         </Text>
       </View>

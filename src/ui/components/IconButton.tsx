@@ -16,6 +16,10 @@ type Props = {
   style?: ViewStyle;
 };
 
+/**
+ * IconButton - Circular button for icons
+ * Use for navigation, actions, or toggles. Always provide accessibilityLabel.
+ */
 export function IconButton({
   onPress,
   disabled,
@@ -53,5 +57,5 @@ const styles = StyleSheet.create({
 const variantStyles: Record<Variant, ViewStyle> = {
   ghost: { backgroundColor: "transparent" },
   soft: { backgroundColor: colors.surface },
-  outline: { backgroundColor: colors.bg, borderWidth: 1, borderColor: colors.border },
+  outline: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
 };

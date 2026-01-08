@@ -242,7 +242,7 @@ export default function ActivityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
   },
   header: {
     paddingHorizontal: space[4],

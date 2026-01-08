@@ -215,7 +215,7 @@ export const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
   },
   scrollContent: {
     flexGrow: 1,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     padding: space[4],
     fontSize: 16,
     color: colors.text,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     marginBottom: space[4],
     minHeight: 52,
   },

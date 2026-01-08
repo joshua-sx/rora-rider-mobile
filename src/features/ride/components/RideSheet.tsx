@@ -264,7 +264,7 @@ export function RideSheet({ bottomInset }: Props) {
 
 const styles = StyleSheet.create({
   background: {
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surface,
     shadowColor: 'transparent',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0,
