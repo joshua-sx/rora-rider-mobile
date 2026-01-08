@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface FavoriteDriversStore {
   favoriteDriverIds: string[];
@@ -8,36 +10,44 @@ interface FavoriteDriversStore {
   toggleFavorite: (driverId: string) => void;
 }
 
-export const useFavoriteDriversStore = create<FavoriteDriversStore>((set, get) => ({
-  favoriteDriverIds: [],
+export const useFavoriteDriversStore = create<FavoriteDriversStore>()(
+  persist(
+    (set, get) => ({
+      favoriteDriverIds: [],
 
-  addFavorite: (driverId) => {
-    set((state) => {
-      if (state.favoriteDriverIds.includes(driverId)) {
-        return state;
-      }
-      return {
-        favoriteDriverIds: [...state.favoriteDriverIds, driverId],
-      };
-    });
-  },
+      addFavorite: (driverId) => {
+        set((state) => {
+          if (state.favoriteDriverIds.includes(driverId)) {
+            return state;
+          }
+          return {
+            favoriteDriverIds: [...state.favoriteDriverIds, driverId],
+          };
+        });
+      },
 
-  removeFavorite: (driverId) => {
-    set((state) => ({
-      favoriteDriverIds: state.favoriteDriverIds.filter((id) => id !== driverId),
-    }));
-  },
+      removeFavorite: (driverId) => {
+        set((state) => ({
+          favoriteDriverIds: state.favoriteDriverIds.filter((id) => id !== driverId),
+        }));
+      },
 
-  isFavorite: (driverId) => {
-    return get().favoriteDriverIds.includes(driverId);
-  },
+      isFavorite: (driverId) => {
+        return get().favoriteDriverIds.includes(driverId);
+      },
 
-  toggleFavorite: (driverId) => {
-    const { isFavorite, addFavorite, removeFavorite } = get();
-    if (isFavorite(driverId)) {
-      removeFavorite(driverId);
-    } else {
-      addFavorite(driverId);
+      toggleFavorite: (driverId) => {
+        const { isFavorite, addFavorite, removeFavorite } = get();
+        if (isFavorite(driverId)) {
+          removeFavorite(driverId);
+        } else {
+          addFavorite(driverId);
+        }
+      },
+    }),
+    {
+      name: 'favorite-drivers-storage',
+      storage: createJSONStorage(() => AsyncStorage),
     }
-  },
-}));
+  )
+);

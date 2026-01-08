@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface SavedLocation {
   id: string;
@@ -23,43 +25,51 @@ interface SavedLocationsStore {
   getWorkLocation: () => SavedLocation | undefined;
 }
 
-export const useSavedLocationsStore = create<SavedLocationsStore>((set, get) => ({
-  locations: [],
+export const useSavedLocationsStore = create<SavedLocationsStore>()(
+  persist(
+    (set, get) => ({
+      locations: [],
 
-  addLocation: (location) => {
-    const newLocation: SavedLocation = {
-      ...location,
-      id: `location-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    set((state) => ({
-      locations: [newLocation, ...state.locations],
-    }));
-  },
+      addLocation: (location) => {
+        const newLocation: SavedLocation = {
+          ...location,
+          id: `location-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => ({
+          locations: [newLocation, ...state.locations],
+        }));
+      },
 
-  updateLocation: (id, updates) => {
-    set((state) => ({
-      locations: state.locations.map((location) =>
-        location.id === id ? { ...location, ...updates } : location
-      ),
-    }));
-  },
+      updateLocation: (id, updates) => {
+        set((state) => ({
+          locations: state.locations.map((location) =>
+            location.id === id ? { ...location, ...updates } : location
+          ),
+        }));
+      },
 
-  removeLocation: (id) => {
-    set((state) => ({
-      locations: state.locations.filter((location) => location.id !== id),
-    }));
-  },
+      removeLocation: (id) => {
+        set((state) => ({
+          locations: state.locations.filter((location) => location.id !== id),
+        }));
+      },
 
-  getLocationByLabel: (label) => {
-    return get().locations.find((location) => location.label === label);
-  },
+      getLocationByLabel: (label) => {
+        return get().locations.find((location) => location.label === label);
+      },
 
-  getHomeLocation: () => {
-    return get().locations.find((location) => location.label === 'Home');
-  },
+      getHomeLocation: () => {
+        return get().locations.find((location) => location.label === 'Home');
+      },
 
-  getWorkLocation: () => {
-    return get().locations.find((location) => location.label === 'Work');
-  },
-}));
+      getWorkLocation: () => {
+        return get().locations.find((location) => location.label === 'Work');
+      },
+    }),
+    {
+      name: 'saved-locations-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
