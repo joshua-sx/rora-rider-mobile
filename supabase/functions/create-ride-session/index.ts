@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { generateQRToken, getNumericDate } from '../_shared/jwt-helpers.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -153,11 +154,25 @@ serve(async (req) => {
       actor_type: userId ? 'rider' : 'system',
     })
 
+    // Generate signed QR token JWT (10-minute expiry)
+    const qrToken = await generateQRToken({
+      jti: qrTokenJti,
+      ride_session_id: rideSession.id,
+      rider_user_id: rideSession.rider_user_id,
+      guest_token_id: rideSession.guest_token_id,
+      driver_user_id: null,  // Not selected yet
+      fare_amount: rideSession.rora_fare_amount,
+      iat: getNumericDate(new Date()),
+      exp: getNumericDate(new Date(Date.now() + 10 * 60 * 1000)), // 10 minutes
+      ver: '1'
+    })
+
     return new Response(
       JSON.stringify({
         success: true,
         ride_session: rideSession,
         qr_token_jti: qrTokenJti,
+        qr_token: qrToken,  // Return full JWT for client to display in QR code
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )

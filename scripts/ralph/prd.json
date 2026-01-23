@@ -1,0 +1,20 @@
+{
+  "project": "Rora Ride",
+  "branchName": "ralph/test-setup",
+  "description": "Test PRD to verify Ralph setup",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Test story - verify Ralph can read PRD",
+      "description": "As a developer, I want to verify Ralph can read and process prd.json correctly.",
+      "acceptanceCriteria": [
+        "Ralph script starts without errors",
+        "Ralph can read prd.json file",
+        "Ralph reports iteration started"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
