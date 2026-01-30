@@ -11,6 +11,11 @@ import { RideSheetQR } from './sheets/RideSheetQR';
 import { RideSheetDiscovery } from './sheets/RideSheetDiscovery';
 import { RideSheetOffers } from './sheets/RideSheetOffers';
 import { RideSheetConfirm } from './sheets/RideSheetConfirm';
+import { RideSheetHold } from './sheets/RideSheetHold';
+import { RideSheetDriverConfirmed } from './sheets/RideSheetDriverConfirmed';
+import { RideSheetDriverArrived } from './sheets/RideSheetDriverArrived';
+import { RideSheetActive } from './sheets/RideSheetActive';
+import { RideSheetCompleted } from './sheets/RideSheetCompleted';
 import { colors } from '@/src/ui/tokens/colors';
 import { space } from '@/src/ui/tokens/spacing';
 
@@ -116,9 +121,60 @@ export function RideSheet({ bottomInset }: Props) {
       }
 
       case 'CONFIRMING':
-      case 'MATCHED':
         // Keep last snap points (confirmation is a modal overlay)
         return ['45%'];
+
+      case 'MATCHED': {
+        // Waiting for driver confirmation
+        const collapsedHeight = HANDLE_HEIGHT + CONTENT_PADDING + 140 + bottomSpace;
+        const expandedHeight = Math.min(
+          HANDLE_HEIGHT + CONTENT_PADDING + 450 + bottomSpace,
+          screenHeight * 0.55
+        );
+        return [collapsedHeight, expandedHeight];
+      }
+
+      case 'DRIVER_CONFIRMED': {
+        // Driver on the way
+        const collapsedHeight = HANDLE_HEIGHT + CONTENT_PADDING + 130 + bottomSpace;
+        const peekHeight = HANDLE_HEIGHT + CONTENT_PADDING + 280 + bottomSpace;
+        const expandedHeight = Math.min(
+          HANDLE_HEIGHT + CONTENT_PADDING + 550 + bottomSpace,
+          screenHeight * 0.65
+        );
+        return [collapsedHeight, peekHeight, expandedHeight];
+      }
+
+      case 'DRIVER_ARRIVED': {
+        // Driver arrived, show QR
+        const peekHeight = HANDLE_HEIGHT + CONTENT_PADDING + 340 + bottomSpace;
+        const expandedHeight = Math.min(
+          HANDLE_HEIGHT + CONTENT_PADDING + 520 + bottomSpace,
+          screenHeight * 0.6
+        );
+        return [peekHeight, expandedHeight];
+      }
+
+      case 'ACTIVE': {
+        // Ride in progress
+        const collapsedHeight = HANDLE_HEIGHT + CONTENT_PADDING + 100 + bottomSpace;
+        const peekHeight = HANDLE_HEIGHT + CONTENT_PADDING + 250 + bottomSpace;
+        const expandedHeight = Math.min(
+          HANDLE_HEIGHT + CONTENT_PADDING + 480 + bottomSpace,
+          screenHeight * 0.55
+        );
+        return [collapsedHeight, peekHeight, expandedHeight];
+      }
+
+      case 'COMPLETED': {
+        // Ride complete, show summary
+        const peekHeight = HANDLE_HEIGHT + CONTENT_PADDING + 200 + bottomSpace;
+        const expandedHeight = Math.min(
+          HANDLE_HEIGHT + CONTENT_PADDING + 550 + bottomSpace,
+          screenHeight * 0.7
+        );
+        return [peekHeight, expandedHeight];
+      }
 
       default:
         return ['20%', '55%'];
@@ -146,6 +202,21 @@ export function RideSheet({ bottomInset }: Props) {
         break;
       case 'OFFERS_RECEIVED':
         targetIndex = 1; // Peek (show top offers)
+        break;
+      case 'MATCHED':
+        targetIndex = 1; // Expanded (show driver info)
+        break;
+      case 'DRIVER_CONFIRMED':
+        targetIndex = 2; // Expanded (show all details)
+        break;
+      case 'DRIVER_ARRIVED':
+        targetIndex = 1; // Expanded (show QR prominently)
+        break;
+      case 'ACTIVE':
+        targetIndex = 1; // Peek (show progress)
+        break;
+      case 'COMPLETED':
+        targetIndex = 1; // Expanded (show rating)
         break;
       default:
         targetIndex = 0;
@@ -211,10 +282,49 @@ export function RideSheet({ bottomInset }: Props) {
         );
 
       case 'CONFIRMING':
-      case 'MATCHED':
         // Show offers in background, confirmation is modal overlay
         return (
           <RideSheetOffers
+            animatedIndex={animatedIndex}
+            currentIndex={currentIndex}
+          />
+        );
+
+      case 'MATCHED':
+        return (
+          <RideSheetHold
+            animatedIndex={animatedIndex}
+            currentIndex={currentIndex}
+          />
+        );
+
+      case 'DRIVER_CONFIRMED':
+        return (
+          <RideSheetDriverConfirmed
+            animatedIndex={animatedIndex}
+            currentIndex={currentIndex}
+          />
+        );
+
+      case 'DRIVER_ARRIVED':
+        return (
+          <RideSheetDriverArrived
+            animatedIndex={animatedIndex}
+            currentIndex={currentIndex}
+          />
+        );
+
+      case 'ACTIVE':
+        return (
+          <RideSheetActive
+            animatedIndex={animatedIndex}
+            currentIndex={currentIndex}
+          />
+        );
+
+      case 'COMPLETED':
+        return (
+          <RideSheetCompleted
             animatedIndex={animatedIndex}
             currentIndex={currentIndex}
           />

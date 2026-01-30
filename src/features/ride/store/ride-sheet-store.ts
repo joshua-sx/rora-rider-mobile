@@ -7,9 +7,11 @@ import {
   createRideSession,
   startDiscovery,
   subscribeToRideOffers,
+  subscribeToRideStatus,
   placeDetailsToRideLocation,
   selectOffer,
   cancelRide,
+  fetchRideSession,
 } from '@/src/services/rides.service';
 
 // ============================================================================
@@ -48,7 +50,11 @@ import {
  * DISCOVERING   → Actively searching for drivers
  * OFFERS_RECEIVED → One or more driver offers received
  * CONFIRMING    → User selected an offer, confirming selection
- * MATCHED       → Driver confirmed, transitioning to active ride
+ * MATCHED       → Offer selected, waiting for driver to confirm (server: hold)
+ * DRIVER_CONFIRMED → Driver confirmed the ride (server: confirmed)
+ * DRIVER_ARRIVED → Driver arrived at pickup (server: arrived)
+ * ACTIVE        → Ride in progress (server: active)
+ * COMPLETED     → Ride finished, show summary + rating
  */
 export type RideSheetState =
   | 'IDLE'
@@ -57,7 +63,11 @@ export type RideSheetState =
   | 'DISCOVERING'
   | 'OFFERS_RECEIVED'
   | 'CONFIRMING'
-  | 'MATCHED';
+  | 'MATCHED'
+  | 'DRIVER_CONFIRMED'
+  | 'DRIVER_ARRIVED'
+  | 'ACTIVE'
+  | 'COMPLETED';
 
 /**
  * Extended offer type with driver location for map display
@@ -92,6 +102,22 @@ export interface RideSheetData {
   offers: RideSheetOffer[];
   selectedOffer: RideSheetOffer | null;
 
+  // Driver info (after match)
+  driverName: string | null;
+  driverPhone: string | null;
+  driverPhoto: string | null;
+  driverRating: number | null;
+  vehicleInfo: string | null;
+  vehicleLicensePlate: string | null;
+  driverEta: number | null; // minutes
+  driverLocation: { lat: number; lng: number } | null;
+
+  // Ride progress
+  arrivedAt: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  finalFareAmount: number | null;
+
   // Error state
   error: string | null;
 
@@ -112,7 +138,24 @@ const VALID_TRANSITIONS: Record<RideSheetState, RideSheetState[]> = {
   DISCOVERING: ['IDLE', 'OFFERS_RECEIVED'],
   OFFERS_RECEIVED: ['IDLE', 'CONFIRMING', 'DISCOVERING'],
   CONFIRMING: ['OFFERS_RECEIVED', 'MATCHED'],
-  MATCHED: [], // Terminal state - transitions to active ride flow
+  MATCHED: ['IDLE', 'DRIVER_CONFIRMED', 'OFFERS_RECEIVED'], // Can timeout back to offers
+  DRIVER_CONFIRMED: ['IDLE', 'DRIVER_ARRIVED'],
+  DRIVER_ARRIVED: ['IDLE', 'ACTIVE'],
+  ACTIVE: ['COMPLETED'], // Cannot cancel active ride (admin only)
+  COMPLETED: ['IDLE'], // Terminal - user dismisses to go back to IDLE
+};
+
+/**
+ * Map server ride status to UI state
+ */
+const SERVER_STATUS_TO_UI_STATE: Record<string, RideSheetState> = {
+  hold: 'MATCHED',
+  confirmed: 'DRIVER_CONFIRMED',
+  arrived: 'DRIVER_ARRIVED',
+  active: 'ACTIVE',
+  completed: 'COMPLETED',
+  canceled: 'IDLE',
+  expired: 'IDLE',
 };
 
 /**
@@ -125,6 +168,7 @@ interface RideSheetStore {
 
   // Subscription cleanup
   _offersUnsubscribe: (() => void) | null;
+  _statusUnsubscribe: (() => void) | null;
 
   // Route actions
   setRoute: (
@@ -152,6 +196,13 @@ interface RideSheetStore {
   confirmRide: () => Promise<boolean>;
   backToOffers: () => void;
 
+  // Server status sync
+  handleServerStatusChange: (status: string) => void;
+  refreshRideSession: () => Promise<void>;
+
+  // Completion actions
+  dismissCompletion: () => void;
+
   // Cancel/reset actions
   cancel: () => void;
   reset: () => void;
@@ -159,6 +210,7 @@ interface RideSheetStore {
   // Internal helpers
   _transition: (newState: RideSheetState) => boolean;
   _cleanupSubscriptions: () => void;
+  _subscribeToStatus: () => void;
 }
 
 // ============================================================================
@@ -178,6 +230,18 @@ const initialData: RideSheetData = {
   discoveryStartedAt: null,
   offers: [],
   selectedOffer: null,
+  driverName: null,
+  driverPhone: null,
+  driverPhoto: null,
+  driverRating: null,
+  vehicleInfo: null,
+  vehicleLicensePlate: null,
+  driverEta: null,
+  driverLocation: null,
+  arrivedAt: null,
+  startedAt: null,
+  completedAt: null,
+  finalFareAmount: null,
   error: null,
   isGeneratingQR: false,
   isStartingDiscovery: false,
@@ -193,6 +257,7 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
   state: 'IDLE',
   data: { ...initialData },
   _offersUnsubscribe: null,
+  _statusUnsubscribe: null,
 
   // -------------------------------------------------------------------------
   // Internal: State transition with validation
@@ -216,11 +281,41 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
   // Internal: Cleanup realtime subscriptions
   // -------------------------------------------------------------------------
   _cleanupSubscriptions: () => {
-    const unsubscribe = get()._offersUnsubscribe;
-    if (unsubscribe) {
-      unsubscribe();
+    const offersUnsub = get()._offersUnsubscribe;
+    if (offersUnsub) {
+      offersUnsub();
       set({ _offersUnsubscribe: null });
     }
+    const statusUnsub = get()._statusUnsubscribe;
+    if (statusUnsub) {
+      statusUnsub();
+      set({ _statusUnsubscribe: null });
+    }
+  },
+
+  // -------------------------------------------------------------------------
+  // Internal: Subscribe to ride status changes
+  // -------------------------------------------------------------------------
+  _subscribeToStatus: () => {
+    const { data, _statusUnsubscribe } = get();
+
+    // Cleanup existing subscription
+    if (_statusUnsubscribe) {
+      _statusUnsubscribe();
+    }
+
+    if (!data.rideSessionId) {
+      return;
+    }
+
+    const subscription = subscribeToRideStatus(
+      data.rideSessionId,
+      (status) => {
+        get().handleServerStatusChange(status);
+      }
+    );
+
+    set({ _statusUnsubscribe: subscription.unsubscribe });
   },
 
   // -------------------------------------------------------------------------
@@ -589,14 +684,32 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
         return false;
       }
 
+      // Extract driver info from selected offer
+      const offer = data.selectedOffer;
+      const driverProfile = offer?.driver_profile;
+
       set({
         data: {
           ...get().data,
           isConfirmingRide: false,
+          driverName: driverProfile?.display_name || 'Your Driver',
+          driverPhoto: driverProfile?.avatar_url || null,
+          driverRating: driverProfile?.rating_average || null,
+          vehicleInfo: driverProfile
+            ? `${driverProfile.vehicle_make || ''} ${driverProfile.vehicle_model || ''}`.trim()
+            : null,
+          finalFareAmount: response.final_fare_amount || offer?.offered_amount || data.fareAmount,
         },
       });
 
-      return _transition('MATCHED');
+      const transitioned = _transition('MATCHED');
+
+      // Start listening for status changes (driver confirms, arrives, etc.)
+      if (transitioned) {
+        get()._subscribeToStatus();
+      }
+
+      return transitioned;
     } catch (error) {
       set({
         data: {
@@ -630,15 +743,125 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
   },
 
   // -------------------------------------------------------------------------
+  // Server Status: Handle status changes from realtime subscription
+  // -------------------------------------------------------------------------
+  handleServerStatusChange: (status: string) => {
+    const { state, data } = get();
+    const newUiState = SERVER_STATUS_TO_UI_STATE[status];
+
+    if (!newUiState) {
+      console.warn(
+        `[ride-sheet-store] Unknown server status: ${status}`
+      );
+      return;
+    }
+
+    // If canceled or expired, reset to IDLE
+    if (newUiState === 'IDLE') {
+      get()._cleanupSubscriptions();
+      set({
+        state: 'IDLE',
+        data: { ...initialData },
+      });
+      return;
+    }
+
+    // Update state based on server status
+    // We bypass normal transition validation since server is authoritative
+    console.log(
+      `[ride-sheet-store] Server status change: ${status} -> UI state: ${newUiState}`
+    );
+
+    // Update timestamps based on status
+    const updates: Partial<RideSheetData> = {};
+    if (status === 'arrived' && !data.arrivedAt) {
+      updates.arrivedAt = new Date().toISOString();
+    }
+    if (status === 'active' && !data.startedAt) {
+      updates.startedAt = new Date().toISOString();
+    }
+    if (status === 'completed' && !data.completedAt) {
+      updates.completedAt = new Date().toISOString();
+    }
+
+    set({
+      state: newUiState,
+      data: { ...data, ...updates },
+    });
+  },
+
+  // -------------------------------------------------------------------------
+  // Refresh: Fetch latest ride session data from server
+  // -------------------------------------------------------------------------
+  refreshRideSession: async () => {
+    const { data } = get();
+
+    if (!data.rideSessionId) {
+      return;
+    }
+
+    try {
+      const response = await fetchRideSession(data.rideSessionId);
+
+      if (response.success && response.ride_session) {
+        const session = response.ride_session;
+
+        // Update driver info if available
+        set({
+          data: {
+            ...get().data,
+            arrivedAt: session.arrived_at || null,
+            completedAt: session.completed_at || null,
+            finalFareAmount: session.final_agreed_amount || null,
+          },
+        });
+
+        // Sync UI state with server status
+        if (session.status) {
+          get().handleServerStatusChange(session.status);
+        }
+      }
+    } catch (error) {
+      console.error('[ride-sheet-store] Failed to refresh ride session:', error);
+    }
+  },
+
+  // -------------------------------------------------------------------------
+  // Completion: Dismiss completion screen and reset
+  // -------------------------------------------------------------------------
+  dismissCompletion: () => {
+    const { state, _cleanupSubscriptions } = get();
+
+    if (state !== 'COMPLETED') {
+      return;
+    }
+
+    _cleanupSubscriptions();
+
+    set({
+      state: 'IDLE',
+      data: { ...initialData },
+    });
+  },
+
+  // -------------------------------------------------------------------------
   // Cancel: Cancel current flow and return to IDLE
   // -------------------------------------------------------------------------
   cancel: () => {
     const { state, data, _cleanupSubscriptions } = get();
 
-    // Cannot cancel from MATCHED (would need separate cancellation flow)
-    if (state === 'MATCHED') {
+    // Cannot cancel from ACTIVE (would need admin intervention)
+    if (state === 'ACTIVE') {
       console.warn(
-        '[ride-sheet-store] Cannot cancel from MATCHED state'
+        '[ride-sheet-store] Cannot cancel active ride - contact support'
+      );
+      return;
+    }
+
+    // Cannot cancel from COMPLETED
+    if (state === 'COMPLETED') {
+      console.warn(
+        '[ride-sheet-store] Cannot cancel completed ride'
       );
       return;
     }
@@ -670,6 +893,7 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
       state: 'IDLE',
       data: { ...initialData },
       _offersUnsubscribe: null,
+      _statusUnsubscribe: null,
     });
   },
 }));

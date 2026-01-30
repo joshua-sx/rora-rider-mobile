@@ -60,6 +60,14 @@ export const colors = {
   skeleton: "#E5E7EB",
 
   // ============================================================================
+  // SEMANTIC COLORS (for component states)
+  // ============================================================================
+  primaryMuted: "#F5F5F5", // Muted primary backgrounds
+  successMuted: "#DCFCE7", // Alias for successLight
+  onPrimary: "#FFFFFF", // Text on primary background
+  backgroundAlt: "#F3F4F6", // Alternative background for sections
+
+  // ============================================================================
   // LEGACY ALIASES (for backward compatibility - deprecate over time)
   // ============================================================================
   bg: "#FFFFFF", // Use surface instead
