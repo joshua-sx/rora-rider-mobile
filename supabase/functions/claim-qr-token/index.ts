@@ -13,10 +13,42 @@ const corsHeaders = {
  * Validates a QR token JWT when driver scans it and returns ride details.
  * Implements 10-step validation checklist from docs/features/qr-token-spec.md
  *
- * Security: Prevents replay attacks, validates token expiry and signature.
- * IMPORTANT: This does NOT auto-transition ride state. Driver must explicitly
- * call activate-ride after successful QR claim.
+ * Security:
+ * - Prevents replay attacks, validates token expiry and signature
+ * - Requires ride to be in 'arrived' state (driver must have marked arrival first)
+ * - Validates driver is within 500m of pickup location (geofence)
+ *
+ * Flow: Driver marks arrival → Driver scans QR → This function validates →
+ *       activate-ride transitions to 'active'
  */
+
+// Haversine distance calculation (in meters)
+function calculateHaversineDistanceMeters(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const EARTH_RADIUS_METERS = 6371000
+  const toRadians = (degrees: number) => degrees * (Math.PI / 180)
+
+  const dLat = toRadians(lat2 - lat1)
+  const dLng = toRadians(lng2 - lng1)
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2)
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+  return EARTH_RADIUS_METERS * c
+}
+
+// Maximum distance (in meters) driver can be from pickup to scan QR
+const MAX_GEOFENCE_DISTANCE_METERS = 500
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -25,7 +57,7 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization')
-    const { qr_token_jwt } = await req.json()
+    const { qr_token_jwt, driver_location } = await req.json()
 
     // Validate required fields
     if (!qr_token_jwt) {
@@ -115,13 +147,13 @@ serve(async (req) => {
       )
     }
 
-    // Step 6: Validate ride exists and is in allowed state (hold or confirmed)
-    const allowedStates = ['hold', 'confirmed']
-    if (!allowedStates.includes(rideSession.status)) {
+    // Step 6: Validate ride exists and is in 'arrived' state
+    // Driver must have marked arrival before scanning QR (mark-driver-arrived function)
+    if (rideSession.status !== 'arrived') {
       return new Response(
         JSON.stringify({
           success: false,
-          error: `INVALID_RIDE_STATE: Ride must be in 'hold' or 'confirmed' state to scan QR. Current state: '${rideSession.status}'`
+          error: `INVALID_RIDE_STATE: Ride must be in 'arrived' state to scan QR. Current state: '${rideSession.status}'. Driver must mark arrival first.`
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
@@ -170,7 +202,33 @@ serve(async (req) => {
       )
     }
 
-    // Step 8: Check token has not been claimed (replay prevention)
+    // Step 8: Verify driver within 500m geofence of pickup location
+    // This prevents QR scanning from a distance (security requirement)
+    if (driver_location?.lat && driver_location?.lng) {
+      const distanceMeters = calculateHaversineDistanceMeters(
+        driver_location.lat,
+        driver_location.lng,
+        parseFloat(rideSession.origin_lat),
+        parseFloat(rideSession.origin_lng)
+      )
+
+      if (distanceMeters > MAX_GEOFENCE_DISTANCE_METERS) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: `GEOFENCE_VIOLATION: Driver must be within ${MAX_GEOFENCE_DISTANCE_METERS}m of pickup location. Current distance: ${Math.round(distanceMeters)}m`,
+            distance_meters: Math.round(distanceMeters),
+            max_allowed_meters: MAX_GEOFENCE_DISTANCE_METERS,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        )
+      }
+    }
+    // Note: If driver_location is not provided, we skip geofence check
+    // This allows for cases where GPS is unavailable, but the QR scan itself
+    // is still validated. In production, you may want to require location.
+
+    // Step 10: Check token has not been claimed (replay prevention)
     if (rideSession.qr_claimed_at) {
       return new Response(
         JSON.stringify({
@@ -183,7 +241,7 @@ serve(async (req) => {
       )
     }
 
-    // Step 9: Atomic write - Set claim fields + log event
+    // Step 11: Atomic write - Set claim fields + log event (prevent race conditions)
     const claimedAt = new Date().toISOString()
 
     const { error: updateError } = await supabaseService
@@ -220,7 +278,7 @@ serve(async (req) => {
       actor_type: 'driver',
     })
 
-    // Step 10: Return ride details (success)
+    // Step 12: Return ride details (success)
     // Get rider name if authenticated
     let riderName = null
     if (rideSession.rider_user_id) {

@@ -356,3 +356,474 @@ export async function fetchRideOffers(rideSessionId: string): Promise<FetchRideO
     return { success: false, offers: [], error: errorMessage };
   }
 }
+
+// =============================================================================
+// OFFER SELECTION
+// =============================================================================
+
+/**
+ * Select offer response
+ */
+export interface SelectOfferResponse {
+  success: boolean;
+  ride_session_id?: string;
+  offer_id?: string;
+  driver_user_id?: string;
+  final_fare_amount?: number;
+  new_status?: string;
+  error?: string;
+}
+
+/**
+ * Select (accept) a driver's offer
+ *
+ * This calls the select-offer Edge Function which:
+ * - Validates the rider owns the ride session
+ * - Validates the ride is in 'discovery' state
+ * - Validates the offer is still pending and not expired
+ * - Accepts the selected offer and rejects all others
+ * - Transitions ride to 'hold' state
+ * - Notifies the selected driver
+ */
+export async function selectOffer(
+  rideSessionId: string,
+  offerId: string
+): Promise<SelectOfferResponse> {
+  if (!isSupabaseConfigured()) {
+    console.warn('[rides.service] Supabase not configured, returning mock response');
+    return {
+      success: true,
+      ride_session_id: rideSessionId,
+      offer_id: offerId,
+      new_status: 'hold',
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('select-offer', {
+      body: {
+        ride_session_id: rideSessionId,
+        offer_id: offerId,
+      },
+    });
+
+    if (error) {
+      console.error('[rides.service] Failed to select offer:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return data as SelectOfferResponse;
+  } catch (error) {
+    console.error('[rides.service] Error selecting offer:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// =============================================================================
+// RIDE CANCELLATION
+// =============================================================================
+
+/**
+ * Cancel ride response
+ */
+export interface CancelRideResponse {
+  success: boolean;
+  ride_session_id?: string;
+  previous_status?: string;
+  new_status?: string;
+  error?: string;
+}
+
+/**
+ * Cancel a ride session
+ *
+ * This calls the cancel-ride Edge Function which:
+ * - Validates the rider/guest owns the ride session
+ * - Validates the ride is in a cancelable state (created, discovery, hold)
+ * - Transitions ride to 'canceled' state
+ * - Rejects any pending/accepted offers
+ * - Notifies affected driver (if any)
+ */
+export async function cancelRide(
+  rideSessionId: string,
+  reason?: string
+): Promise<CancelRideResponse> {
+  if (!isSupabaseConfigured()) {
+    console.warn('[rides.service] Supabase not configured, returning mock response');
+    return {
+      success: true,
+      ride_session_id: rideSessionId,
+      previous_status: 'discovery',
+      new_status: 'canceled',
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('cancel-ride', {
+      body: {
+        ride_session_id: rideSessionId,
+        reason,
+      },
+    });
+
+    if (error) {
+      console.error('[rides.service] Failed to cancel ride:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return data as CancelRideResponse;
+  } catch (error) {
+    console.error('[rides.service] Error canceling ride:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// =============================================================================
+// RIDE SESSION FETCHING
+// =============================================================================
+
+/**
+ * Fetch ride session response
+ */
+export interface FetchRideSessionResponse {
+  success: boolean;
+  ride_session?: RideSession & {
+    selected_driver_id?: string | null;
+    selected_offer_id?: string | null;
+    final_agreed_amount?: number | null;
+    arrived_at?: string | null;
+    confirmed_at?: string | null;
+    completed_at?: string | null;
+  };
+  error?: string;
+}
+
+/**
+ * Fetch a single ride session by ID
+ */
+export async function fetchRideSession(
+  rideSessionId: string
+): Promise<FetchRideSessionResponse> {
+  if (!isSupabaseConfigured()) {
+    console.warn('[rides.service] Supabase not configured');
+    return {
+      success: false,
+      error: 'Supabase not configured',
+    };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('ride_sessions')
+      .select('*')
+      .eq('id', rideSessionId)
+      .single();
+
+    if (error) {
+      console.error('[rides.service] Failed to fetch ride session:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: true,
+      ride_session: data as FetchRideSessionResponse['ride_session'],
+    };
+  } catch (error) {
+    console.error('[rides.service] Error fetching ride session:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// =============================================================================
+// DRIVER ARRIVAL (for driver app, but useful for testing)
+// =============================================================================
+
+/**
+ * Mark driver arrived response
+ */
+export interface MarkDriverArrivedResponse {
+  success: boolean;
+  ride_session_id?: string;
+  new_status?: string;
+  arrived_at?: string;
+  message?: string;
+  error?: string;
+}
+
+/**
+ * Mark driver as arrived at pickup location
+ *
+ * This calls the mark-driver-arrived Edge Function which:
+ * - Validates the driver is the selected driver
+ * - Validates the ride is in 'confirmed' state
+ * - Transitions ride to 'arrived' state
+ * - Notifies the rider
+ */
+export async function markDriverArrived(
+  rideSessionId: string,
+  driverLocation?: { lat: number; lng: number }
+): Promise<MarkDriverArrivedResponse> {
+  if (!isSupabaseConfigured()) {
+    console.warn('[rides.service] Supabase not configured, returning mock response');
+    return {
+      success: true,
+      ride_session_id: rideSessionId,
+      new_status: 'arrived',
+      arrived_at: new Date().toISOString(),
+      message: 'Driver arrival marked (mock)',
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('mark-driver-arrived', {
+      body: {
+        ride_session_id: rideSessionId,
+        driver_location: driverLocation,
+      },
+    });
+
+    if (error) {
+      console.error('[rides.service] Failed to mark driver arrived:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return data as MarkDriverArrivedResponse;
+  } catch (error) {
+    console.error('[rides.service] Error marking driver arrived:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// =============================================================================
+// QR TOKEN CLAIM (for driver app, but useful for testing)
+// =============================================================================
+
+/**
+ * Claim QR token response
+ */
+export interface ClaimQRTokenResponse {
+  success: boolean;
+  ride_session?: {
+    id: string;
+    status: string;
+    origin_label: string;
+    destination_label: string;
+    final_agreed_amount: number | null;
+    rider_name: string;
+    is_guest: boolean;
+    qr_claimed_at: string;
+  };
+  message?: string;
+  error?: string;
+  distance_meters?: number;
+  max_allowed_meters?: number;
+}
+
+/**
+ * Claim (validate) a QR token
+ *
+ * This calls the claim-qr-token Edge Function which:
+ * - Validates the JWT token signature and expiry
+ * - Validates the ride is in 'arrived' state
+ * - Validates the driver is the selected driver
+ * - Validates the driver is within 500m geofence (if location provided)
+ * - Marks the QR as claimed (preventing replay attacks)
+ */
+export async function claimQRToken(
+  qrTokenJwt: string,
+  driverLocation?: { lat: number; lng: number }
+): Promise<ClaimQRTokenResponse> {
+  if (!isSupabaseConfigured()) {
+    console.warn('[rides.service] Supabase not configured, returning mock response');
+    return {
+      success: true,
+      ride_session: {
+        id: 'mock-ride-session',
+        status: 'arrived',
+        origin_label: 'Mock Origin',
+        destination_label: 'Mock Destination',
+        final_agreed_amount: 20,
+        rider_name: 'Mock Rider',
+        is_guest: false,
+        qr_claimed_at: new Date().toISOString(),
+      },
+      message: 'QR token validated (mock)',
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('claim-qr-token', {
+      body: {
+        qr_token_jwt: qrTokenJwt,
+        driver_location: driverLocation,
+      },
+    });
+
+    if (error) {
+      console.error('[rides.service] Failed to claim QR token:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return data as ClaimQRTokenResponse;
+  } catch (error) {
+    console.error('[rides.service] Error claiming QR token:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// =============================================================================
+// RIDE ACTIVATION (for driver app, but useful for testing)
+// =============================================================================
+
+/**
+ * Activate ride response
+ */
+export interface ActivateRideResponse {
+  success: boolean;
+  ride_session_id?: string;
+  new_status?: string;
+  error?: string;
+}
+
+/**
+ * Activate a ride (start the trip)
+ *
+ * This calls the activate-ride Edge Function which:
+ * - Validates the driver is the selected driver
+ * - Validates the ride is in 'arrived' state
+ * - Validates the QR was claimed
+ * - Transitions ride to 'active' state
+ * - Notifies the rider
+ */
+export async function activateRide(
+  rideSessionId: string
+): Promise<ActivateRideResponse> {
+  if (!isSupabaseConfigured()) {
+    console.warn('[rides.service] Supabase not configured, returning mock response');
+    return {
+      success: true,
+      ride_session_id: rideSessionId,
+      new_status: 'active',
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('activate-ride', {
+      body: {
+        ride_session_id: rideSessionId,
+      },
+    });
+
+    if (error) {
+      console.error('[rides.service] Failed to activate ride:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return data as ActivateRideResponse;
+  } catch (error) {
+    console.error('[rides.service] Error activating ride:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// =============================================================================
+// RIDE COMPLETION (for driver app, but useful for testing)
+// =============================================================================
+
+/**
+ * Complete ride response
+ */
+export interface CompleteRideResponse {
+  success: boolean;
+  ride_session_id?: string;
+  new_status?: string;
+  completed_at?: string;
+  final_agreed_amount?: number;
+  error?: string;
+}
+
+/**
+ * Complete a ride
+ *
+ * This calls the complete-ride Edge Function which:
+ * - Validates the driver is the selected driver
+ * - Validates the ride is in 'active' state
+ * - Transitions ride to 'completed' state
+ * - Notifies the rider
+ */
+export async function completeRide(
+  rideSessionId: string,
+  finalAgreedAmount?: number
+): Promise<CompleteRideResponse> {
+  if (!isSupabaseConfigured()) {
+    console.warn('[rides.service] Supabase not configured, returning mock response');
+    return {
+      success: true,
+      ride_session_id: rideSessionId,
+      new_status: 'completed',
+      completed_at: new Date().toISOString(),
+      final_agreed_amount: finalAgreedAmount ?? 20,
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('complete-ride', {
+      body: {
+        ride_session_id: rideSessionId,
+        final_agreed_amount: finalAgreedAmount,
+      },
+    });
+
+    if (error) {
+      console.error('[rides.service] Failed to complete ride:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return data as CompleteRideResponse;
+  } catch (error) {
+    console.error('[rides.service] Error completing ride:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
