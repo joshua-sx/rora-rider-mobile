@@ -61,8 +61,10 @@ export default function OffersScreen() {
     }
 
     const loadOffers = async () => {
-      const data = await fetchRideOffers(rideSessionId);
-      setOffers(data);
+      const result = await fetchRideOffers(rideSessionId);
+      if (result.success) {
+        setOffers(result.offers);
+      }
       setLoading(false);
     };
 
