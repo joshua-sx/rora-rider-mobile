@@ -7,9 +7,10 @@ const corsHeaders = {
 }
 
 /**
- * Valid states from which a ride can be canceled
+ * Valid states from which a ride can be canceled by rider
+ * Note: 'active' can only be canceled by admin (not included here)
  */
-const CANCELABLE_STATES = ['created', 'discovery', 'hold']
+const CANCELABLE_STATES = ['created', 'discovery', 'hold', 'confirmed', 'arrived']
 
 /**
  * Cancel Ride Edge Function
