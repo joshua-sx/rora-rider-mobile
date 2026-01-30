@@ -10,10 +10,14 @@ const corsHeaders = {
  * Activate Ride Edge Function
  *
  * Allows a driver to mark a ride as active (started).
- * State transition: confirmed → active
+ * State transition: arrived → active
  *
- * Security: Only the selected driver can activate their own ride.
- * Can be called automatically after QR scan OR manually by driver.
+ * Flow: Driver marks arrival → Driver scans QR (claim-qr-token) → This function activates ride
+ *
+ * Security:
+ * - Only the selected driver can activate their own ride
+ * - Ride must be in 'arrived' state (driver must have marked arrival first)
+ * - QR must have been claimed (validated) before activation
  */
 serve(async (req) => {
   // Handle CORS preflight
@@ -86,12 +90,24 @@ serve(async (req) => {
       )
     }
 
-    // Validate state transition (confirmed → active)
-    if (rideSession.status !== 'confirmed') {
+    // Validate state transition (arrived → active)
+    // Driver must have marked arrival (mark-driver-arrived) before activating
+    if (rideSession.status !== 'arrived') {
       return new Response(
         JSON.stringify({
           success: false,
-          error: `INVALID_STATE_TRANSITION: Cannot activate from '${rideSession.status}' state. Expected 'confirmed'.`
+          error: `INVALID_STATE_TRANSITION: Cannot activate from '${rideSession.status}' state. Expected 'arrived'. Driver must mark arrival first.`
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
+
+    // Validate QR was claimed (required before activation)
+    if (!rideSession.qr_claimed_at) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'QR_NOT_CLAIMED: QR code must be scanned before activating the ride.'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
@@ -116,8 +132,9 @@ serve(async (req) => {
       event_type: 'ride_started',
       event_data: {
         driver_user_id: driverId,
-        status_from: 'confirmed',
+        status_from: 'arrived',
         final_agreed_amount: rideSession.final_agreed_amount,
+        qr_claimed_at: rideSession.qr_claimed_at,
       },
       actor_user_id: driverId,
       actor_type: 'driver',
@@ -158,12 +175,12 @@ serve(async (req) => {
       }
 
       // Create in-app notification
-      await supabaseService.from('notifications').insert({
+      await supabaseService.from('notifications_inbox').insert({
         user_id: rideSession.rider_user_id,
         type: 'ride_started',
         title: 'Ride Started',
-        message: 'Your ride has started. Enjoy your trip!',
-        data: {
+        body: 'Your ride has started. Enjoy your trip!',
+        metadata: {
           ride_session_id: ride_session_id,
         },
       })
