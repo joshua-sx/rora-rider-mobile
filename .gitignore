@@ -45,5 +45,4 @@ app-example
 /ios
 /android
 
-.env.local
 .cursor/worktrees.json
