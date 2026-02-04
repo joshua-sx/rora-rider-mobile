@@ -48,10 +48,14 @@ space[8]  // 40px  - Large
 
 ### Typography
 ```tsx
-type.title  // 20px / 26px - Headings
-type.body   // 16px / 22px - Body text
-type.sub    // 14px / 20px - Secondary text
-type.cap    // 12px / 16px - Captions
+type.display   // 28px / 34px - Hero moments, impact screens
+type.title     // 24px / 30px - Page titles, section headers
+type.headline  // 16px / 22px - Card titles, buttons, nav titles
+type.body      // 16px / 24px - Primary content
+type.caption   // 14px / 20px - Secondary text, list titles
+type.small     // 13px / 18px - List descriptions, helper text
+type.footnote  // 12px / 16px - Timestamps, tertiary info
+type.overline  // 11px / 14px - Labels, badges, tab bar
 ```
 
 ### Radius
@@ -73,10 +77,14 @@ shadow.lg  // Prominent elevation
 
 ### Text
 ```tsx
-<Text variant="title">Heading</Text>
+<Text variant="display">Hero Text</Text>
+<Text variant="title">Page Title</Text>
+<Text variant="headline">Card Title</Text>
 <Text variant="body">Body text</Text>
-<Text variant="sub" muted>Secondary</Text>
-<Text variant="cap">Caption</Text>
+<Text variant="caption">Secondary text</Text>
+<Text variant="small" muted>Helper text</Text>
+<Text variant="footnote" muted>Timestamp</Text>
+<Text variant="overline">LABEL</Text>
 ```
 
 ### Button

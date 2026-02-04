@@ -2,8 +2,17 @@
  * Typography System
  * Rora Mobile Design System
  *
- * Minimal scale: 4 sizes + 1 utility + price variants
- * Never use more than 2 font weights on a single screen.
+ * Scale based on DesignMe mobile UI guidelines:
+ * - Display (28px): Hero moments, impact screens
+ * - Title (24px): Page titles, section headers
+ * - Headline (16px): Card titles, buttons, nav titles
+ * - Body (16px): Primary content
+ * - Caption (14px): Secondary text, list item titles
+ * - Small (13px): List descriptions, helper text
+ * - Footnote (12px): Timestamps, tertiary info
+ * - Overline (11px): Labels, badges, tab bar
+ *
+ * Never use more than 2-3 font weights on a single screen.
  */
 
 export const type = {
@@ -11,26 +20,35 @@ export const type = {
   // PRIMARY SCALE (use these)
   // ============================================================================
 
-  // Title - Screen titles, section headers (22px Bold)
-  title: { fontSize: 22, lineHeight: 28, fontWeight: "700" as const },
+  // Display - Hero moments, impact screens, confirmations (28px Bold)
+  display: { fontSize: 28, lineHeight: 34, fontWeight: "700" as const },
 
-  // Headline - Card titles, button labels, emphasis (16px SemiBold)
+  // Title - Page titles, section headers (24px Bold)
+  title: { fontSize: 24, lineHeight: 30, fontWeight: "700" as const },
+
+  // Headline - Card titles, button labels, nav titles (16px SemiBold)
   headline: { fontSize: 16, lineHeight: 22, fontWeight: "600" as const },
 
-  // Body - Default text, descriptions (16px Regular)
+  // Body - Primary content, descriptions (16px Regular)
   body: { fontSize: 16, lineHeight: 24, fontWeight: "400" as const },
 
-  // Caption - Secondary info, metadata, timestamps (14px Regular)
+  // Caption - Secondary text, list item titles (14px Regular)
   caption: { fontSize: 14, lineHeight: 20, fontWeight: "400" as const },
 
-  // Overline - Labels, badges, category tags (11px SemiBold)
-  overline: { fontSize: 11, lineHeight: 14, fontWeight: "600" as const, letterSpacing: 0.5 },
+  // Small - List descriptions, helper text (13px Regular)
+  small: { fontSize: 13, lineHeight: 18, fontWeight: "400" as const },
+
+  // Footnote - Timestamps, tertiary info, metadata (12px Regular)
+  footnote: { fontSize: 12, lineHeight: 16, fontWeight: "400" as const },
+
+  // Overline - Labels, badges, tab bar labels (11px Medium)
+  overline: { fontSize: 11, lineHeight: 14, fontWeight: "500" as const, letterSpacing: 0.5 },
 
   // ============================================================================
   // PRICE TYPOGRAPHY (special use)
   // ============================================================================
 
-  // Price Display - Hero prices, fare display (32px Bold = 2x body)
+  // Price Display - Hero prices, fare display (32px Bold)
   priceDisplay: { fontSize: 32, lineHeight: 40, fontWeight: "700" as const },
 
   // Price Card - Prices on offer cards (24px Bold)
@@ -44,12 +62,11 @@ export const type = {
   // ============================================================================
 
   // Map old names to new scale
-  display: { fontSize: 32, lineHeight: 40, fontWeight: "700" as const }, // Use priceDisplay
-  title1: { fontSize: 22, lineHeight: 28, fontWeight: "700" as const }, // Use title
-  title2: { fontSize: 22, lineHeight: 28, fontWeight: "600" as const }, // Use title
-  title3: { fontSize: 18, lineHeight: 24, fontWeight: "600" as const }, // Use headline or title
+  title1: { fontSize: 24, lineHeight: 30, fontWeight: "700" as const }, // Use title
+  title2: { fontSize: 24, lineHeight: 30, fontWeight: "600" as const }, // Use title
+  title3: { fontSize: 18, lineHeight: 24, fontWeight: "600" as const }, // Use headline
   bodySmall: { fontSize: 14, lineHeight: 20, fontWeight: "400" as const }, // Use caption
   h2: { fontSize: 18, lineHeight: 24, fontWeight: "600" as const }, // Use headline
   sub: { fontSize: 14, lineHeight: 20, fontWeight: "400" as const }, // Use caption
-  cap: { fontSize: 12, lineHeight: 16, fontWeight: "400" as const }, // Use caption
+  cap: { fontSize: 12, lineHeight: 16, fontWeight: "400" as const }, // Use footnote
 } as const;
