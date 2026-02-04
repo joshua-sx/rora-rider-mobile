@@ -12,7 +12,8 @@ type Props = TextProps & {
 
 /**
  * Text - Typography primitive
- * Variants: title, body, sub, cap
+ * Primary variants: display, title, headline, body, caption, small, footnote, overline
+ * Price variants: priceDisplay, priceCard, priceList
  */
 export function Text({ variant = "body", muted, style, ...rest }: Props) {
   return (

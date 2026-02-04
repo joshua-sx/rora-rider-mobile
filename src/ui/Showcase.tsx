@@ -56,10 +56,14 @@ export function Showcase() {
 
       {/* Typography */}
       <Section title="Typography">
-        <Text variant="title">Title (20px / 26px)</Text>
-        <Text variant="body">Body text (16px / 22px)</Text>
-        <Text variant="sub">Subtitle (14px / 20px)</Text>
-        <Text variant="cap">Caption (12px / 16px)</Text>
+        <Text variant="display">Display (28px) - Hero moments</Text>
+        <Text variant="title">Title (24px) - Page titles</Text>
+        <Text variant="headline">Headline (16px) - Card titles, buttons</Text>
+        <Text variant="body">Body (16px) - Primary content</Text>
+        <Text variant="caption">Caption (14px) - Secondary text</Text>
+        <Text variant="small">Small (13px) - Helper text</Text>
+        <Text variant="footnote">Footnote (12px) - Timestamps</Text>
+        <Text variant="overline">OVERLINE (11px) - LABELS</Text>
         <Text variant="body" muted>
           Muted text variant
         </Text>
