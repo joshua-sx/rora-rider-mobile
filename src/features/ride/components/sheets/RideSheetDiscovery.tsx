@@ -12,6 +12,7 @@ import Animated, {
 import { Text } from '@/src/ui/primitives/Text';
 import { Pressable } from '@/src/ui/primitives/Pressable';
 import { Button } from '@/src/ui/components/Button';
+import { DriverCardSkeleton } from '@/src/ui/components/DriverCardSkeleton';
 import { RouteHeader } from '../shared/RouteHeader';
 import { useRideSheetStore } from '../../store/ride-sheet-store';
 import { formatPrice } from '@/src/utils/pricing';
@@ -190,6 +191,19 @@ export function RideSheetDiscovery({
             </View>
           )}
 
+          {/* Skeleton preview cards */}
+          {!showExpandPrompt && data.offers.length === 0 && (
+            <View style={styles.skeletonSection}>
+              <Text variant="caption" style={styles.skeletonLabel}>
+                Waiting for driver responses...
+              </Text>
+              <View style={styles.skeletonRow}>
+                <DriverCardSkeleton style={styles.skeletonCard} />
+                <DriverCardSkeleton style={styles.skeletonCard} />
+              </View>
+            </View>
+          )}
+
           {/* Info text */}
           {!showExpandPrompt && (
             <View style={styles.infoSection}>
@@ -314,5 +328,21 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: colors.danger,
     fontWeight: '600',
+  },
+  skeletonSection: {
+    marginTop: space[4],
+  },
+  skeletonLabel: {
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: space[3],
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: space[3],
+  },
+  skeletonCard: {
+    flex: 1,
   },
 });

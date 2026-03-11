@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { LatLng } from 'react-native-maps';
+import * as Haptics from 'expo-haptics';
 import type { PlaceDetails, RouteData } from '@/src/store/route-store';
 import type { PricingCalculationMetadata } from '@/src/types/pricing';
 import type { RideOffer as ServiceRideOffer } from '@/src/services/rides.service';
@@ -13,6 +14,27 @@ import {
   cancelRide,
   fetchRideSession,
 } from '@/src/services/rides.service';
+
+// Haptic feedback for state transitions
+const triggerHaptic = (type: 'success' | 'warning' | 'error' | 'light' | 'medium') => {
+  switch (type) {
+    case 'success':
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      break;
+    case 'warning':
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      break;
+    case 'error':
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      break;
+    case 'light':
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      break;
+    case 'medium':
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      break;
+  }
+};
 
 // ============================================================================
 // Types
@@ -583,6 +605,9 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
       return;
     }
 
+    // Haptic feedback for new offer!
+    triggerHaptic('success');
+
     // Add offer sorted by price (lowest first)
     const updatedOffers = [...data.offers, offer].sort((a, b) => {
       const aPrice = a.offered_amount ?? Infinity;
@@ -758,6 +783,7 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
 
     // If canceled or expired, reset to IDLE
     if (newUiState === 'IDLE') {
+      triggerHaptic('warning');
       get()._cleanupSubscriptions();
       set({
         state: 'IDLE',
@@ -771,6 +797,17 @@ export const useRideSheetStore = create<RideSheetStore>((set, get) => ({
     console.log(
       `[ride-sheet-store] Server status change: ${status} -> UI state: ${newUiState}`
     );
+
+    // Trigger haptic feedback for positive transitions
+    if (status === 'confirmed') {
+      triggerHaptic('success'); // Driver confirmed!
+    } else if (status === 'arrived') {
+      triggerHaptic('success'); // Driver arrived!
+    } else if (status === 'active') {
+      triggerHaptic('medium'); // Ride started
+    } else if (status === 'completed') {
+      triggerHaptic('success'); // Ride completed!
+    }
 
     // Update timestamps based on status
     const updates: Partial<RideSheetData> = {};

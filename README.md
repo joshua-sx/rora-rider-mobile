@@ -33,10 +33,10 @@ This app includes several native-facing dependencies that may require config or 
   - Env vars: `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, `EXPO_PUBLIC_GOOGLE_PLACES_API_KEY`
   - Optional proxy: `EXPO_PUBLIC_GOOGLE_MAPS_PROXY_URL`, `EXPO_PUBLIC_GOOGLE_MAPS_PROXY_TOKEN`
   - Native keys are injected via `app.config.ts` for iOS/Android.
-  - Setup/testing: `GOOGLE_MAPS_SETUP.md`, `TESTING_GUIDE.md`
+  - Setup/testing: `docs/audits/GOOGLE_MAPS_SETUP.md`, `docs/audits/TESTING_GUIDE.md`
 - Location: `expo-location`
   - Permissions are declared in `app.json` (iOS/Android).
-  - Testing flow: `LOCATION_PERMISSION_TEST_GUIDE.md`
+  - Testing flow: `docs/audits/LOCATION_PERMISSION_TEST_GUIDE.md`
 - Blur: `expo-blur`
   - Used by the location permission modal; no extra native config required in Expo managed.
 - QR: `react-native-qrcode-svg` (via `react-native-svg`)
@@ -51,6 +51,14 @@ npm run reset-project
 ```
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+
+## Related: Driver app
+
+The **Rora Driver** app is a separate project: `../rora-driver-mobile/`. Driver UX specs and planning live there.
+
+## Documentation
+
+Audits, checklists, implementation summaries, and setup guides live in **`docs/`** and **`docs/audits/`**.
 
 ## Learn more
 
